@@ -1,0 +1,107 @@
+---
+import '../../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — ExamDraft</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
+      <a href="/en" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
+        ExamDraft
+      </a>
+      <div class="flex items-center gap-3 text-xs">
+        <a href="/privacy" class="text-gray-500 hover:text-gray-300 transition-colors">DE</a>
+        <span class="text-white">EN</span>
+      </div>
+    </header>
+    <main class="max-w-2xl mx-auto px-4 py-12">
+      <h1 class="text-2xl font-bold text-white mb-6">Privacy Policy</h1>
+
+      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
+        <p>
+          Protecting your data matters to us. This policy explains which data ExamDraft processes.
+        </p>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">What is stored</h2>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <strong class="text-gray-300">API key</strong>: Stored in your browser's localStorage.
+              ExamDraft does not send it through its own servers.
+            </li>
+            <li>
+              <strong class="text-gray-300">Provider and model choice</strong>: Stored in your browser's localStorage.
+            </li>
+            <li>
+              <strong class="text-gray-300">Temporary session data</strong>: Analysis results and generated exams
+              may be stored in sessionStorage for the current browser session.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">What is NOT stored</h2>
+          <ul class="list-disc list-inside space-y-1">
+            <li>No PDFs or exam texts on ExamDraft servers</li>
+            <li>No analytics or tracking</li>
+            <li>No user accounts</li>
+            <li>No cookies beyond technically necessary browser behavior</li>
+          </ul>
+          <p class="mt-2 text-gray-600">
+            ExamDraft has no own backend for your exam content. The application is delivered as a
+            static site.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">API requests</h2>
+          <p>
+            API requests go directly from your browser to the provider you selected, currently
+            Anthropic (api.anthropic.com) or OpenRouter (openrouter.ai). The contents needed for
+            analysis, generation, or grading are transferred to that provider. ExamDraft does not
+            access these requests through its own servers.
+          </p>
+          <p class="mt-2">
+            Data processing by the provider is governed by the provider's own privacy policy,
+            especially the{' '}
+            <a
+              href="https://www.anthropic.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-400 hover:text-blue-300"
+            >
+              Anthropic Privacy Policy
+            </a>{' '}
+            and the{' '}
+            <a
+              href="https://openrouter.ai/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-400 hover:text-blue-300"
+            >
+              OpenRouter Privacy Policy
+            </a>.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">Deletion / contact</h2>
+          <p>
+            You can remove locally stored data at any time through your browser's site data settings.
+          </p>
+          <p class="mt-2">
+            Contact: <a href="mailto:privacy@examdraft.com" class="text-blue-400 hover:text-blue-300">privacy@examdraft.com</a>
+          </p>
+        </section>
+
+        <p class="text-gray-600 text-xs">Version: March 2026</p>
+      </div>
+    </main>
+  </body>
+</html>

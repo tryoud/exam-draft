@@ -1,0 +1,428 @@
+---
+import '../styles/global.css';
+
+const benefits = [
+  { value: '1', label: 'Prüfungslogik', copy: 'Aus Altklausuren wird ein glaubwürdiges Format mit wiedererkennbarer Struktur.' },
+  { value: '2', label: 'Lernpfade', copy: 'Volle Probeklausur oder fokussiertes Training einzelner Aufgabentypen.' },
+  { value: '3', label: 'Feedbackschleife', copy: 'Antworten schreiben, korrigieren lassen und daraus gezielt weiterlernen.' },
+  { value: '4', label: 'Datensouveränität', copy: 'Kein ExamDraft-Backend für deine Inhalte, nur dein eigener API-Key.' },
+];
+
+const metrics = [
+  { value: '100K+', label: 'mögliche Kombinationen aus Themen, Schwierigkeit und Aufgabentypen' },
+  { value: '<0,2 EUR', label: 'typische Kosten pro generierter Klausur' },
+  { value: '30+', label: 'Minuten gesparte Vorbereitungsarbeit pro Lerneinheit' },
+  { value: '97%', label: 'mehr Ruhe, wenn das Klausurformat vorher schon vertraut wirkt' },
+];
+
+const cards = [
+  {
+    title: 'Lerne nicht nur den Stoff, lerne die Form',
+    body: 'ExamDraft rekonstruiert Aufbau, Punkte und Ton der Originale. Genau dieser Teil fehlt in vielen generischen Lernapps.',
+  },
+  {
+    title: 'Trainiere schwierige Aufgabentypen isoliert',
+    body: 'Wenn dir immer derselbe Typ Probleme macht, lässt du ihn mehrfach variieren statt wieder eine komplette Klausur zu erzeugen.',
+  },
+  {
+    title: 'Bleibe in einer konzentrierten Oberfläche',
+    body: 'Schreiben, korrigieren und exportieren passieren in einem zusammenhängenden Lernflow statt über mehrere Tools verteilt.',
+  },
+  {
+    title: 'Wähle dein Modell passend zum Material',
+    body: 'OpenRouter für Flexibilität, Anthropic direkt für bildlastige PDFs. So steuerst du Kosten und Qualität über deinen API-Key.',
+  },
+];
+---
+
+<!doctype html>
+<html lang="de" class="landing-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ExamDraft macht aus Altklausuren glaubwürdige Probeklausuren mit Musterlösung, Korrektur und scrollstarker Produktseite."
+    />
+    <title>ExamDraft — Lern, wie geprüft wird</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="landing-body landing-grid overflow-x-hidden">
+    <div class="editorial-shell">
+      <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
+          <div class="flex items-center gap-3 scroll-fade-right" data-reveal>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8"    width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">exam design for practice</p>
+            </div>
+          </div>
+
+          <div class="hidden items-center gap-8 text-sm text-[#6c6c6c] md:flex">
+            <a href="#benefits" class="transition-colors hover:text-[#111111]">Vorteile</a>
+            <a href="#metrics" class="transition-colors hover:text-[#111111]">Kennzahlen</a>
+            <a href="#final" class="transition-colors hover:text-[#111111]">Start</a>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">DE</span>
+            <a href="/en" class="secondary-link px-4 py-2 text-xs">EN</a>
+            <a href="/app" class="primary-link scroll-reveal px-5 py-3 text-sm" data-reveal style="--reveal-delay:120ms">
+              App öffnen
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <main>
+        <section class="px-5 pb-20 pt-28 sm:px-6 sm:pt-36">
+          <div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+            <div class="space-y-8">
+              <div class="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-start">
+                <div class="scroll-reveal" data-reveal>
+                  <p class="text-[11px] uppercase tracking-[0.22em] text-[#7b7b7b]">Prüfungsvorbereitung / bewusst gestaltet</p>
+                </div>
+
+                <div class="space-y-6">
+                  <h1 class="display-title scroll-reveal text-[3.8rem] leading-[0.9] sm:text-[5.8rem] lg:text-[7rem]" data-reveal style="--reveal-delay:80ms">
+                    LERN, <span class="text-[#6b8dff]">WIE</span>
+                    <br />
+                    GEPRÜFT WIRD
+                    <span class="block text-[0.58em] leading-[0.95] tracking-[-0.03em]">
+                      – NICHT NUR, WAS.
+                    </span>
+                  </h1>
+
+                  <p class="scroll-reveal max-w-xl text-lg leading-8 muted-copy sm:text-xl" data-reveal style="--reveal-delay:180ms">
+                    ExamDraft hilft dir nicht dabei, eine einzelne Altklausur auswendig zu lernen,
+                    sondern zu verstehen, wie Klausuren in diesem Fach aufgebaut sind:
+                    Aufgabentypen, Muster, Gewichtung und typische Denkwege.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-devices">
+              <div class="hero-phone hero-phone-front scroll-reveal parallax-float" data-reveal data-parallax="0.18">
+                <div class="phone-shell aspect-[0.49] p-3">
+                  <div class="phone-screen h-full rounded-[1.55rem] bg-[#f6f2ea] p-4">
+                    <div class="mt-5 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[#888]">
+                      <span>Lernkurve</span>
+                      <span>+12%</span>
+                    </div>
+                    <div class="phone-card mt-6 rounded-[1.2rem] border border-black/8 bg-white/70 p-3">
+                      <div class="mb-3 h-2 w-16 rounded-full bg-black/8"></div>
+                      <svg viewBox="0 0 220 140" class="w-full">
+                        <path class="chart-line-muted" d="M0 110 C30 80 55 85 82 66 C106 48 126 46 150 56 C176 68 193 44 220 24" />
+                        <path class="chart-line" d="M0 116 C24 104 52 70 80 76 C101 80 128 32 154 42 C182 54 196 44 220 18" />
+                      </svg>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-3 text-[11px]">
+                      <div class="phone-card rounded-2xl border border-black/6 bg-white/70 p-3">
+                        <p class="text-[#999]">Themen</p>
+                        <p class="mt-2 text-lg font-semibold text-[#111]">12</p>
+                      </div>
+                      <div class="phone-card rounded-2xl bg-[#6b8dff] p-3 text-white">
+                        <p class="text-white/70">Sicherheit</p>
+                        <p class="mt-2 text-lg font-semibold">93%</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hero-phone hero-phone-back scroll-reveal parallax-float" data-reveal data-parallax="-0.12" style="--reveal-delay:140ms">
+                <div class="phone-shell aspect-[0.49] p-3">
+                  <div class="phone-screen phone-screen-stack grid-dots h-full rounded-[1.55rem] bg-[#f6f2ea] p-4">
+                    <div class="mt-5 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[#888]">
+                      <span>Prüfungsmodus</span>
+                      <span>90m</span>
+                    </div>
+                    <div class="phone-card phone-card-grow rounded-[1.3rem] border border-black/6 bg-white/70 p-4">
+                      <p class="text-[11px] uppercase tracking-[0.16em] text-[#999]">Aufgabe 01</p>
+                      <p class="mt-3 text-[0.96rem] leading-[1.5] text-[#333]">
+                        Rekonstruiere den Frequenzgang und begründe die Wahl des Filters anhand
+                        der gegebenen Randbedingungen.
+                      </p>
+                    </div>
+                    <div class="phone-card phone-card-compact rounded-[1.3rem] border border-[#6b8dff]/25 bg-[#eef1ff] p-4 text-[#3a5fd4]">
+                      <p class="text-[11px] uppercase tracking-[0.16em]">Trainingsmodus</p>
+                      <p class="mt-2 text-[0.96rem] leading-[1.5]">
+                        Gleicher Aufgabentyp, neue Zahlenwerte, neue Konstellation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="benefits" class="anchor-offset px-5 py-10 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="landing-card-strong rounded-[2rem] px-6 py-7 sm:px-8">
+              <div class="scroll-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between" data-reveal>
+                <div>
+                  <p class="editorial-kicker">Lernen am Format</p>
+                  <h2 class="section-title mt-4 text-4xl sm:text-5xl">Lerne nicht eine Altklausur. Verstehe, wie dieses Fach seine Klausuren baut.</h2>
+                </div>
+                <p class="max-w-xl text-base leading-8 muted-copy">
+                  Wenn man dieselbe Altklausur fünfmal wiederholt, entsteht schnell das Gefühl,
+                  den Stoff zu beherrschen, obwohl man oft nur genau diese eine Klausur kennt.
+                  ExamDraft reduziert diesen Bias, weil es die Struktur hinter mehreren
+                  Originalen sichtbar macht und daraus neue, aber passende Aufgaben erzeugt.
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {benefits.map((benefit, index) => (
+                <article
+                  class="scroll-reveal landing-card rounded-[1.8rem] p-6"
+                  data-reveal
+                  style={`--reveal-delay:${index * 90}ms`}
+                >
+                  <p class="text-[4.25rem] font-extrabold leading-none tracking-[-0.08em] text-[#111111]">{benefit.value}</p>
+                  <h3 class="mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-[#111111]">
+                    {benefit.label}
+                  </h3>
+                  <p class="mt-3 text-sm leading-7 text-[#4c4c4c]">{benefit.copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="metrics" class="anchor-offset px-5 py-24 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="scroll-reveal mb-12 max-w-2xl" data-reveal>
+              <p class="editorial-kicker">Lernsignale</p>
+              <h2 class="section-title mt-4 text-4xl sm:text-5xl">Kennzahlen, die Vorbereitung greifbar machen.</h2>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {metrics.map((metric, index) => (
+                <article
+                  class="scroll-reveal rounded-[1.8rem] border border-black/8 bg-white px-6 py-7"
+                  data-reveal
+                  style={`--reveal-delay:${index * 110}ms`}
+                >
+                  <p class="text-[2.35rem] font-extrabold tracking-[-0.08em] text-[#111111]">{metric.value}</p>
+                  <p class="mt-3 text-sm leading-7 text-[#4d4d4d]">{metric.label}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="px-5 py-24 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="scroll-reveal grid gap-6 lg:grid-cols-[1fr_1.15fr] lg:items-stretch" data-reveal>
+
+              <!-- Left: copy -->
+              <div class="landing-card-strong flex flex-col justify-between gap-10 rounded-[2rem] p-7 sm:p-10">
+                <div>
+                  <p class="editorial-kicker">Analyse</p>
+                  <h2 class="section-title mt-4 text-4xl sm:text-5xl">
+                    Erst verstehen,<br/>dann üben.
+                  </h2>
+                  <p class="mt-6 max-w-sm text-base leading-8 text-[#4b4b4b]">
+                    Bevor ExamDraft eine einzige Aufgabe generiert, liest es deine Altklausuren
+                    und legt offen, was in diesem Fach wirklich abgeprüft wird — Typen, Gewicht,
+                    Muster, Schwierigkeit.
+                  </p>
+                </div>
+                <div class="space-y-4">
+                  {[
+                    ['Aufgabentypen & Häufigkeit', 'Welche Typen kommen wie oft — und wie viele Punkte bringen sie?'],
+                    ['Themengebiete aus Folien', 'Slide-Kontext fließt direkt in die Generierung ein.'],
+                    ['Schwierigkeit & Zeitbudget', 'Die KI kennt die typische Klausurlänge und Gewichtung.'],
+                  ].map(([title, desc]) => (
+                    <div class="flex items-start gap-3">
+                      <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#111113] text-[10px] font-bold text-white">→</div>
+                      <div>
+                        <p class="text-sm font-semibold text-[#111111]">{title}</p>
+                        <p class="mt-0.5 text-sm leading-6 text-[#666]">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <!-- Right: analysis UI mockup -->
+              <div class="landing-card overflow-hidden rounded-[2rem] p-5 sm:p-7">
+                <!-- Header row -->
+                <div class="mb-6 flex items-center justify-between">
+                  <div>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[#888]">Analyseergebnis</p>
+                    <p class="mt-1 text-xl font-bold tracking-tight text-[#111]">Datenbanksysteme</p>
+                  </div>
+                  <div class="flex gap-2 text-[11px]">
+                    <span class="rounded-full border border-black/8 bg-white/80 px-3 py-1 text-[#555]">3 Klausuren</span>
+                    <span class="rounded-full border border-black/8 bg-white/80 px-3 py-1 text-[#555]">90 Min</span>
+                  </div>
+                </div>
+
+                <!-- Task type bars -->
+                <div class="space-y-3">
+                  {[
+                    { name: 'SQL-Abfragen', pct: 78, pts: '15 Pkt', color: '#6b8dff' },
+                    { name: 'ER-Modell', pct: 62, pts: '12 Pkt', color: '#111113' },
+                    { name: 'Normalisierung', pct: 48, pts: '10 Pkt', color: '#c4573a' },
+                    { name: 'Transaktionen', pct: 35, pts: '8 Pkt', color: '#6b8dff' },
+                    { name: 'Indexe & Optimierung', pct: 22, pts: '5 Pkt', color: '#bbb' },
+                  ].map(t => (
+                    <div>
+                      <div class="mb-1.5 flex items-center justify-between text-xs">
+                        <span class="font-medium text-[#222]">{t.name}</span>
+                        <span class="text-[#888]">{t.pts}</span>
+                      </div>
+                      <div class="h-2 w-full overflow-hidden rounded-full bg-black/6">
+                        <div class="h-full rounded-full" style={`width:${t.pct}%; background:${t.color}`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <!-- Topic chips -->
+                <div class="mt-6">
+                  <p class="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#999]">Erkannte Themen</p>
+                  <div class="flex flex-wrap gap-2">
+                    {['Relationale Algebra', 'Joins', 'B-Baum', 'ACID', '2NF / 3NF', 'Sperren', 'Subqueries'].map(t => (
+                      <span class="rounded-full border border-black/8 bg-white/70 px-3 py-1 text-[11px] text-[#444]">{t}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Bottom stats row -->
+                <div class="mt-6 grid grid-cols-3 gap-3 border-t border-black/6 pt-5">
+                  {[
+                    { val: '5', lbl: 'Aufgabentypen' },
+                    { val: '3,2', lbl: 'Ø Schwierigkeit' },
+                    { val: '50', lbl: 'Punkte gesamt' },
+                  ].map(s => (
+                    <div class="text-center">
+                      <p class="text-xl font-extrabold tracking-tight text-[#111]">{s.val}</p>
+                      <p class="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-[#999]">{s.lbl}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section class="px-5 py-24 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="grid gap-4 lg:grid-cols-[0.88fr_1.12fr]">
+              <div class="scroll-reveal paper-panel rounded-[2rem] p-6 sm:p-8" data-reveal>
+                <div class="pl-7">
+                  <p class="red-note text-xs uppercase">Exam confidence</p>
+                  <h2 class="section-title mt-4 text-4xl sm:text-5xl">Weniger Überraschung in der echten Klausur.</h2>
+                  <p class="mt-6 max-w-md text-base leading-8 text-[#4e4e4e]">
+                    Wer das Klausurformat versteht, lernt ruhiger. ExamDraft macht aus mehreren
+                    Altklausuren eine Übungssituation, die näher an der echten Prüfung bleibt
+                    als bloßes Wiederholen derselben bekannten Aufgaben.
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid gap-4 md:grid-cols-2">
+                {cards.map((card, index) => (
+                  <article
+                    class="scroll-reveal landing-card rounded-[1.8rem] p-7"
+                    data-reveal
+                    style={`--reveal-delay:${index * 90}ms`}
+                  >
+                    <h3 class="text-2xl font-extrabold leading-[0.95] tracking-[-0.03em] text-[#111111]">
+                      {card.title}
+                    </h3>
+                    <p class="mt-5 text-base leading-8 text-[#4b4b4b]">{card.body}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="final" class="anchor-offset px-5 pb-24 pt-12 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="scroll-reveal lime-panel rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14" data-reveal>
+              <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-3xl min-w-0">
+                  <p class="text-[11px] uppercase tracking-[0.2em] text-black/55">ExamDraft</p>
+                  <h2 class="mt-5 max-w-[13ch] text-[3rem] font-extrabold leading-[0.86] tracking-[-0.04em] text-black sm:text-[4.8rem] lg:text-[5.6rem]">
+                    VERSTEH DIE KLAUSUR.
+                    <br />
+                    NICHT NUR DIE ANTWORT.
+                  </h2>
+                </div>
+
+                <div class="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
+                  <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white">
+                    Zur App
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="px-5 pb-10 sm:px-6">
+        <div class="mx-auto flex max-w-6xl flex-col gap-4 border-t border-black/8 pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-semibold tracking-tight text-[#111111]">ExamDraft</p>
+            <p class="mt-1 text-[#6f6f6f]">Probeklausuren aus echten Altklausuren.</p>
+          </div>
+          <div class="flex flex-wrap gap-5">
+            <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+            <a href="/privacy" class="footer-link">Datenschutz</a>
+            <a href="/en" class="footer-link">English</a>
+            <a href="/app" class="footer-link">App</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const items = document.querySelectorAll('[data-reveal]');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+
+      items.forEach((item) => observer.observe(item));
+
+      const parallaxNodes = Array.from(document.querySelectorAll('[data-parallax]'));
+      const updateParallax = () => {
+        const viewport = window.innerHeight;
+        parallaxNodes.forEach((node) => {
+          const rect = node.getBoundingClientRect();
+          const speed = Number(node.getAttribute('data-parallax')) || 0;
+          const progress = (rect.top + rect.height / 2 - viewport / 2) * speed;
+          node.style.setProperty('--parallax-shift', `${progress}px`);
+        });
+      };
+
+      updateParallax();
+      window.addEventListener('scroll', updateParallax, { passive: true });
+      window.addEventListener('resize', updateParallax);
+    </script>
+  </body>
+</html>

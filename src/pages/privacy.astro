@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Datenschutzerklärung — ExamDraft</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
+      <a href="/" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
+        ExamDraft
+      </a>
+      <div class="flex items-center gap-3 text-xs">
+        <span class="text-white">DE</span>
+        <a href="/en/privacy" class="text-gray-500 hover:text-gray-300 transition-colors">EN</a>
+      </div>
+    </header>
+    <main class="max-w-2xl mx-auto px-4 py-12">
+      <h1 class="text-2xl font-bold text-white mb-6">Datenschutzerklärung</h1>
+
+      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
+        <p>
+          Der Schutz deiner Daten ist uns wichtig. Diese Erklärung beschreibt, welche Daten
+          ExamDraft verarbeitet.
+        </p>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">Was gespeichert wird</h2>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <strong class="text-gray-300">API-Key</strong>: Wird im localStorage deines Browsers gespeichert.
+              ExamDraft überträgt ihn nicht an eigene Server.
+            </li>
+            <li>
+              <strong class="text-gray-300">Provider- und Modellwahl</strong>: Wird im localStorage deines Browsers gespeichert.
+            </li>
+            <li>
+              <strong class="text-gray-300">Temporäre Sitzungsdaten</strong>: Analyseergebnisse und generierte Klausuren
+              können während deiner Browser-Sitzung im sessionStorage liegen.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">Was NICHT gespeichert wird</h2>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Keine PDFs oder Klausurtexte auf ExamDraft-Servern</li>
+            <li>Keine personenbezogenen Daten</li>
+            <li>Kein Tracking, keine Analytics</li>
+            <li>Keine Cookies (außer technisch notwendige)</li>
+          </ul>
+          <p class="mt-2 text-gray-600">
+            ExamDraft hat keine eigenen Server. Die gesamte Anwendung läuft als statische Seite
+            auf Cloudflare Pages.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">API-Anfragen</h2>
+          <p>
+            API-Anfragen gehen direkt von deinem Browser an den von dir gewählten Anbieter,
+            derzeit Anthropic (api.anthropic.com) oder OpenRouter (openrouter.ai). Dabei
+            werden die für Analyse, Generierung oder Korrektur benötigten Inhalte deiner
+            Dokumente an diesen Anbieter übertragen. ExamDraft hat keinen Zugriff auf diese
+            Anfragen über eigene Server.
+          </p>
+          <p class="mt-2">
+            Für die Verarbeitung dieser Daten gelten die Datenschutzhinweise des jeweiligen
+            Anbieters, insbesondere die{' '}
+            <a
+              href="https://www.anthropic.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-400 hover:text-blue-300"
+            >
+              Datenschutzerklärung von Anthropic
+            </a>{' '}
+            und die{' '}
+            <a
+              href="https://openrouter.ai/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-400 hover:text-blue-300"
+            >
+              Datenschutzerklärung von OpenRouter
+            </a>.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-white font-semibold mb-2">Deine Rechte / Löschung</h2>
+          <p>
+            Du kannst alle lokal gespeicherten Daten jederzeit löschen:
+            Browser-Einstellungen → Websitedaten löschen → examdraft.com.
+          </p>
+          <p class="mt-2">
+            Kontakt: <a href="mailto:privacy@examdraft.com" class="text-blue-400 hover:text-blue-300">privacy@examdraft.com</a>
+          </p>
+        </section>
+
+        <p class="text-gray-600 text-xs">Stand: März 2026</p>
+      </div>
+    </main>
+  </body>
+</html>
