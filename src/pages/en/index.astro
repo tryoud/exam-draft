@@ -62,7 +62,7 @@ const cards = [
             </svg>
             <div>
               <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
-              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">exam design for practice</p>
+              <p class="hidden sm:block text-[11px] uppercase tracking-[0.18em] text-[#707070]">exam design for practice</p>
             </div>
           </div>
 
@@ -127,12 +127,12 @@ const cards = [
                       </svg>
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-3 text-[11px]">
-                      <div class="phone-card rounded-2xl border border-black/6 bg-white/70 p-3">
-                        <p class="text-[#999]">Topics</p>
+                      <div class="phone-card min-w-0 rounded-2xl border border-black/6 bg-white/70 p-3">
+                        <p class="text-[10px] leading-tight text-[#999]">Topics</p>
                         <p class="mt-2 text-lg font-semibold text-[#111]">12</p>
                       </div>
-                      <div class="phone-card rounded-2xl bg-[#6b8dff] p-3 text-white">
-                        <p class="text-white/70">Confidence</p>
+                      <div class="phone-card min-w-0 rounded-2xl bg-[#6b8dff] p-3 text-white">
+                        <p class="text-[10px] leading-tight text-white/75">Confidence</p>
                         <p class="mt-2 text-lg font-semibold">93%</p>
                       </div>
                     </div>
@@ -398,16 +398,19 @@ const cards = [
       </main>
 
       <footer class="px-5 pb-10 sm:px-6">
-        <div class="mx-auto flex max-w-6xl flex-col gap-4 border-t border-black/8 pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <div class="mx-auto flex max-w-6xl flex-col gap-5 border-t border-black/8 pt-6 text-sm sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="font-semibold tracking-tight text-[#111111]">ExamDraft</p>
             <p class="mt-1 text-[#6f6f6f]">Mock exams built from real past exams.</p>
+            <p class="footer-note mt-2 max-w-md">
+              Built for exam prep that focuses on understanding patterns, task types, and
+              weighting instead of memorizing one past paper.
+            </p>
           </div>
           <div class="flex flex-wrap gap-5">
-            <a href="/" class="footer-link">Deutsch</a>
+            <a href="/app" class="footer-link">App</a>
             <a href="/en/terms" class="footer-link">Terms</a>
             <a href="/en/privacy" class="footer-link">Privacy</a>
-            <a href="/app" class="footer-link">App</a>
           </div>
         </div>
       </footer>
