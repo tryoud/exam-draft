@@ -3,73 +3,199 @@ import '../../styles/global.css';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="legal-html">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terms of Use — ExamDraft</title>
+    <meta
+      name="description"
+      content="Terms for using ExamDraft: permitted use, upload responsibility, Bring Your Own Key, and service limitations."
+    />
+    <title>Terms — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
-    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
-      <a href="/en" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
-        ExamDraft
-      </a>
-      <div class="flex items-center gap-3 text-xs">
-        <a href="/terms" class="text-gray-500 hover:text-gray-300 transition-colors">DE</a>
-        <span class="text-white">EN</span>
-      </div>
-    </header>
-    <main class="max-w-2xl mx-auto px-4 py-12">
-      <h1 class="text-2xl font-bold text-white mb-6">Terms of Use</h1>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/en" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Terms</p>
+            </div>
+          </a>
 
-      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
-        <p>
-          These terms govern the use of ExamDraft. By using the service, you agree to these terms.
-        </p>
+          <div class="flex items-center gap-3">
+            <a href="/terms" class="secondary-link px-4 py-2 text-xs">DE</a>
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">EN</span>
+          </div>
+        </div>
+      </header>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">1. Use of the service</h2>
-          <p>
-            ExamDraft is an AI-assisted tool for generating practice exams. The service may only
-            be used for lawful and personal study purposes.
-          </p>
-        </section>
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-5xl space-y-8">
+          <section class="legal-hero rounded-[2rem] px-6 py-8 sm:px-8 sm:py-10">
+            <p class="legal-kicker">Use framework</p>
+            <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Terms for using ExamDraft</h1>
+            <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
+              These terms govern the use of ExamDraft as a tool for analyzing past exams,
+              generating practice exams, and evaluating answers with AI support. The main goal
+              is clarity: what the product is for, what remains your responsibility as the user,
+              and which limits naturally apply to an AI-based study tool.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="legal-meta-chip">Version: April 2026</span>
+              <span class="legal-meta-chip">Bring Your Own Key</span>
+              <span class="legal-meta-chip">Study use only</span>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">2. Copyright</h2>
-          <p>
-            You may only upload documents for which you own the copyright or have explicit
-            permission from the rights holder. ExamDraft accepts no liability for copyright
-            violations caused by users.
-          </p>
-        </section>
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Summary</p>
+              <ul class="legal-list legal-copy mt-4 text-sm">
+                <li>ExamDraft is intended for lawful personal exam preparation.</li>
+                <li>You may only use materials you have the right to use.</li>
+                <li>You use your own API key and bear the related model costs yourself.</li>
+                <li>Generated content is study material, not an official answer key or guaranteed assessment.</li>
+              </ul>
+            </article>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">3. API usage (BYOK)</h2>
-          <p>
-            ExamDraft uses a Bring Your Own Key model. You use your own provider key and bear all
-            related API costs. ExamDraft does not provide its own API resources.
-          </p>
-        </section>
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Contact</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  Questions about these terms can be sent to
+                  <a href="mailto:legal@examdraft.com"> legal@examdraft.com</a>.
+                </p>
+                <p>
+                  Privacy-related questions belong to
+                  <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>.
+                </p>
+              </div>
+            </article>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">4. Disclaimer</h2>
-          <p>
-            ExamDraft is provided as is. We do not guarantee the correctness or completeness of
-            generated content. Generated exams are intended for practice only.
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">1. Purpose of the service</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft is an AI-assisted study tool. It helps users turn past exams and
+                optional lecture context into new practice exams, type-specific drills, and
+                AI-assisted answer evaluation.
+              </p>
+              <p>
+                ExamDraft is not intended to replace official exam regulations, deliver binding
+                grading decisions, or provide guaranteed predictions of a real university exam.
+              </p>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">5. Contact</h2>
-          <p>
-            Questions: <a href="mailto:legal@examdraft.com" class="text-blue-400 hover:text-blue-300">legal@examdraft.com</a>
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2. Permitted use</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>You may only use ExamDraft for lawful purposes, especially:</p>
+              <ul class="legal-list">
+                <li>your own exam preparation,</li>
+                <li>legitimate study and practice workflows,</li>
+                <li>internal, non-abusive teaching or learning contexts.</li>
+              </ul>
+              <p>Use is not permitted where it:</p>
+              <ul class="legal-list">
+                <li>violates copyright, exam rules, confidentiality duties, or comparable restrictions,</li>
+                <li>processes protected third-party materials without authorization,</li>
+                <li>supports cheating, evasion, or misuse in real examinations,</li>
+                <li>abuses technical infrastructure or external providers in an unlawful way.</li>
+              </ul>
+            </div>
+          </section>
 
-        <p class="text-gray-600 text-xs">Version: March 2026</p>
-      </div>
-    </main>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">3. Your responsibility for uploads and content</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                You are responsible for the past exams, model solutions, lecture slides, or topic
+                summaries you provide to ExamDraft.
+              </p>
+              <ul class="legal-list">
+                <li>You should only use content you own or are otherwise entitled to use.</li>
+                <li>You should not upload content whose use is prohibited by copyright, contracts, or exam rules.</li>
+                <li>If materials contain personal or confidential information, you must assess yourself whether their use is lawful and appropriate.</li>
+              </ul>
+              <p>
+                ExamDraft does not perform legal pre-screening of uploads. Responsibility for the
+                legality of the submitted materials remains with you.
+              </p>
+            </div>
+          </section>
+
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">4. Bring Your Own Key</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft works with your own provider key. That means you choose the provider
+                  and you bear the resulting API costs yourself.
+                </p>
+                <p>
+                  ExamDraft does not provide bundled model credits, its own token quota, or a
+                  flat-rate model usage plan.
+                </p>
+              </div>
+            </article>
+
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">5. Dependence on external providers</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  Parts of the product depend on external AI providers. If those providers change
+                  models, pricing, limits, or policies, that can also affect how ExamDraft behaves.
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">6. Quality, limitations, and liability</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                AI-generated content can be inaccurate, incomplete, or poorly phrased. That applies
+                to analysis results, generated tasks, sample solutions, hints, and AI grading.
+              </p>
+              <p>
+                ExamDraft is therefore provided as a study tool “as is”. We do not guarantee that a
+                generated exam perfectly matches the style of a future real exam or that AI grading
+                matches the decision of a real examiner.
+              </p>
+              <p>
+                To the extent permitted by law, liability for slight negligence is limited. Mandatory
+                statutory liability, especially for intent, gross negligence, or non-waivable duties,
+                remains unaffected.
+              </p>
+            </div>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">7. Changes and further development</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft may evolve over time. That can include changes to the interface,
+                supported models, indicative pricing text, export options, or available learning modes.
+              </p>
+              <p>
+                If these terms change in a material way, the current version published on the
+                website is the governing version.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

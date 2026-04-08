@@ -3,105 +3,203 @@ import '../../styles/global.css';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="legal-html">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Privacy Policy — ExamDraft</title>
+    <meta
+      name="description"
+      content="Privacy information for ExamDraft: local browser storage, direct API traffic, and how uploaded study materials are handled."
+    />
+    <title>Privacy — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
-    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
-      <a href="/en" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
-        ExamDraft
-      </a>
-      <div class="flex items-center gap-3 text-xs">
-        <a href="/privacy" class="text-gray-500 hover:text-gray-300 transition-colors">DE</a>
-        <span class="text-white">EN</span>
-      </div>
-    </header>
-    <main class="max-w-2xl mx-auto px-4 py-12">
-      <h1 class="text-2xl font-bold text-white mb-6">Privacy Policy</h1>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/en" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Privacy</p>
+            </div>
+          </a>
 
-      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
-        <p>
-          Protecting your data matters to us. This policy explains which data ExamDraft processes.
-        </p>
+          <div class="flex items-center gap-3">
+            <a href="/privacy" class="secondary-link px-4 py-2 text-xs">DE</a>
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">EN</span>
+          </div>
+        </div>
+      </header>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">What is stored</h2>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <strong class="text-gray-300">API key</strong>: Stored in your browser's localStorage.
-              ExamDraft does not send it through its own servers.
-            </li>
-            <li>
-              <strong class="text-gray-300">Provider and model choice</strong>: Stored in your browser's localStorage.
-            </li>
-            <li>
-              <strong class="text-gray-300">Temporary session data</strong>: Analysis results and generated exams
-              may be stored in sessionStorage for the current browser session.
-            </li>
-          </ul>
-        </section>
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-5xl space-y-8">
+          <section class="legal-hero rounded-[2rem] px-6 py-8 sm:px-8 sm:py-10">
+            <p class="legal-kicker">Transparency</p>
+            <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Privacy at ExamDraft</h1>
+            <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
+              ExamDraft is designed so your study materials do not pass through an ExamDraft-owned
+              content backend. The app runs in the browser. When you use AI features, your browser
+              talks to the provider you selected. This page explains what is stored locally, what
+              is sent to external AI providers, and which parts of that flow you control yourself.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="legal-meta-chip">Version: April 2026</span>
+              <span class="legal-meta-chip">No user account required</span>
+              <span class="legal-meta-chip">Bring Your Own Key</span>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">What is NOT stored</h2>
-          <ul class="list-disc list-inside space-y-1">
-            <li>No PDFs or exam texts on ExamDraft servers</li>
-            <li>No analytics or tracking</li>
-            <li>No user accounts</li>
-            <li>No cookies beyond technically necessary browser behavior</li>
-          </ul>
-          <p class="mt-2 text-gray-600">
-            ExamDraft has no own backend for your exam content. The application is delivered as a
-            static site.
-          </p>
-        </section>
+          <section class="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Summary</p>
+              <ul class="legal-list legal-copy mt-4 text-sm">
+                <li>Your API key is stored locally in your browser, not on ExamDraft servers.</li>
+                <li>Analysis, generation, and AI grading send content directly to Anthropic or OpenRouter.</li>
+                <li>Analysis results and generated exams may be stored temporarily in your browser session.</li>
+                <li>ExamDraft does not maintain a classic user-content database for your uploaded learning material.</li>
+              </ul>
+            </article>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">API requests</h2>
-          <p>
-            API requests go directly from your browser to the provider you selected, currently
-            Anthropic (api.anthropic.com) or OpenRouter (openrouter.ai). The contents needed for
-            analysis, generation, or grading are transferred to that provider. ExamDraft does not
-            access these requests through its own servers.
-          </p>
-          <p class="mt-2">
-            Data processing by the provider is governed by the provider's own privacy policy,
-            especially the{' '}
-            <a
-              href="https://www.anthropic.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-blue-400 hover:text-blue-300"
-            >
-              Anthropic Privacy Policy
-            </a>{' '}
-            and the{' '}
-            <a
-              href="https://openrouter.ai/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-blue-400 hover:text-blue-300"
-            >
-              OpenRouter Privacy Policy
-            </a>.
-          </p>
-        </section>
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Responsibility</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft is a static web application. ExamDraft is responsible for the product
+                  interface and the way these pages describe product behavior.
+                </p>
+                <p>
+                  For content that you actively send to an AI provider, the relevant provider is
+                  additionally responsible for its own processing. That applies in particular when
+                  you trigger analysis, exam generation, or AI grading.
+                </p>
+                <p>
+                  Contact for privacy questions:
+                  <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>
+                </p>
+              </div>
+            </article>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">Deletion / contact</h2>
-          <p>
-            You can remove locally stored data at any time through your browser's site data settings.
-          </p>
-          <p class="mt-2">
-            Contact: <a href="mailto:privacy@examdraft.com" class="text-blue-400 hover:text-blue-300">privacy@examdraft.com</a>
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">1. Data stored locally in the browser</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft stores part of its state exclusively in your browser so the app can
+                continue working across page changes and sessions.
+              </p>
+              <ul class="legal-list">
+                <li><strong>API key</strong> for the selected provider in <strong>localStorage</strong>.</li>
+                <li><strong>Provider and model preferences</strong> in <strong>localStorage</strong>.</li>
+                <li><strong>Temporary analysis results and generated exams</strong> in <strong>sessionStorage</strong> so you can continue within the same browser session.</li>
+                <li><strong>No persistent ExamDraft document vault</strong> for your uploaded PDFs. Files are read for processing and then only used as needed for the active flow.</li>
+              </ul>
+            </div>
+          </section>
 
-        <p class="text-gray-600 text-xs">Version: March 2026</p>
-      </div>
-    </main>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2. Data sent to AI providers</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                When you actively use ExamDraft for analysis, exam generation, or AI grading,
+                your browser sends the required content directly to the provider you selected.
+                ExamDraft currently supports providers such as <strong>Anthropic</strong> and
+                <strong> OpenRouter</strong>.
+              </p>
+              <p>Depending on the feature, that may include:</p>
+              <ul class="legal-list">
+                <li>text extracted from past exams,</li>
+                <li>text extracted from model solutions or marking schemes,</li>
+                <li>lecture context from uploaded PDFs or from your pasted topic summary,</li>
+                <li>answers you type when using AI grading.</li>
+              </ul>
+              <p>
+                ExamDraft does <strong>not</strong> proxy this traffic through its own content
+                backend. The transfer goes directly from your browser to the selected API. The
+                provider's own privacy terms apply in addition, especially the
+                <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer"> Anthropic Privacy Policy</a>
+                {' '}and the
+                <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer"> OpenRouter Privacy Policy</a>.
+              </p>
+            </div>
+          </section>
+
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">3. No ExamDraft content database</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft does not operate a classic user document store for your exam content.
+                  In particular, there is no product-side archive where ExamDraft keeps your
+                  uploaded exams as a long-term content library.
+                </p>
+                <p>
+                  The practical consequence is simple: the meaningful content processing happens
+                  either in your browser or at the external AI provider you selected.
+                </p>
+              </div>
+            </article>
+
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">4. No classic tracking layer</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft currently does not rely on classic user accounts, personalized ad
+                  profiles, or product-side analytics for your study content.
+                </p>
+                <p>
+                  Necessary browser and hosting processes may still exist. This page describes how
+                  your content is handled inside the product flow itself.
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">5. Legal basis and user control</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Where privacy law applies, local browser storage is mainly used to provide the
+                functionality you explicitly requested. Transfers to external AI providers happen
+                because you actively trigger those functions and use your own API key.
+              </p>
+              <p>You decide:</p>
+              <ul class="legal-list">
+                <li>whether to connect ExamDraft to an external provider at all,</li>
+                <li>which provider you use,</li>
+                <li>which documents or text you supply as context,</li>
+                <li>whether to paste a compact lecture summary instead of uploading full lecture PDFs.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">6. Retention, deletion, and rights</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Locally stored data remains in your browser until you remove it or until browser
+                logic clears or replaces it. Session data is intended for the active session.
+              </p>
+              <p>
+                If you want to delete local ExamDraft data, you can remove the site's stored data
+                in your browser settings. If you have questions about how an AI provider stores or
+                further processes content after the API request reaches them, you need to contact
+                that provider directly.
+              </p>
+              <p>
+                Contact:
+                <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

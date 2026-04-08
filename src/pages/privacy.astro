@@ -3,108 +3,215 @@ import '../styles/global.css';
 ---
 
 <!doctype html>
-<html lang="de">
+<html lang="de" class="legal-html">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Datenschutzerklärung — ExamDraft</title>
+    <meta
+      name="description"
+      content="Datenschutzhinweise für ExamDraft: lokale Speicherung, direkter API-Verkehr und Umgang mit hochgeladenen Lernunterlagen."
+    />
+    <title>Datenschutz — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
-    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
-      <a href="/" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
-        ExamDraft
-      </a>
-      <div class="flex items-center gap-3 text-xs">
-        <span class="text-white">DE</span>
-        <a href="/en/privacy" class="text-gray-500 hover:text-gray-300 transition-colors">EN</a>
-      </div>
-    </header>
-    <main class="max-w-2xl mx-auto px-4 py-12">
-      <h1 class="text-2xl font-bold text-white mb-6">Datenschutzerklärung</h1>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Datenschutz</p>
+            </div>
+          </a>
 
-      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
-        <p>
-          Der Schutz deiner Daten ist uns wichtig. Diese Erklärung beschreibt, welche Daten
-          ExamDraft verarbeitet.
-        </p>
+          <div class="flex items-center gap-3">
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">DE</span>
+            <a href="/en/privacy" class="secondary-link px-4 py-2 text-xs">EN</a>
+          </div>
+        </div>
+      </header>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">Was gespeichert wird</h2>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <strong class="text-gray-300">API-Key</strong>: Wird im localStorage deines Browsers gespeichert.
-              ExamDraft überträgt ihn nicht an eigene Server.
-            </li>
-            <li>
-              <strong class="text-gray-300">Provider- und Modellwahl</strong>: Wird im localStorage deines Browsers gespeichert.
-            </li>
-            <li>
-              <strong class="text-gray-300">Temporäre Sitzungsdaten</strong>: Analyseergebnisse und generierte Klausuren
-              können während deiner Browser-Sitzung im sessionStorage liegen.
-            </li>
-          </ul>
-        </section>
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-5xl space-y-8">
+          <section class="legal-hero rounded-[2rem] px-6 py-8 sm:px-8 sm:py-10">
+            <p class="legal-kicker">Transparenz</p>
+            <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Datenschutz bei ExamDraft</h1>
+            <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
+              ExamDraft ist so gebaut, dass deine Lernunterlagen nicht über einen eigenen
+              ExamDraft-Server laufen. Die App arbeitet direkt im Browser. Für KI-Funktionen
+              kommuniziert dein Browser mit dem von dir gewählten Anbieter. Auf dieser Seite
+              erklären wir präzise, welche Daten lokal gespeichert werden, welche Daten an
+              externe KI-Anbieter übertragen werden und welche Entscheidungen du selbst steuerst.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="legal-meta-chip">Stand: April 2026</span>
+              <span class="legal-meta-chip">Kein Nutzerkonto erforderlich</span>
+              <span class="legal-meta-chip">Bring Your Own Key</span>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">Was NICHT gespeichert wird</h2>
-          <ul class="list-disc list-inside space-y-1">
-            <li>Keine PDFs oder Klausurtexte auf ExamDraft-Servern</li>
-            <li>Keine personenbezogenen Daten</li>
-            <li>Kein Tracking, keine Analytics</li>
-            <li>Keine Cookies (außer technisch notwendige)</li>
-          </ul>
-          <p class="mt-2 text-gray-600">
-            ExamDraft hat keine eigenen Server. Die gesamte Anwendung läuft als statische Seite
-            auf Cloudflare Pages.
-          </p>
-        </section>
+          <section class="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Kurzfassung</p>
+              <ul class="legal-list legal-copy mt-4 text-sm">
+                <li>Dein API-Key wird lokal im Browser gespeichert, nicht auf ExamDraft-Servern.</li>
+                <li>Analyse, Generierung und KI-Bewertung senden Inhalte direkt an Anthropic oder OpenRouter.</li>
+                <li>Analyseergebnisse und generierte Klausuren können während deiner Sitzung im Browser zwischengespeichert werden.</li>
+                <li>ExamDraft setzt keine klassischen Nutzerkonten, keine Profile und kein produktseitiges Tracking für Lerninhalte ein.</li>
+              </ul>
+            </article>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">API-Anfragen</h2>
-          <p>
-            API-Anfragen gehen direkt von deinem Browser an den von dir gewählten Anbieter,
-            derzeit Anthropic (api.anthropic.com) oder OpenRouter (openrouter.ai). Dabei
-            werden die für Analyse, Generierung oder Korrektur benötigten Inhalte deiner
-            Dokumente an diesen Anbieter übertragen. ExamDraft hat keinen Zugriff auf diese
-            Anfragen über eigene Server.
-          </p>
-          <p class="mt-2">
-            Für die Verarbeitung dieser Daten gelten die Datenschutzhinweise des jeweiligen
-            Anbieters, insbesondere die{' '}
-            <a
-              href="https://www.anthropic.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-blue-400 hover:text-blue-300"
-            >
-              Datenschutzerklärung von Anthropic
-            </a>{' '}
-            und die{' '}
-            <a
-              href="https://openrouter.ai/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-blue-400 hover:text-blue-300"
-            >
-              Datenschutzerklärung von OpenRouter
-            </a>.
-          </p>
-        </section>
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Verantwortung</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft ist eine statische Webanwendung. Für die produktbezogene Darstellung
+                  dieser Seiten und die Bedienoberfläche ist ExamDraft verantwortlich.
+                </p>
+                <p>
+                  Für die Verarbeitung der Inhalte, die du aktiv an einen KI-Anbieter sendest,
+                  ist zusätzlich der jeweilige Anbieter verantwortlich. Das gilt insbesondere
+                  dann, wenn du Analyse-, Generierungs- oder Bewertungsfunktionen startest.
+                </p>
+                <p>
+                  Kontakt für Datenschutzfragen:
+                  <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>
+                </p>
+              </div>
+            </article>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">Deine Rechte / Löschung</h2>
-          <p>
-            Du kannst alle lokal gespeicherten Daten jederzeit löschen:
-            Browser-Einstellungen → Websitedaten löschen → examdraft.com.
-          </p>
-          <p class="mt-2">
-            Kontakt: <a href="mailto:privacy@examdraft.com" class="text-blue-400 hover:text-blue-300">privacy@examdraft.com</a>
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">1. Lokal im Browser gespeicherte Daten</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft speichert einen Teil der Daten ausschließlich lokal in deinem Browser,
+                damit die App zwischen Seitenwechseln und Sitzungen sinnvoll weiterarbeiten kann.
+              </p>
+              <ul class="legal-list">
+                <li><strong>API-Key</strong> des gewählten Anbieters im <strong>localStorage</strong>.</li>
+                <li><strong>Provider- und Modellwahl</strong> im <strong>localStorage</strong>.</li>
+                <li><strong>Temporäre Analyseergebnisse und generierte Klausuren</strong> im <strong>sessionStorage</strong>, damit du im selben Browserfenster weiterarbeiten kannst.</li>
+                <li><strong>Keine Upload-PDFs</strong> als dauerhafte lokale ExamDraft-Datenbank. Die Dateien werden zur Verarbeitung im Browser gelesen und anschließend nur insoweit weiterverwendet, wie es für den laufenden Vorgang nötig ist.</li>
+              </ul>
+              <p>
+                Diese lokale Speicherung dient ausschließlich der Funktion der App. Du kannst sie
+                jederzeit durch das Löschen der Websitedaten deines Browsers entfernen.
+              </p>
+            </div>
+          </section>
 
-        <p class="text-gray-600 text-xs">Stand: März 2026</p>
-      </div>
-    </main>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2. Daten, die an KI-Anbieter übertragen werden</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Wenn du ExamDraft aktiv nutzt, zum Beispiel für Analyse, Klausurgenerierung oder
+                KI-Bewertung, schickt dein Browser die dafür erforderlichen Inhalte direkt an
+                den ausgewählten Anbieter. Aktuell unterstützt ExamDraft insbesondere
+                <strong> Anthropic</strong> und <strong>OpenRouter</strong>.
+              </p>
+              <p>Je nach Funktion können darunter insbesondere fallen:</p>
+              <ul class="legal-list">
+                <li>Textinhalte aus Altklausuren</li>
+                <li>Textinhalte aus Musterlösungen oder Erwartungshorizonten</li>
+                <li>Vorlesungskontext aus hochgeladenen PDFs oder aus deiner eingefügten Themen-Zusammenfassung</li>
+                <li>von dir eingegebene Antworten bei der KI-Bewertung</li>
+              </ul>
+              <p>
+                ExamDraft leitet diese Inhalte <strong>nicht</strong> über einen eigenen
+                Zwischenserver. Die Übertragung erfolgt vom Browser direkt an die jeweilige API.
+                Für diese Verarbeitung gelten ergänzend die Hinweise des jeweiligen Anbieters:
+                <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer"> Anthropic Privacy Policy</a>
+                {' '}und
+                <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer"> OpenRouter Privacy Policy</a>.
+              </p>
+            </div>
+          </section>
+
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">3. Keine ExamDraft-Inhaltsdatenbank</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft führt keine klassische Nutzer- oder Dokumentendatenbank für deine
+                  Klausurinhalte. Es gibt insbesondere keine Oberfläche, in der ExamDraft selbst
+                  deine hochgeladenen Klausuren langfristig sammelt, archiviert oder profilbasiert
+                  auswertet.
+                </p>
+                <p>
+                  Das ist wichtig: Die eigentliche inhaltliche Verarbeitung findet entweder
+                  lokal im Browser oder beim von dir gewählten KI-Anbieter statt.
+                </p>
+              </div>
+            </article>
+
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">4. Keine klassische Tracking-Logik</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft verwendet aktuell keine klassischen Nutzerkonten, keine
+                  personalisierten Werbeprofile und kein produktseitiges Analytics-System für
+                  deine Lerninhalte.
+                </p>
+                <p>
+                  Technisch notwendige Browser- und Hostingvorgänge können dennoch anfallen.
+                  Diese Seite beschreibt den produktseitigen Umgang mit deinen Inhalten innerhalb
+                  der App.
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">5. Rechtsgrundlagen und deine Entscheidungshoheit</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Soweit Datenschutzrecht anwendbar ist, verarbeitet ExamDraft lokale
+                Browserdaten vor allem zur Bereitstellung der von dir gewünschten Funktionen.
+                Die Übertragung an externe KI-Anbieter erfolgt, weil du diese Funktionen aktiv
+                auslöst und dafür deinen eigenen API-Key einsetzt.
+              </p>
+              <p>
+                Du entscheidest selbst,
+              </p>
+              <ul class="legal-list">
+                <li>ob du ExamDraft überhaupt mit einem API-Anbieter verbindest,</li>
+                <li>welchen Anbieter du verwendest,</li>
+                <li>welche Dokumente oder Texte du als Kontext übermittelst,</li>
+                <li>ob du statt kompletter Folien lieber eine kompakte Themen-Zusammenfassung einfügst.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">6. Speicherdauer, Löschung und Rechte</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Lokal gespeicherte Daten bleiben in deinem Browser, bis du sie löschst oder sie
+                durch Browserlogik überschrieben werden. Session-Daten sind grundsätzlich für die
+                laufende Sitzung gedacht.
+              </p>
+              <p>
+                Wenn du lokal gespeicherte Daten entfernen möchtest, kannst du in deinem Browser
+                die Websitedaten von ExamDraft löschen. Wenn du Fragen zur Verarbeitung durch
+                einen KI-Anbieter hast, musst du dich zusätzlich an diesen Anbieter wenden, weil
+                ExamDraft keinen Zugriff auf dessen interne Verarbeitung oder Speicherfristen hat.
+              </p>
+              <p>
+                Kontakt:
+                <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

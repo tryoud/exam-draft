@@ -3,76 +3,206 @@ import '../styles/global.css';
 ---
 
 <!doctype html>
-<html lang="de">
+<html lang="de" class="legal-html">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nutzungsbedingungen für ExamDraft: zulässige Nutzung, Upload-Verantwortung, Bring Your Own Key und Haftung."
+    />
     <title>Nutzungsbedingungen — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
-    <header class="sticky top-0 h-14 bg-[#0a0a0a] border-b border-[#222222] flex items-center justify-between px-4">
-      <a href="/" class="text-white font-bold text-lg hover:text-blue-400 transition-colors">
-        ExamDraft
-      </a>
-      <div class="flex items-center gap-3 text-xs">
-        <span class="text-white">DE</span>
-        <a href="/en/terms" class="text-gray-500 hover:text-gray-300 transition-colors">EN</a>
-      </div>
-    </header>
-    <main class="max-w-2xl mx-auto px-4 py-12">
-      <h1 class="text-2xl font-bold text-white mb-6">Nutzungsbedingungen</h1>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Nutzungsbedingungen</p>
+            </div>
+          </a>
 
-      <div class="space-y-6 text-gray-400 text-sm leading-relaxed">
-        <p>
-          Diese Nutzungsbedingungen regeln die Verwendung von ExamDraft. Durch die Nutzung
-          des Dienstes stimmst du diesen Bedingungen zu.
-        </p>
+          <div class="flex items-center gap-3">
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">DE</span>
+            <a href="/en/terms" class="secondary-link px-4 py-2 text-xs">EN</a>
+          </div>
+        </div>
+      </header>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">1. Nutzung des Dienstes</h2>
-          <p>
-            ExamDraft ist ein KI-gestütztes Werkzeug zur Generierung von Übungsklausuren.
-            Der Dienst darf ausschließlich für legale und persönliche Lernzwecke genutzt werden.
-          </p>
-        </section>
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-5xl space-y-8">
+          <section class="legal-hero rounded-[2rem] px-6 py-8 sm:px-8 sm:py-10">
+            <p class="legal-kicker">Rahmen der Nutzung</p>
+            <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Nutzungsbedingungen für ExamDraft</h1>
+            <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
+              Diese Bedingungen regeln die Nutzung von ExamDraft als Werkzeug zur Analyse von
+              Altklausuren, zur Generierung von Übungsklausuren und zur KI-gestützten Bewertung
+              von Antworten. Die Bedingungen sollen vor allem klar machen, wofür das Produkt
+              gedacht ist, welche Verantwortung bei dir als Nutzer liegt und welche Grenzen
+              ein KI-basiertes Lernwerkzeug naturgemäß hat.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="legal-meta-chip">Stand: April 2026</span>
+              <span class="legal-meta-chip">Bring Your Own Key</span>
+              <span class="legal-meta-chip">Nur für zulässige Lernzwecke</span>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">2. Urheberrecht</h2>
-          <p>
-            Du darfst nur Dokumente hochladen, an denen du das Urheberrecht besitzt oder für die
-            du die ausdrückliche Erlaubnis des Rechteinhabers hast. ExamDraft übernimmt keine
-            Haftung für urheberrechtliche Verletzungen durch Nutzer.
-          </p>
-        </section>
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Kurzfassung</p>
+              <ul class="legal-list legal-copy mt-4 text-sm">
+                <li>ExamDraft ist für persönliche, legale Prüfungsvorbereitung gedacht.</li>
+                <li>Du darfst nur Unterlagen verwenden, für die du Nutzungsrechte hast oder die du rechtmäßig verwenden darfst.</li>
+                <li>Du nutzt deinen eigenen API-Key und trägst die dabei entstehenden Kosten selbst.</li>
+                <li>Generierte Inhalte sind Lernmaterial, keine garantierte Musterlösung und keine Rechts- oder Prüfungsberatung.</li>
+              </ul>
+            </article>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">3. API-Nutzung (BYOK)</h2>
-          <p>
-            ExamDraft nutzt das "Bring Your Own Key"-Modell. Du verwendest deinen eigenen
-            Anthropic-API-Key und trägst alle anfallenden API-Kosten. ExamDraft stellt keine
-            eigenen API-Ressourcen bereit.
-          </p>
-        </section>
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">Kontakt</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  Fragen zu diesen Bedingungen kannst du an
+                  <a href="mailto:legal@examdraft.com"> legal@examdraft.com</a>
+                  senden.
+                </p>
+                <p>
+                  Fragen zum Datenschutz gehören an
+                  <a href="mailto:privacy@examdraft.com"> privacy@examdraft.com</a>.
+                </p>
+              </div>
+            </article>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">4. Haftungsausschluss</h2>
-          <p>
-            ExamDraft wird "wie besehen" bereitgestellt. Wir übernehmen keine Garantie für die
-            Richtigkeit oder Vollständigkeit der generierten Inhalte. Generierte Klausuren dienen
-            ausschließlich Übungszwecken.
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">1. Zweck des Dienstes</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft ist ein KI-gestütztes Werkzeug für die akademische Vorbereitung. Die App
+                hilft dabei, aus Altklausuren und optionalem Vorlesungskontext neue Übungsklausuren,
+                Aufgabentyp-Variationen und KI-gestützte Bewertungen zu erzeugen.
+              </p>
+              <p>
+                ExamDraft ist nicht dafür gedacht, Prüfungsordnungen zu ersetzen, amtliche
+                Bewertungen vorzunehmen oder verbindliche Aussagen über das tatsächliche Ergebnis
+                einer realen Hochschulprüfung zu treffen.
+              </p>
+            </div>
+          </section>
 
-        <section>
-          <h2 class="text-white font-semibold mb-2">5. Kontakt</h2>
-          <p>
-            Bei Fragen: <a href="mailto:legal@examdraft.com" class="text-blue-400 hover:text-blue-300">legal@examdraft.com</a>
-          </p>
-        </section>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2. Zulässige Nutzung</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>Du darfst ExamDraft nur für rechtmäßige Zwecke verwenden, insbesondere für:</p>
+              <ul class="legal-list">
+                <li>eigene Prüfungsvorbereitung,</li>
+                <li>zulässige Lern- und Übungszwecke,</li>
+                <li>interne, nicht missbräuchliche Lehr- oder Lernkontexte.</li>
+              </ul>
+              <p>Nicht zulässig ist insbesondere eine Nutzung, die</p>
+              <ul class="legal-list">
+                <li>gegen Urheberrecht, Prüfungsrecht oder Vertraulichkeitspflichten verstößt,</li>
+                <li>unbefugt geschützte Unterlagen Dritter verarbeitet,</li>
+                <li>ExamDraft für Täuschung, Umgehung oder Missbrauch realer Prüfungen einsetzt,</li>
+                <li>die Infrastruktur oder externe Anbieter rechtswidrig oder technisch missbräuchlich belastet.</li>
+              </ul>
+            </div>
+          </section>
 
-        <p class="text-gray-600 text-xs">Stand: März 2026</p>
-      </div>
-    </main>
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">3. Deine Verantwortung für Uploads und Inhalte</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Du bist selbst dafür verantwortlich, welche Altklausuren, Musterlösungen,
+                Vorlesungsfolien oder Themen-Zusammenfassungen du in ExamDraft einbringst.
+              </p>
+              <ul class="legal-list">
+                <li>Du solltest nur Inhalte verwenden, die dir gehören oder die du rechtmäßig nutzen darfst.</li>
+                <li>Du solltest keine Inhalte hochladen, deren Nutzung vertraglich, prüfungsrechtlich oder urheberrechtlich untersagt ist.</li>
+                <li>Wenn du personenbezogene oder vertrauliche Informationen in Materialien hast, musst du selbst prüfen, ob deren Verwendung zulässig ist.</li>
+              </ul>
+              <p>
+                ExamDraft prüft Uploads nicht rechtlich vor. Die Verantwortung für die Rechtmäßigkeit
+                der eingebrachten Inhalte liegt bei dir.
+              </p>
+            </div>
+          </section>
+
+          <section class="grid gap-4 lg:grid-cols-2">
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">4. Bring Your Own Key</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  ExamDraft arbeitet mit deinem eigenen API-Key. Das bedeutet: Du entscheidest,
+                  welchen Anbieter du nutzt, und du trägst die dadurch entstehenden API-Kosten.
+                </p>
+                <p>
+                  ExamDraft stellt keine eigenen Tokens, kein eigenes Freikontingent und keine
+                  pauschal abgegoltene API-Nutzung bereit.
+                </p>
+              </div>
+            </article>
+
+            <article class="legal-card rounded-[1.7rem] p-6">
+              <p class="legal-kicker">5. Abhängigkeit von externen Anbietern</p>
+              <div class="legal-copy mt-4 space-y-4 text-sm">
+                <p>
+                  Teile der Funktion hängen von externen KI-Anbietern ab. Wenn diese Anbieter
+                  ihre Modelle, Preise, Limits oder Richtlinien ändern, kann sich dadurch auch
+                  das Verhalten von ExamDraft verändern.
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">6. Qualität, Grenzen und Haftung</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                KI-generierte Inhalte können fehlerhaft, unvollständig oder fachlich unpräzise sein.
+                Das gilt sowohl für Analyseergebnisse als auch für generierte Aufgaben,
+                Musterlösungen, Hinweise oder Bewertungen.
+              </p>
+              <p>
+                ExamDraft wird daher als Lernwerkzeug „wie besehen“ bereitgestellt. Wir geben
+                keine Garantie dafür, dass eine generierte Klausur dem tatsächlichen Stil einer
+                späteren Prüfung exakt entspricht oder dass eine KI-Bewertung mit der Bewertung
+                einer realen Prüferin oder eines realen Prüfers übereinstimmt.
+              </p>
+              <p>
+                Soweit gesetzlich zulässig, ist die Haftung für leichte Fahrlässigkeit beschränkt.
+                Zwingende gesetzliche Haftung, insbesondere bei Vorsatz, grober Fahrlässigkeit
+                oder Verletzung zwingender Schutzpflichten, bleibt unberührt.
+              </p>
+            </div>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">7. Änderungen und Weiterentwicklung</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                ExamDraft kann weiterentwickelt, angepasst oder in einzelnen Funktionen verändert
+                werden. Dazu können Änderungen an Benutzeroberfläche, unterstützten Modellen,
+                Preisindikationen, Exportfunktionen oder verfügbaren Lernmodi gehören.
+              </p>
+              <p>
+                Wenn diese Bedingungen wesentlich angepasst werden, wird auf den Seitenstand
+                hingewiesen. Maßgeblich ist jeweils die auf der Website veröffentlichte Fassung.
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
   </body>
 </html>
