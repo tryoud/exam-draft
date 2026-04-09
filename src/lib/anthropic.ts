@@ -83,32 +83,41 @@ function buildOpenRouterHeaders(apiKey: string): Record<string, string> {
  * Wrong (old):  close all `]` then all `}` → `]]}}` (invalid nesting)
  */
 function repairTruncatedJSON(text: string): string {
-  const stack: ('{' | '[')[] = [];
-  let inString = false, escape = false;
+  let current = text;
 
-  for (const ch of text) {
-    if (escape)                   { escape = false; continue; }
-    if (ch === '\\' && inString)  { escape = true;  continue; }
-    if (ch === '"')               { inString = !inString; continue; }
-    if (inString)                 continue;
-    if      (ch === '{' || ch === '[') stack.push(ch as '{' | '[');
-    else if (ch === '}') { if (stack.at(-1) === '{') stack.pop(); }
-    else if (ch === ']') { if (stack.at(-1) === '[') stack.pop(); }
-  }
+  // Iterative backtracking: if we land inside a string, walk back to the
+  // previous `}` and retry.  Capped at 200 attempts to prevent infinite loops
+  // when the response contains many `}` characters inside string values.
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const stack: ('{' | '[')[] = [];
+    let inString = false, escape = false;
 
-  if (inString) {
+    for (const ch of current) {
+      if (escape)                   { escape = false; continue; }
+      if (ch === '\\' && inString)  { escape = true;  continue; }
+      if (ch === '"')               { inString = !inString; continue; }
+      if (inString)                 continue;
+      if      (ch === '{' || ch === '[') stack.push(ch as '{' | '[');
+      else if (ch === '}') { if (stack.at(-1) === '{') stack.pop(); }
+      else if (ch === ']') { if (stack.at(-1) === '[') stack.pop(); }
+    }
+
+    if (!inString) {
+      // Close in reverse order (LIFO) — respects nesting
+      let repaired = current.trimEnd().replace(/,\s*$/, '');
+      for (let i = stack.length - 1; i >= 0; i--) {
+        repaired += stack[i] === '{' ? '}' : ']';
+      }
+      return repaired;
+    }
+
     // Truncated inside a string value — backtrack to last complete object
-    const lastBrace = text.lastIndexOf('}');
-    if (lastBrace > 0) return repairTruncatedJSON(text.slice(0, lastBrace + 1));
-    return text;
+    const lastBrace = current.lastIndexOf('}');
+    if (lastBrace <= 0) break;
+    current = current.slice(0, lastBrace + 1);
   }
 
-  // Close in reverse order (LIFO) — respects nesting
-  let repaired = text.trimEnd().replace(/,\s*$/, '');
-  for (let i = stack.length - 1; i >= 0; i--) {
-    repaired += stack[i] === '{' ? '}' : ']';
-  }
-  return repaired;
+  return current;
 }
 
 /**
@@ -248,6 +257,9 @@ function validateAnalysisResult(data: unknown): AnalysisResult {
   ) {
     throw new Error('JSON_PARSE_ERROR');
   }
+  // Tolerate missing optional arrays — model sometimes omits them to save tokens
+  if (!Array.isArray(d.topicAreas))  d.topicAreas  = [];
+  if (!Array.isArray(d.slideTopics)) d.slideTopics = [];
   return d as unknown as AnalysisResult;
 }
 
