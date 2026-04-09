@@ -274,6 +274,7 @@ export default function GeneratedExamComponent({
             <div className="w-4 h-4 border-2 border-[#6b8dff] border-t-transparent rounded-full animate-spin" />
             {LOADING_MESSAGES[msgIndex]}
           </div>
+          <p className="text-xs text-[#9b95a2] mt-2">Die Generierung kann 1–2 Minuten dauern.</p>
         </div>
         <div className="app-surface rounded-[1.8rem] p-6">
           <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
