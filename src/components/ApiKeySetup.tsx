@@ -230,7 +230,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
 
   if (mode === 'fullscreen') {
     return (
-      <div className="min-h-screen app-body flex items-center justify-center px-4 py-16">
+      <div className="fixed inset-0 z-50 app-body flex items-center justify-center px-4 py-16 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#111111] mb-2">ExamDraft</h1>
