@@ -770,8 +770,10 @@ ${taskSchema}`;
 
   // ── PHASE 3: Solutions ────────────────────────────────────────────────────────
   // MC solutions are tiny (just a correct key + brief explanation) → batch more.
-  // Regular solutions need more space.
-  const SOLUTION_BATCH_SIZE   = mc ? 20 : 6;
+  // Regular solutions can be very long (full Rechenweg + keyPoints + commonMistakes),
+  // so keep batches small (≤3) to avoid hitting output-token limits and losing
+  // solutions for later tasks due to JSON truncation.
+  const SOLUTION_BATCH_SIZE   = mc ? 20 : 3;
   const SOLUTION_BATCH_TOKENS = mc ? 3000 : 6000;
   const solutionBatches = chunkArray(allTasks, SOLUTION_BATCH_SIZE);
 
@@ -779,19 +781,18 @@ ${taskSchema}`;
     ? `{"solution":[{"taskId":"task_1","solution":"Kurze Begründung warum die richtige Antwort korrekt ist","correctOption":"B","keyPoints":["Kernpunkt"],"commonMistakes":["Häufiger Fehler"]}]}`
     : `{"solution":[{"taskId":"task_1","solution":"Vollständige Musterlösung mit Rechenweg","keyPoints":["Kernpunkt"],"commonMistakes":["Häufiger Fehler"]}]}`;
 
-  const solutionBatchResults = await Promise.all(
-    solutionBatches.map(async (batchTasks, batchIndex) => {
-      const taskSummary = batchTasks.map((t: ExamTask) => ({
-        id: t.id,
-        number: t.number,
-        title: t.title,
-        type: t.type,
-        points: t.points,
-        description: t.description,
-        ...(t.options ? { options: t.options } : { subTasks: t.subTasks ?? [] }),
-      }));
+  async function fetchSolutionBatch(batchTasks: ExamTask[], label: string): Promise<ExamSolution[]> {
+    const taskSummary = batchTasks.map((t: ExamTask) => ({
+      id: t.id,
+      number: t.number,
+      title: t.title,
+      type: t.type,
+      points: t.points,
+      description: t.description,
+      ...(t.options ? { options: t.options } : { subTasks: t.subTasks ?? [] }),
+    }));
 
-      const solutionsPrompt = `Erstelle vollständige Musterlösungen für ${batchTasks.length} Klausuraufgaben. Gib NUR JSON zurück.
+    const solutionsPrompt = `Erstelle vollständige Musterlösungen für ${batchTasks.length} Klausuraufgaben. Gib NUR JSON zurück.
 
 FACH: ${input.analysis.subject}
 AUFGABEN: ${JSON.stringify(taskSummary)}
@@ -804,16 +805,38 @@ ANFORDERUNGEN:
 JSON-Schema:
 ${solutionSchema}`;
 
-      const solutionsJson = await llmCall(provider, solutionsPrompt, SOLUTION_BATCH_TOKENS, 0.3);
-      return parseAndLog(solutionsJson, `generateExam[solutions-batch-${batchIndex}]`, (d) => {
-        const obj = d as Record<string, unknown>;
-        const arr = Array.isArray(obj) ? obj : (Array.isArray(obj.solution) ? obj.solution : []);
-        return arr as ExamSolution[];
-      });
-    })
+    const solutionsJson = await llmCall(provider, solutionsPrompt, SOLUTION_BATCH_TOKENS, 0.3);
+    return parseAndLog(solutionsJson, label, (d) => {
+      const obj = d as Record<string, unknown>;
+      const arr = Array.isArray(obj) ? obj : (Array.isArray(obj.solution) ? obj.solution : []);
+      return arr as ExamSolution[];
+    });
+  }
+
+  const solutionBatchResults = await Promise.all(
+    solutionBatches.map((batchTasks, batchIndex) =>
+      fetchSolutionBatch(batchTasks, `generateExam[solutions-batch-${batchIndex}]`)
+    )
   );
 
-  const solutions = solutionBatchResults.flat();
+  let solutions = solutionBatchResults.flat();
+
+  // ── PHASE 3b: Retry missing solutions ────────────────────────────────────────
+  // If the model truncated a batch (output-token limit), some tasks won't have a
+  // solution. Detect them and retry individually so every task gets covered.
+  if (!mc) {
+    const coveredIds = new Set(solutions.map((s) => s.taskId));
+    const missingTasks = allTasks.filter((t) => !coveredIds.has(t.id));
+    if (missingTasks.length > 0) {
+      console.warn(`[ExamDraft] ${missingTasks.length} task(s) missing solutions — retrying individually`);
+      const retryResults = await Promise.all(
+        missingTasks.map((t, i) =>
+          fetchSolutionBatch([t], `generateExam[solutions-retry-${i}]`).catch(() => [] as ExamSolution[])
+        )
+      );
+      solutions = [...solutions, ...retryResults.flat()];
+    }
+  }
 
   return {
     title: plan.title,
