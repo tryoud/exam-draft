@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AnalysisResult, Provider } from '../lib/types';
-import { getModelInputPriceUSD, getModelOutputPriceUSD } from '../lib/tokenEstimator';
+import { TYPICAL_PRICE_LABEL } from '../lib/tokenEstimator';
 import { OPENROUTER_MODELS } from '../lib/anthropic';
 
 interface ExamConfiguratorProps {
@@ -42,20 +42,6 @@ export default function ExamConfigurator({
     if (!mode || !canGenerate) return;
     onGenerate(mode, difficulty, selectedTypeId ?? undefined, excludedTopics.length ? excludedTopics : undefined);
   }
-
-  // Generation cost: plan + task batches + solution batches
-  // Realistic estimate: ~10k input tokens + ~13k output tokens across all phases
-  const GEN_INPUT_TOKENS  = 10_500;
-  const GEN_OUTPUT_TOKENS = 13_000;
-  const inputPriceUSD  = getModelInputPriceUSD(provider, generationModel);
-  const outputPriceUSD = getModelOutputPriceUSD(provider, generationModel);
-  const genCostEUR =
-    ((GEN_INPUT_TOKENS / 1_000_000) * inputPriceUSD +
-     (GEN_OUTPUT_TOKENS / 1_000_000) * outputPriceUSD) * 0.92;
-  const genCostLabel =
-    genCostEUR < 0.01
-      ? '<€0.01'
-      : `~€${genCostEUR.toFixed(2)}`;
 
   const modelName =
     provider === 'anthropic'
@@ -209,8 +195,8 @@ export default function ExamConfigurator({
 
       <div className="flex items-center justify-between app-surface rounded-[1.3rem] p-4">
         <p className="text-xs text-[#7d7785]">
-          Generierung: <span className="text-[#3e3944] font-mono">{genCostLabel}</span>
-          <span className="text-[#8b8593] ml-2">· {modelName} · nur JSON, keine PDFs</span>
+          Typischer Gesamtpreis: <span className="text-[#3e3944] font-mono">{TYPICAL_PRICE_LABEL}</span>
+          <span className="text-[#8b8593] ml-2">· {modelName} · Analyse + Generierung, nur JSON</span>
         </p>
       </div>
 

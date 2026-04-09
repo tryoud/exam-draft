@@ -246,9 +246,62 @@ function buildOpenRouterText(file: ExtractedFile, index: number, label: string):
   return `${header}\n${file.text ?? ''}`;
 }
 
+function detectTotalPointsFromExamText(examFiles: ExtractedFile[]): number | null {
+  const texts = examFiles
+    .map((file) => file.text ?? '')
+    .filter(Boolean);
+
+  const contextualPatterns = [
+    /(?:gesamt(?:punkt(?:e|zahl)?)?|max(?:imal)?(?:\s+erreichbar(?:e|en)?)?|insgesamt|summe)\s*[:\-]?\s*(\d{2,3})\s*(?:punkte|pkt|p\.?)\b/gi,
+    /(\d{2,3})\s*(?:punkte|pkt|p\.?)\s*(?:gesamt|insgesamt|max(?:imal)?)/gi,
+    /erreichbar(?:e|en)?\s*[:\-]?\s*(\d{2,3})\s*(?:punkte|pkt|p\.?)\b/gi,
+  ];
+
+  for (const text of texts) {
+    for (const pattern of contextualPatterns) {
+      for (const match of text.matchAll(pattern)) {
+        const value = Number(match[1]);
+        if (value >= 20 && value <= 300) return value;
+      }
+    }
+  }
+
+  return null;
+}
+
+function detectDurationFromExamText(examFiles: ExtractedFile[]): number | null {
+  const texts = examFiles
+    .map((file) => file.text ?? '')
+    .filter(Boolean);
+
+  const contextualPatterns = [
+    /(?:bearbeitungszeit|arbeitszeit|prüfungsdauer|klausurdauer|dauer|zeit)\s*[:\-]?\s*(\d{2,3})\s*(?:min(?:uten)?|mins?|minute(?:n)?)\b/gi,
+    /(\d{2,3})\s*(?:min(?:uten)?|mins?|minute(?:n)?)\s*(?:bearbeitungszeit|arbeitszeit|prüfungsdauer|klausurdauer|dauer|zeit)\b/gi,
+    /(?:bearbeitungszeit|arbeitszeit|prüfungsdauer|klausurdauer|dauer|zeit)\s*[:\-]?\s*(\d{1,2})\s*(?:std|stunden?|h)\b/gi,
+    /(\d{1,2})\s*(?:std|stunden?|h)\s*(?:bearbeitungszeit|arbeitszeit|prüfungsdauer|klausurdauer|dauer|zeit)\b/gi,
+  ];
+
+  for (const text of texts) {
+    for (let i = 0; i < contextualPatterns.length; i++) {
+      const pattern = contextualPatterns[i];
+      for (const match of text.matchAll(pattern)) {
+        const value = Number(match[1]);
+        if (i < 2 && value >= 15 && value <= 360) return value;
+        if (i >= 2 && value >= 1 && value <= 8) return value * 60;
+      }
+    }
+  }
+
+  return null;
+}
+
 // --- Response validators ---
 
-function validateAnalysisResult(data: unknown): AnalysisResult {
+function validateAnalysisResult(
+  data: unknown,
+  detectedTotalPoints?: number | null,
+  detectedDuration?: number | null
+): AnalysisResult {
   const d = data as Record<string, unknown>;
   if (
     typeof d.subject !== 'string' ||
@@ -257,9 +310,40 @@ function validateAnalysisResult(data: unknown): AnalysisResult {
   ) {
     throw new Error('JSON_PARSE_ERROR');
   }
+
+  const taskTypes = d.taskTypes as Array<Record<string, unknown>>;
+  const avgDifficultyFallback = taskTypes.length > 0
+    ? taskTypes.reduce((sum, task) => sum + (typeof task.difficulty === 'number' ? task.difficulty : 3), 0) / taskTypes.length
+    : 3;
+  const totalPointsFallback = taskTypes.reduce(
+    (sum, task) => sum + (typeof task.avgPoints === 'number' ? task.avgPoints : 0),
+    0
+  );
+
   // Tolerate missing optional arrays — model sometimes omits them to save tokens
   if (!Array.isArray(d.topicAreas))  d.topicAreas  = [];
   if (!Array.isArray(d.slideTopics)) d.slideTopics = [];
+  if (typeof d.averageDifficulty !== 'number' || Number.isNaN(d.averageDifficulty)) {
+    d.averageDifficulty = avgDifficultyFallback;
+  }
+  if (typeof detectedTotalPoints === 'number' && detectedTotalPoints > 0) {
+    d.totalPoints = detectedTotalPoints;
+  }
+  if (typeof d.totalPoints !== 'number' || Number.isNaN(d.totalPoints) || d.totalPoints <= 0) {
+    d.totalPoints = detectedTotalPoints ?? (totalPointsFallback > 0 ? totalPointsFallback : 60);
+  }
+  if (typeof detectedDuration === 'number' && detectedDuration > 0) {
+    d.estimatedDuration = detectedDuration;
+  }
+  if (typeof d.estimatedDuration !== 'number' || Number.isNaN(d.estimatedDuration) || d.estimatedDuration <= 0) {
+    d.estimatedDuration = 120;
+  }
+  if (typeof d.examCount !== 'number' || Number.isNaN(d.examCount) || d.examCount <= 0) {
+    d.examCount = 1;
+  }
+  if (typeof d.hasSlideContext !== 'boolean') d.hasSlideContext = false;
+  if (typeof d.hadImageOnlyContent !== 'boolean') d.hadImageOnlyContent = false;
+
   return d as unknown as AnalysisResult;
 }
 
@@ -396,7 +480,11 @@ Gib NUR dieses JSON zurück (kein Markdown, kein Text davor/danach):
   }
 
   try {
-    return validateAnalysisResult(parsed);
+    return validateAnalysisResult(
+      parsed,
+      detectTotalPointsFromExamText(examFiles),
+      detectDurationFromExamText(examFiles)
+    );
   } catch (validErr) {
     console.error('[ExamDraft] Schema validation failed. Parsed object:', parsed);
     throw new Error('JSON_PARSE_ERROR');

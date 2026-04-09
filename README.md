@@ -53,14 +53,9 @@ npm run build
 
 ## Kostenübersicht
 
-| Szenario | Tokens | Kosten |
-|---|---|---|
-| 5 Klausuren, Text-Modus | ~200k | ~€0.06 |
-| 5 Klausuren + 3 Folien, Text-Modus | ~290k | ~€0.08 |
-| 5 Klausuren, Bild-Modus | ~950k | ~€0.26 |
-| Pro Generierungsaufruf | ~5k | ~€0.01 |
+Ein typischer kompletter Durchlauf aus Analyse + Generierung liegt ungefähr bei **~€0.20**.
 
-*Preise basieren auf claude-sonnet-4 ($3.00/M Input-Tokens, Kurs: 0.92 EUR/USD)*
+Je nach Modell, Bild-Modus und Umfang der PDFs kann der tatsächliche Preis etwas darunter oder darüber liegen.
 
 ---
 

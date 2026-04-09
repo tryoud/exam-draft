@@ -1,7 +1,8 @@
 import type { ExtractedFile, Provider } from '../lib/types';
 import {
   estimateTotalTokens,
-  estimateCostEUR,
+  estimateTypicalWorkflowCostEURValue,
+  formatEURApprox,
   getCostLevel,
   formatTokens,
 } from '../lib/tokenEstimator';
@@ -17,6 +18,7 @@ interface TokenEstimatorProps {
   examImageCount: number;
   provider: Provider;
   analysisModel: string;
+  generationModel: string;
 }
 
 export default function TokenEstimator({
@@ -29,9 +31,12 @@ export default function TokenEstimator({
   examImageCount,
   provider,
   analysisModel,
+  generationModel,
 }: TokenEstimatorProps) {
   const totalTokens = estimateTotalTokens(examFiles, slideFiles, includeSlides);
-  const cost = estimateCostEUR(totalTokens, provider, analysisModel);
+  const cost = formatEURApprox(
+    estimateTypicalWorkflowCostEURValue(totalTokens, provider, analysisModel, generationModel)
+  );
   const level = getCostLevel(totalTokens, provider, analysisModel);
   const examTokens = examFiles.reduce((s, f) => s + f.tokenEstimate, 0);
   const slideTokens = includeSlides ? slideFiles.reduce((s, f) => s + f.tokenEstimate, 0) : 0;
@@ -51,7 +56,7 @@ export default function TokenEstimator({
     <div className="app-surface rounded-[1.5rem] p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-[#3e3944]">
-          Geschätzte API-Kosten für diese Analyse
+          Konservative Gesamtkostenschätzung
         </h3>
         <span className="text-xs text-[#8b8593] font-mono">{modelName}</span>
       </div>
@@ -98,7 +103,7 @@ export default function TokenEstimator({
         <span className="text-[#2f5bd2] text-xs shrink-0">ℹ</span>
         <p className="text-xs text-[#8b8593]">
           Text wird lokal extrahiert — keine Bilder werden gesendet außer bei aktiviertem
-          Bild-Modus
+          Bild-Modus. Die Preisschätzung rechnet bewusst etwas höher, damit sie eher zu hoch als zu niedrig ist.
         </p>
       </div>
     </div>

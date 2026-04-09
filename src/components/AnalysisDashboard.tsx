@@ -158,6 +158,21 @@ export default function AnalysisDashboard({
 
   if (!result) return null;
 
+  const safeDifficulty =
+    typeof result.averageDifficulty === 'number' && Number.isFinite(result.averageDifficulty)
+      ? result.averageDifficulty
+      : result.taskTypes.length > 0
+      ? result.taskTypes.reduce((sum, task) => sum + task.difficulty, 0) / result.taskTypes.length
+      : 3;
+  const safeTotalPoints =
+    typeof result.totalPoints === 'number' && Number.isFinite(result.totalPoints) && result.totalPoints > 0
+      ? result.totalPoints
+      : result.taskTypes.reduce((sum, task) => sum + task.avgPoints, 0);
+  const safeDuration =
+    typeof result.estimatedDuration === 'number' && Number.isFinite(result.estimatedDuration) && result.estimatedDuration > 0
+      ? result.estimatedDuration
+      : 120;
+
   return (
     <div className="space-y-6 animate-slide-up">
       <div>
@@ -192,10 +207,10 @@ export default function AnalysisDashboard({
           { label: 'Aufgabentypen', value: result.totalTaskTypes },
           {
             label: 'Schwierigkeit',
-            value: <StarRating value={result.averageDifficulty} />,
+            value: <StarRating value={safeDifficulty} />,
           },
-          { label: 'Prüfungsdauer', value: `${result.estimatedDuration} Min` },
-          { label: 'Gesamtpunkte', value: `${result.totalPoints} Pkt` },
+          { label: 'Prüfungsdauer', value: `${safeDuration} Min` },
+          { label: 'Gesamtpunkte', value: `${safeTotalPoints} Pkt` },
         ].map((stat) => (
           <div key={stat.label} className="app-surface rounded-[1.2rem] p-4">
             <p className="text-xs text-[#7d7785] mb-1">{stat.label}</p>

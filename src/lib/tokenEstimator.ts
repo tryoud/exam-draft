@@ -23,6 +23,11 @@ const MODEL_OUTPUT_PRICES_USD: Record<string, number> = {
 };
 
 const EUR_RATE = 0.92;
+export const TYPICAL_PRICE_EUR = 0.20;
+export const TYPICAL_PRICE_LABEL = '~€0.20';
+export const GENERATION_INPUT_TOKENS = 10_500;
+export const GENERATION_OUTPUT_TOKENS = 13_000;
+const ESTIMATE_SAFETY_MULTIPLIER = 1.35;
 
 export function getModelInputPriceUSD(provider: Provider, model: string): number {
   if (provider === 'anthropic') return MODEL_INPUT_PRICES_USD['anthropic'] ?? 3.00;
@@ -46,15 +51,50 @@ export function estimateTotalTokens(
   return examTokens + slideTokens + 300; // ~300 tokens for instruction block overhead
 }
 
+export function formatEURApprox(eur: number): string {
+  if (eur < 0.01) return '<€0.01';
+  return `~€${eur.toFixed(2)}`;
+}
+
+export function estimateInputCostEURValue(
+  tokens: number,
+  provider: Provider = 'anthropic',
+  model = ''
+): number {
+  const priceUSD = getModelInputPriceUSD(provider, model);
+  return (tokens / 1_000_000) * priceUSD * EUR_RATE;
+}
+
+export function estimateGenerationCostEURValue(
+  provider: Provider = 'anthropic',
+  model = ''
+): number {
+  const inputPriceUSD = getModelInputPriceUSD(provider, model);
+  const outputPriceUSD = getModelOutputPriceUSD(provider, model);
+  return (
+    ((GENERATION_INPUT_TOKENS / 1_000_000) * inputPriceUSD) +
+    ((GENERATION_OUTPUT_TOKENS / 1_000_000) * outputPriceUSD)
+  ) * EUR_RATE;
+}
+
+export function estimateTypicalWorkflowCostEURValue(
+  analysisTokens: number,
+  provider: Provider = 'anthropic',
+  analysisModel = '',
+  generationModel = analysisModel
+): number {
+  const analysisCostEUR = estimateInputCostEURValue(analysisTokens, provider, analysisModel);
+  const generationCostEUR = estimateGenerationCostEURValue(provider, generationModel);
+  const conservativeEstimateEUR = (analysisCostEUR + generationCostEUR) * ESTIMATE_SAFETY_MULTIPLIER;
+  return Math.max(TYPICAL_PRICE_EUR, conservativeEstimateEUR);
+}
+
 export function estimateCostEUR(
   tokens: number,
   provider: Provider = 'anthropic',
   model = ''
 ): string {
-  const priceUSD = getModelInputPriceUSD(provider, model);
-  const eur = (tokens / 1_000_000) * priceUSD * EUR_RATE;
-  if (eur < 0.01) return '<€0.01';
-  return `~€${eur.toFixed(2)}`;
+  return formatEURApprox(estimateInputCostEURValue(tokens, provider, model));
 }
 
 export function getCostLevel(

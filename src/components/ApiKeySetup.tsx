@@ -6,6 +6,7 @@ import {
   DEFAULT_OPENROUTER_ANALYSIS_MODEL,
 } from '../lib/anthropic';
 import type { Provider } from '../lib/types';
+import { TYPICAL_PRICE_LABEL } from '../lib/tokenEstimator';
 
 interface ApiKeySetupProps {
   onSaved: (provider: Provider, key: string, generationModel: string, analysisModel: string) => void;
@@ -121,7 +122,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
           <div className="mb-5 bg-[#f8f4ee] border border-[#e5dfd5] rounded-xl p-3">
             <p className="text-xs text-[#7d7785]">
               <span className="text-[#3e3944] font-medium">Modell:</span> claude-sonnet-4-20250514
-              <span className="text-[#8b8593] ml-2">· Kosten: ca. €0.01–0.20 pro Analyse</span>
+              <span className="text-[#8b8593] ml-2">· Typischer Gesamtpreis: {TYPICAL_PRICE_LABEL} pro Durchlauf</span>
             </p>
           </div>
           <a

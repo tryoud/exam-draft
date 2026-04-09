@@ -3,7 +3,7 @@ import type { AppState, AppStep, ExtractedFile, AnalysisResult, GeneratedExam, P
 import { DEFAULT_OPENROUTER_ANALYSIS_MODEL } from '../lib/anthropic';
 import { processFile } from '../lib/pdfExtractor';
 import { analyzeExams, generateExam, getProvider } from '../lib/anthropic';
-import { estimateTotalTokens, estimateCostEUR, formatTokens } from '../lib/tokenEstimator';
+import { estimateTotalTokens, formatTokens } from '../lib/tokenEstimator';
 import ApiKeySetup from './ApiKeySetup';
 import UploadZone, { type PendingFile } from './UploadZone';
 import ConsentCheckbox from './ConsentCheckbox';
@@ -57,6 +57,7 @@ const initialState: AppState = {
   selectedMode: null,
   selectedDifficulty: 'same',
   selectedTypeId: null,
+  selectedExcludedTopics: [],
   generatedExam: null,
   currentStep: 1,
   isLoading: false,
@@ -221,6 +222,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
       selectedMode: mode,
       selectedDifficulty: difficulty,
       selectedTypeId: typeId ?? null,
+      selectedExcludedTopics: excludedTopics ?? [],
     }));
 
     try {
@@ -278,7 +280,8 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     await handleGenerate(
       state.selectedMode,
       state.selectedDifficulty,
-      state.selectedTypeId ?? undefined
+      state.selectedTypeId ?? undefined,
+      state.selectedExcludedTopics.length ? state.selectedExcludedTopics : undefined
     );
   }
 
@@ -292,7 +295,10 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         difficulty: state.selectedDifficulty,
         selectedTypeId: state.selectedTypeId,
       });
-      setState((s) => ({ ...s, generatedExam: exam }));
+      try {
+        sessionStorage.setItem('examdraft_session_exam', JSON.stringify(exam));
+      } catch { /* storage quota exceeded — ignore */ }
+      setState((s) => ({ ...s, generatedExam: exam, error: null }));
     } catch (err: unknown) {
       const code = err instanceof Error ? err.message : 'API_ERROR';
       showError(code);
@@ -317,6 +323,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
       generatedExam: null,
       currentStep: 3,
       selectedMode: null,
+      selectedExcludedTopics: [],
       error: null,
     }));
     setShowSession(false);
@@ -606,6 +613,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                     examImageCount={examImageCount}
                     provider={state.provider}
                     analysisModel={state.openrouterAnalysisModel}
+                    generationModel={state.openrouterModel}
                   />
                 )}
 

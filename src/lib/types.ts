@@ -128,6 +128,7 @@ export interface AppState {
   selectedMode: 'random' | 'type-training' | null;
   selectedDifficulty: 'easier' | 'same' | 'harder';
   selectedTypeId: string | null;
+  selectedExcludedTopics: string[];
   generatedExam: GeneratedExam | null;
   currentStep: AppStep;
   isLoading: boolean;
