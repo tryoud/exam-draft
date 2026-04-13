@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AnalysisResult, Provider } from '../lib/types';
-import { TYPICAL_PRICE_LABEL } from '../lib/tokenEstimator';
+import { estimateGenerationCostEURValue, formatEURApprox } from '../lib/tokenEstimator';
 import { OPENROUTER_MODELS } from '../lib/anthropic';
 
 interface ExamConfiguratorProps {
@@ -47,6 +47,8 @@ export default function ExamConfigurator({
     provider === 'anthropic'
       ? 'Claude Sonnet 4.5'
       : (OPENROUTER_MODELS.find((m) => m.id === generationModel)?.name ?? generationModel);
+
+  const generationCostLabel = formatEURApprox(estimateGenerationCostEURValue(provider, generationModel));
 
   return (
     <div className="space-y-6">
@@ -195,7 +197,7 @@ export default function ExamConfigurator({
 
       <div className="flex items-center justify-between app-surface rounded-[1.3rem] p-4">
         <p className="text-xs text-[#7d7785]">
-          Typischer Gesamtpreis: <span className="text-[#3e3944] font-mono">{TYPICAL_PRICE_LABEL}</span>
+          Typischer Generierungspreis: <span className="text-[#3e3944] font-mono">{generationCostLabel}</span>
           <span className="text-[#8b8593] ml-2">· {modelName} · Analyse + Generierung, nur JSON</span>
         </p>
       </div>

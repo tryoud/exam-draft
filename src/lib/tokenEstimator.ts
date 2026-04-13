@@ -23,11 +23,11 @@ const MODEL_OUTPUT_PRICES_USD: Record<string, number> = {
 };
 
 const EUR_RATE = 0.92;
-export const TYPICAL_PRICE_EUR = 0.20;
-export const TYPICAL_PRICE_LABEL = '~€0.20';
+export const TYPICAL_PRICE_EUR = 0.40;
+export const TYPICAL_PRICE_LABEL = '~€0.40';
 export const GENERATION_INPUT_TOKENS = 10_500;
-export const GENERATION_OUTPUT_TOKENS = 13_000;
-const ESTIMATE_SAFETY_MULTIPLIER = 1.35;
+export const GENERATION_OUTPUT_TOKENS = 25_000;
+const ESTIMATE_SAFETY_MULTIPLIER = 1.15;
 
 export function getModelInputPriceUSD(provider: Provider, model: string): number {
   if (provider === 'anthropic') return MODEL_INPUT_PRICES_USD['anthropic'] ?? 3.00;
@@ -85,8 +85,7 @@ export function estimateTypicalWorkflowCostEURValue(
 ): number {
   const analysisCostEUR = estimateInputCostEURValue(analysisTokens, provider, analysisModel);
   const generationCostEUR = estimateGenerationCostEURValue(provider, generationModel);
-  const conservativeEstimateEUR = (analysisCostEUR + generationCostEUR) * ESTIMATE_SAFETY_MULTIPLIER;
-  return Math.max(TYPICAL_PRICE_EUR, conservativeEstimateEUR);
+  return (analysisCostEUR + generationCostEUR) * ESTIMATE_SAFETY_MULTIPLIER;
 }
 
 export function estimateCostEUR(
@@ -100,12 +99,12 @@ export function estimateCostEUR(
 export function getCostLevel(
   tokens: number,
   provider: Provider = 'anthropic',
-  model = ''
+  analysisModel = '',
+  generationModel = analysisModel
 ): 'low' | 'medium' | 'high' {
-  const priceUSD = getModelInputPriceUSD(provider, model);
-  const eur = (tokens / 1_000_000) * priceUSD * EUR_RATE;
-  if (eur < 0.10) return 'low';
-  if (eur < 0.50) return 'medium';
+  const eur = estimateTypicalWorkflowCostEURValue(tokens, provider, analysisModel, generationModel);
+  if (eur < 0.15) return 'low';
+  if (eur < 0.35) return 'medium';
   return 'high';
 }
 

@@ -418,13 +418,15 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
           {/* Header */}
           <header className="app-header sticky top-0 z-40 flex items-center justify-between px-4">
             <div className="flex items-center gap-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 shrink-0">
-                <rect width="32" height="32" rx="7" fill="#111111"/>
-                <rect x="8" y="8"    width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
-                <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
-                <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
-              </svg>
-              <span className="text-[#111111] font-bold text-lg">ExamDraft</span>
+              <a href="/" className="flex items-center gap-2.5 hover:opacity-75 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 shrink-0">
+                  <rect width="32" height="32" rx="7" fill="#111111"/>
+                  <rect x="8" y="8"    width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+                  <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+                  <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+                </svg>
+                <span className="text-[#111111] font-bold text-lg">ExamDraft</span>
+              </a>
               <span className="text-[#7d7785] text-xs hidden sm:inline">
                 Lerne klüger. Übe smarter. Bestehe sicher.
               </span>

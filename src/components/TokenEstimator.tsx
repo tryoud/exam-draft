@@ -37,14 +37,14 @@ export default function TokenEstimator({
   const cost = formatEURApprox(
     estimateTypicalWorkflowCostEURValue(totalTokens, provider, analysisModel, generationModel)
   );
-  const level = getCostLevel(totalTokens, provider, analysisModel);
+  const level = getCostLevel(totalTokens, provider, analysisModel, generationModel);
   const examTokens = examFiles.reduce((s, f) => s + f.tokenEstimate, 0);
   const slideTokens = includeSlides ? slideFiles.reduce((s, f) => s + f.tokenEstimate, 0) : 0;
 
   const modelName =
     provider === 'anthropic'
       ? 'Claude Sonnet 4'
-      : (OPENROUTER_MODELS.find((m) => m.id === analysisModel)?.name ?? analysisModel);
+      : (OPENROUTER_MODELS.find((m) => m.id === generationModel)?.name ?? generationModel);
 
   const levelConfig = {
     low:    { label: 'günstig',  color: 'text-green-400', dots: '●●●○○' },
