@@ -620,7 +620,7 @@ ANFORDERUNGEN:
 JSON-Schema:
 {"title":"Training: ${typeName}","duration":30,"totalPoints":${avgPts * 5},"tasks":[{"id":"task_1","number":1,"type":"${typeName}","typeId":"${input.selectedTypeId ?? ''}","title":"Variation 1: [Kurzbeschreibung]","description":"Vollständiger Aufgabentext","points":${avgPts},"subTasks":[],"hints":[],"hasDiagram":false,"diagramDescription":""}],"includedTypes":["${input.selectedTypeId ?? ''}"],"excludedTypes":[],"solution":[{"taskId":"task_1","solution":"Vollständiger Lösungsweg mit allen Schritten","keyPoints":["Konkretes messbares Bewertungskriterium"],"commonMistakes":["Typischer fachspezifischer Fehler"]}]}`;
 
-  const json = await llmCall(provider, prompt, 4000, 0.7);
+  const json = await llmCall(provider, prompt, 8000, 0.7);
   return parseAndLog(json, 'typeTraining', (d) => {
     const obj = d as Record<string, unknown>;
     const exam = (obj.tasks ? obj : (obj.exam as Record<string, unknown> | undefined) ?? obj) as Record<string, unknown>;
