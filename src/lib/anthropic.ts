@@ -773,8 +773,8 @@ ${taskSchema}`;
   // Regular solutions can be very long (full Rechenweg + keyPoints + commonMistakes),
   // so keep batches small (≤3) to avoid hitting output-token limits and losing
   // solutions for later tasks due to JSON truncation.
-  const SOLUTION_BATCH_SIZE   = mc ? 20 : 3;
-  const SOLUTION_BATCH_TOKENS = mc ? 3000 : 6000;
+  const SOLUTION_BATCH_SIZE   = mc ? 20 : 2;
+  const SOLUTION_BATCH_TOKENS = mc ? 3000 : 8000;
   const solutionBatches = chunkArray(allTasks, SOLUTION_BATCH_SIZE);
 
   const solutionSchema = mc
