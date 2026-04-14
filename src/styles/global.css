@@ -801,8 +801,7 @@
     .hero-phone-back {
       left: 0;
       right: auto;
-      top: 28px;
-      bottom: auto;
+      bottom: 0;
       transform: none;
     }
   }
