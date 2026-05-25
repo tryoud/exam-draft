@@ -118,7 +118,8 @@ const initialState: AppState = {
   error: null,
 };
 
-export default function App({ locale = 'de' }: { locale?: Locale }) {
+export default function App({ locale: initialLocale = 'de' }: { locale?: Locale }) {
+  const [locale, setLocale] = useState<Locale>(initialLocale);
   const copy = appCopy[locale];
   const app = copy.app;
   const [state, setState] = useState<AppState>({ ...initialState });
@@ -159,6 +160,12 @@ ZIELFORMAT — Kompakter strukturierter Klartext:
 Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgenerierungs-Tool eingefügt.`;
 
   useEffect(() => {
+    const storedLocale = localStorage.getItem('examdraft_locale');
+    const pathLocale: Locale = window.location.pathname.startsWith('/en') ? 'en' : 'de';
+    const nextLocale: Locale = pathLocale === 'en' || storedLocale === 'en' ? 'en' : initialLocale;
+    setLocale(nextLocale);
+    localStorage.setItem('examdraft_locale', nextLocale);
+
     trackEvent('app_opened');
     const { key, provider, model, analysisModel } = getStoredConfig();
     setState((s) => ({ ...s, apiKey: key, provider, openrouterModel: model, openrouterAnalysisModel: analysisModel }));
@@ -187,7 +194,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
       sessionStorage.removeItem('examdraft_session_analysis');
       sessionStorage.removeItem('examdraft_session_exam');
     }
-  }, []);
+  }, [initialLocale]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -617,6 +624,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
             setShowKeySetup(false);
           }}
           onClose={() => setShowKeySetup(false)}
+          locale={locale}
         />
       )}
 
@@ -651,6 +659,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
             <div className="flex items-center gap-2">
               <a
                 href={locale === 'en' ? '/app?lang=de' : '/en/app'}
+                onClick={() => localStorage.setItem('examdraft_locale', locale === 'en' ? 'de' : 'en')}
                 className="app-pill-button px-3 py-1 text-xs transition-all"
               >
                 {locale === 'en' ? 'DE' : 'EN'}
@@ -780,6 +789,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                         setExamPendingFiles(files);
                       }}
                       maxFiles={10}
+                      locale={locale}
                     />
                   </div>
 
@@ -877,6 +887,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                           }}
                           disabled={!state.includeSlides}
                           maxFiles={20}
+                          locale={locale}
                         />
                         <p className="text-xs text-[#908997] mt-2">
                           {app.slideAlternative}

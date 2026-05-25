@@ -4,6 +4,8 @@ import { analyzePDF } from '../lib/pdfExtractor';
 import { formatTokens } from '../lib/tokenEstimator';
 import { showToast } from './Toast';
 import { getProvider } from '../lib/anthropic';
+import type { Locale } from '../lib/i18n';
+import { appCopy } from '../lib/i18n';
 
 export interface PendingFile {
   id: string;
@@ -17,9 +19,11 @@ interface FileCardWrapperProps {
   type: 'exam' | 'slides';
   onRemove: () => void;
   onModeChange: (useImage: boolean) => void;
+  locale: Locale;
 }
 
-function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrapperProps) {
+function FileCardWrapper({ pendingFile, onRemove, onModeChange, locale }: FileCardWrapperProps) {
+  const copy = appCopy[locale].upload;
   const { file } = pendingFile;
   const [analyzing, setAnalyzing] = useState(true);
   const [pageCount, setPageCount] = useState(0);
@@ -45,9 +49,9 @@ function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrappe
       })
       .catch(() => {
         setAnalyzing(false);
-        showToast('PDF konnte nicht gelesen werden. Ist die Datei beschädigt?', 'error');
+        showToast(copy.readError, 'error');
       });
-  }, [file, onModeChange, pendingFile.useImage]);
+  }, [copy.readError, file, onModeChange, pendingFile.useImage]);
 
   function handleToggle(useImage: boolean) {
     setIsImageMode(useImage);
@@ -83,13 +87,13 @@ function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrappe
             {nameTruncated}
           </p>
           <p className="text-xs text-[#7f7987] mt-0.5">
-            {sizeKB} KB · {pageCount} Seiten · {imageCount} Bilder erkannt
+            {sizeKB} KB · {pageCount} {copy.pages} · {imageCount} {copy.imagesDetected}
           </p>
         </div>
         <button
           onClick={onRemove}
           className="shrink-0 w-6 h-6 flex items-center justify-center text-[#8d8794] hover:text-red-500 hover:bg-red-500/10 rounded transition-all"
-          aria-label="Datei entfernen"
+          aria-label={copy.removeFile}
         >
           ✕
         </button>
@@ -97,11 +101,11 @@ function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrappe
 
       {hasSignificantImages ? (
         <span className="inline-flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded px-2 py-1 mb-2">
-          ⚠ Enthält Diagramme (~{imageCount} Bilder)
+          ⚠ {copy.containsCharts} (~{imageCount})
         </span>
       ) : (
         <span className="inline-flex items-center gap-1.5 text-xs bg-green-500/10 text-green-400 border border-green-500/20 rounded px-2 py-1 mb-2">
-          ✓ Hauptsächlich Text
+          ✓ {copy.mostlyText}
         </span>
       )}
 
@@ -112,7 +116,7 @@ function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrappe
             !isImageMode ? 'bg-[#6b8dff] text-white' : 'text-[#6f6a78] hover:text-[#19161d]'
           }`}
         >
-          Text-Modus {!isImageMode && '✓'}
+          {copy.textMode} {!isImageMode && '✓'}
         </button>
         <button
           onClick={() => handleToggle(true)}
@@ -120,27 +124,27 @@ function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrappe
             isImageMode ? 'bg-[#6b8dff] text-white' : 'text-[#6f6a78] hover:text-[#19161d]'
           }`}
         >
-          Bild-Modus {isImageMode && '✓'}
+          {copy.imageMode} {isImageMode && '✓'}
         </button>
       </div>
 
       <p className="text-xs text-[#8d8794] mb-1">
         {isImageMode
           ? hasSignificantImages
-            ? 'Vollständig, ~3x mehr Tokens'
-            : 'Falls Diagramme fehlen sollten'
+            ? copy.completeMoreTokens
+            : copy.missingCharts
           : hasSignificantImages
-          ? 'Günstiger, Diagramme fehlen'
-          : 'Empfohlen für diese Datei'}
+          ? copy.cheaperMissingCharts
+          : copy.recommended}
       </p>
 
       {isImageMode && getProvider() !== 'anthropic' && (
         <p className="text-xs text-amber-600 mt-1">
-          ⚠ Dieser Modus sendet PDF-Bilder nur mit Anthropic BYOK vollständig. ExamDraft/OpenRouter nutzen Text-Extraktion.
+          ⚠ {copy.imageWarning}
         </p>
       )}
 
-      <p className="text-xs text-[#7f7987]">~{formatTokens(tokenEstimate)} Tokens</p>
+      <p className="text-xs text-[#7f7987]">~{formatTokens(tokenEstimate)} {copy.tokens}</p>
     </div>
   );
 }
@@ -151,9 +155,11 @@ interface UploadZoneProps {
   onFilesChange: (files: PendingFile[]) => void;
   disabled?: boolean;
   maxFiles: number;
+  locale?: Locale;
 }
 
-export default function UploadZone({ type, files, onFilesChange, disabled, maxFiles }: UploadZoneProps) {
+export default function UploadZone({ type, files, onFilesChange, disabled, maxFiles, locale = 'de' }: UploadZoneProps) {
+  const copy = appCopy[locale].upload;
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -161,12 +167,12 @@ export default function UploadZone({ type, files, onFilesChange, disabled, maxFi
     (incoming: File[]) => {
       const pdfs = incoming.filter((f) => f.type === 'application/pdf');
       if (pdfs.length !== incoming.length) {
-        showToast('Nur PDF-Dateien werden unterstützt.', 'error');
+        showToast(copy.onlyPdf, 'error');
       }
 
       const valid = pdfs.filter((f) => {
         if (f.size > 32 * 1024 * 1024) {
-          showToast(`${f.name}: Datei zu groß (max. 32MB pro PDF).`, 'error');
+          showToast(`${f.name}: ${copy.tooLarge}`, 'error');
           return false;
         }
         return true;
@@ -176,8 +182,8 @@ export default function UploadZone({ type, files, onFilesChange, disabled, maxFi
       if (valid.length > remaining) {
         showToast(
           type === 'exam'
-            ? 'Maximal 10 Altklausuren erlaubt.'
-            : 'Maximal 20 Vorlesungsfolien erlaubt.',
+            ? copy.maxExams
+            : copy.maxSlides,
           'warning'
         );
       }
@@ -192,7 +198,7 @@ export default function UploadZone({ type, files, onFilesChange, disabled, maxFi
 
       onFilesChange([...files, ...newEntries]);
     },
-    [files, maxFiles, onFilesChange, type]
+    [copy.maxExams, copy.maxSlides, copy.onlyPdf, copy.tooLarge, files, maxFiles, onFilesChange, type]
   );
 
   const onDrop = useCallback(
@@ -232,15 +238,15 @@ export default function UploadZone({ type, files, onFilesChange, disabled, maxFi
       >
         <div className="text-3xl mb-3 select-none">📄</div>
         {disabled ? (
-          <p className="text-sm text-[#8b8593]">Deaktiviert</p>
+          <p className="text-sm text-[#8b8593]">{copy.disabled}</p>
         ) : (
           <>
             <p className="text-sm text-[#5d5866]">
-              PDFs hier ablegen oder{' '}
-              <span className="text-[#2f5bd2] underline">klicken</span>
+              {copy.drop}{' '}
+              <span className="text-[#2f5bd2] underline">{copy.click}</span>
             </p>
             <p className="text-xs text-[#8b8593] mt-1">
-              Max. {maxFiles} Dateien · 32 MB pro Datei
+              {copy.max} {maxFiles} {copy.files} · {copy.perFile}
             </p>
           </>
         )}
@@ -267,6 +273,7 @@ export default function UploadZone({ type, files, onFilesChange, disabled, maxFi
               onModeChange={(useImage) =>
                 onFilesChange(files.map((f, idx) => (idx === i ? { ...f, useImage } : f)))
               }
+              locale={locale}
             />
           ))}
         </div>

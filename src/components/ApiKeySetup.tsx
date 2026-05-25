@@ -7,18 +7,23 @@ import {
 } from '../lib/anthropic';
 import type { Provider } from '../lib/types';
 import { TYPICAL_PRICE_LABEL } from '../lib/tokenEstimator';
+import type { Locale } from '../lib/i18n';
+import { appCopy } from '../lib/i18n';
 
 interface ApiKeySetupProps {
   onSaved: (provider: Provider, key: string, generationModel: string, analysisModel: string) => void;
   mode: 'fullscreen' | 'drawer';
   onClose?: () => void;
+  locale?: Locale;
 }
 
 function storage(key: string): string | null {
   return typeof window !== 'undefined' ? localStorage.getItem(key) : null;
 }
 
-export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps) {
+export default function ApiKeySetup({ onSaved, mode, onClose, locale = 'de' }: ApiKeySetupProps) {
+  const copy = appCopy[locale].apiKey;
+  const tagline = appCopy[locale].tagline;
   const storedProvider = storage('examdraft_provider');
   const [provider, setProvider] = useState<Provider>(
     storedProvider === 'anthropic' ? 'anthropic' : 'openrouter'
@@ -44,7 +49,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
 
     if (provider === 'anthropic') {
       if (!anthropicKey.startsWith('sk-ant-')) {
-        setError('Der Key muss mit "sk-ant-" beginnen.');
+        setError(copy.invalidAnthropic);
         return;
       }
       localStorage.setItem('examdraft_api_key', anthropicKey);
@@ -52,7 +57,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
       onSaved('anthropic', anthropicKey, openrouterGenModel, openrouterAnalysisModel);
     } else {
       if (!openrouterKey.startsWith('sk-or-')) {
-        setError('Der Key muss mit "sk-or-" beginnen.');
+        setError(copy.invalidOpenrouter);
         return;
       }
       localStorage.setItem('examdraft_openrouter_key', openrouterKey);
@@ -63,7 +68,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
     }
 
     setSaved(true);
-    showToast('Einstellungen gespeichert', 'success');
+    showToast(copy.savedToast, 'success');
     setTimeout(() => onClose?.(), 800);
   }
 
@@ -74,8 +79,8 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
           🔑
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-[#111111]">API-Einstellungen</h2>
-          <p className="text-xs text-[#7d7785]">Wird nur lokal gespeichert</p>
+          <h2 className="text-lg font-semibold text-[#111111]">{copy.title}</h2>
+          <p className="text-xs text-[#7d7785]">{copy.subtitle}</p>
         </div>
       </div>
 
@@ -106,7 +111,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
       {provider === 'anthropic' ? (
         <>
           <p className="text-sm text-[#5d5866] mb-4">
-            Alle API-Anfragen gehen direkt von deinem Browser zu Anthropic. Dein Key wird nie an ExamDraft-Server übertragen.
+            {copy.anthropicIntro}
           </p>
           <div className="mb-4">
             <input
@@ -122,8 +127,8 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
           </div>
           <div className="mb-5 bg-[#f8f4ee] border border-[#e5dfd5] rounded-xl p-3">
             <p className="text-xs text-[#7d7785]">
-              <span className="text-[#3e3944] font-medium">Modell:</span> claude-sonnet-4-20250514
-              <span className="text-[#8b8593] ml-2">· Typischer Gesamtpreis: {TYPICAL_PRICE_LABEL} pro Durchlauf</span>
+              <span className="text-[#3e3944] font-medium">{copy.model}:</span> claude-sonnet-4-20250514
+              <span className="text-[#8b8593] ml-2">· {copy.typicalTotal}: {TYPICAL_PRICE_LABEL} {copy.perRun}</span>
             </p>
           </div>
           <a
@@ -132,13 +137,13 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
             rel="noopener noreferrer"
             className="block text-[#2f5bd2] hover:text-[#2448a8] text-sm mb-4 transition-colors"
           >
-            Key erstellen auf console.anthropic.com →
+            {copy.createAnthropicKey}
           </a>
         </>
       ) : (
         <>
           <p className="text-sm text-[#5d5866] mb-4">
-            OpenRouter ermöglicht Zugriff auf viele Modelle mit einem einzigen API-Key. Alle Anfragen gehen direkt von deinem Browser zu OpenRouter.
+            {copy.openrouterIntro}
           </p>
 
           <div className="mb-4">
@@ -157,8 +162,8 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
 
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs text-[#7d7785]">Analyse-Modell</label>
-              <span className="text-xs text-[#2e7d4f]">günstig — großer Input</span>
+              <label className="text-xs text-[#7d7785]">{copy.analysisModel}</label>
+              <span className="text-xs text-[#2e7d4f]">{copy.cheapLargeInput}</span>
             </div>
             <select
               value={openrouterAnalysisModel}
@@ -169,13 +174,13 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
-            <p className="text-xs text-[#8b8593] mt-1">Liest PDF-Texte aus → einfache Klassifikation, günstiges Modell reicht.</p>
+            <p className="text-xs text-[#8b8593] mt-1">{copy.analysisHint}</p>
           </div>
 
           <div className="mb-5">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs text-[#7d7785]">Generations-Modell</label>
-              <span className="text-xs text-[#b7791f]">fähig — kreativer Output</span>
+              <label className="text-xs text-[#7d7785]">{copy.generationModel}</label>
+              <span className="text-xs text-[#b7791f]">{copy.capableCreative}</span>
             </div>
             <select
               value={openrouterGenModel}
@@ -186,12 +191,12 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
-            <p className="text-xs text-[#8b8593] mt-1">Erstellt Aufgaben + Lösungen → bessere Modelle = bessere Klausuren.</p>
+            <p className="text-xs text-[#8b8593] mt-1">{copy.generationHint}</p>
           </div>
 
           <div className="mb-4 bg-[#f8f4ee] border border-[#e5dfd5] rounded-xl p-3">
             <p className="text-xs text-[#7d7785]">
-              ⚠ PDF-Bild-Modus wird von OpenRouter nicht unterstützt — Dateien werden als Text gesendet.
+              ⚠ {copy.openrouterPdfWarning}
             </p>
           </div>
 
@@ -201,7 +206,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
             rel="noopener noreferrer"
             className="block text-[#2f5bd2] hover:text-[#2448a8] text-sm mb-4 transition-colors"
           >
-            Key erstellen auf openrouter.ai →
+            {copy.createOpenrouterKey}
           </a>
         </>
       )}
@@ -212,9 +217,9 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
         className="app-primary-btn w-full disabled:bg-[#2e7d4f] text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2"
       >
         {saved ? (
-          <><span className="text-lg">✓</span> Gespeichert</>
+          <><span className="text-lg">✓</span> {copy.saved}</>
         ) : (
-          'Speichern'
+          copy.save
         )}
       </button>
 
@@ -223,7 +228,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
           onClick={onClose}
           className="w-full mt-3 text-[#8b8593] hover:text-[#4c4754] text-sm transition-colors py-1"
         >
-          Schließen
+          {copy.close}
         </button>
       )}
     </div>
@@ -235,7 +240,7 @@ export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#111111] mb-2">ExamDraft</h1>
-            <p className="text-[#7d7785] text-sm">Lerne klüger. Übe smarter. Bestehe sicher.</p>
+            <p className="text-[#7d7785] text-sm">{tagline}</p>
           </div>
           {card}
         </div>
