@@ -19,8 +19,9 @@ function storage(key: string): string | null {
 }
 
 export default function ApiKeySetup({ onSaved, mode, onClose }: ApiKeySetupProps) {
+  const storedProvider = storage('examdraft_provider');
   const [provider, setProvider] = useState<Provider>(
-    (storage('examdraft_provider') as Provider) ?? 'openrouter'
+    storedProvider === 'anthropic' ? 'anthropic' : 'openrouter'
   );
   const [anthropicKey, setAnthropicKey] = useState(storage('examdraft_api_key') ?? '');
   const [openrouterKey, setOpenrouterKey] = useState(storage('examdraft_openrouter_key') ?? '');

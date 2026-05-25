@@ -1,16 +1,17 @@
 ---
 import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
 
 const benefits = [
   { value: '1', label: 'Exam structure', copy: 'Past exams become a believable format with recognizable structure.' },
   { value: '2', label: 'Study paths', copy: 'Generate a full mock exam or isolate one task type for focused practice.' },
   { value: '3', label: 'Feedback loop', copy: 'Write answers, get corrections, and turn the result into the next study step.' },
-  { value: '4', label: 'Data control', copy: 'No ExamDraft backend for your content, only your own API key.' },
+  { value: '4', label: 'No API key needed', copy: 'Start with ExamDraft credits. BYOK remains available as an advanced mode for full cost control.' },
 ];
 
 const metrics = [
   { value: '100K+', label: 'possible combinations of topics, difficulty and task types' },
-  { value: 'from €0.10', label: 'typical total cost per run with GPT-4o – up to ~€0.50 with Claude Sonnet' },
+  { value: '1 credit', label: 'free starter analysis for new accounts — full exams continue through credits or BYOK' },
   { value: '30+', label: 'minutes of prep work saved per study session' },
   { value: '97%', label: 'more calm when the exam format already feels familiar' },
 ];
@@ -29,8 +30,8 @@ const cards = [
     body: 'Writing, grading and exporting happen in one connected study flow instead of being spread across several tools.',
   },
   {
-    title: 'Choose the model for your material',
-    body: 'Use OpenRouter for flexibility or Anthropic directly for image-heavy PDFs. Your own API key controls cost and quality.',
+    title: 'Start simple, stay flexible',
+    body: 'Most users start with a magic link and ExamDraft credits. Power users can still bring their own OpenRouter or Anthropic key.',
   },
 ];
 ---
@@ -46,10 +47,18 @@ const cards = [
     />
     <title>ExamDraft — Behind every question, a pattern</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body class="landing-body landing-grid overflow-x-hidden">
+    <script is:inline>
+      localStorage.setItem('examdraft_locale', 'en');
+      navigator.sendBeacon?.('/api/events', new Blob([JSON.stringify({
+        event: 'landing_view',
+        properties: { path: window.location.pathname, locale: 'en' },
+      })], { type: 'application/json' }));
+    </script>
     <div class="editorial-shell">
       <nav class="top-nav fixed inset-x-0 top-0 z-50">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
@@ -75,7 +84,7 @@ const cards = [
           <div class="flex items-center gap-3">
             <a href="/" class="secondary-link px-4 py-2 text-xs">DE</a>
             <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">EN</span>
-            <a href="/app" class="primary-link scroll-reveal px-5 py-3 text-sm" data-reveal style="--reveal-delay:120ms">
+            <a href="/en/app" class="primary-link scroll-reveal px-5 py-3 text-sm" data-reveal style="--reveal-delay:120ms">
               Open app
               <span aria-hidden="true">→</span>
             </a>
@@ -107,6 +116,15 @@ const cards = [
                     how exams in this subject are constructed: recurring task types, patterns,
                     weightings, and the kinds of reasoning they expect.
                   </p>
+                  <div class="scroll-reveal flex flex-col gap-3 sm:flex-row" data-reveal style="--reveal-delay:240ms">
+                    <a href="/en/app" class="primary-link px-5 py-3 text-sm">
+                      Start free
+                      <span aria-hidden="true">→</span>
+                    </a>
+                    <a href="/en/app?demo=1" class="secondary-link px-5 py-3 text-sm">
+                      View sample analysis
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -386,7 +404,7 @@ const cards = [
                 </div>
 
                 <div class="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
-                  <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white">
+                  <a href="/en/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white">
                     Open app
                     <span aria-hidden="true">→</span>
                   </a>
@@ -408,7 +426,7 @@ const cards = [
             </p>
           </div>
           <div class="flex flex-wrap gap-5">
-            <a href="/app" class="footer-link">App</a>
+            <a href="/en/app" class="footer-link">App</a>
             <a href="/en/terms" class="footer-link">Terms</a>
             <a href="/en/privacy" class="footer-link">Privacy</a>
           </div>
@@ -429,7 +447,7 @@ const cards = [
 
       items.forEach((item) => observer.observe(item));
 
-      const parallaxNodes = Array.from(document.querySelectorAll('[data-parallax]'));
+      const parallaxNodes = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
       const updateParallax = () => {
         const viewport = window.innerHeight;
         parallaxNodes.forEach((node) => {

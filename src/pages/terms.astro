@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 ---
 
 <!doctype html>
@@ -13,6 +14,7 @@ import '../styles/global.css';
     />
     <title>Nutzungsbedingungen — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
   </head>
   <body class="legal-body overflow-x-hidden">
     <div class="legal-shell">
@@ -140,15 +142,17 @@ import '../styles/global.css';
 
           <section class="grid gap-4 lg:grid-cols-2">
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">4. Bring Your Own Key</p>
+              <p class="legal-kicker">4. ExamDraft-Credits und Bring Your Own Key</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft arbeitet mit deinem eigenen API-Key. Das bedeutet: Du entscheidest,
-                  welchen Anbieter du nutzt, und du trägst die dadurch entstehenden API-Kosten.
+                  ExamDraft kann mit einem Konto und Credits genutzt werden. Neue Konten können ein
+                  kostenloses Startguthaben erhalten. Credits sind keine Zusage unbegrenzter Nutzung
+                  und können durch technische Limits, Missbrauchsschutz oder Anbieterfehler begrenzt sein.
                 </p>
                 <p>
-                  ExamDraft stellt keine eigenen Tokens, kein eigenes Freikontingent und keine
-                  pauschal abgegoltene API-Nutzung bereit.
+                  Alternativ kannst du im Advanced-Modus eigene API-Keys verwenden. In diesem Fall
+                  entscheidest du, welchen Anbieter du nutzt, und trägst die dadurch entstehenden
+                  API-Kosten selbst.
                 </p>
               </div>
             </article>

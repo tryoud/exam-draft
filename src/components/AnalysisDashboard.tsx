@@ -172,6 +172,26 @@ export default function AnalysisDashboard({
     typeof result.estimatedDuration === 'number' && Number.isFinite(result.estimatedDuration) && result.estimatedDuration > 0
       ? result.estimatedDuration
       : 120;
+  const sortedByFrequency = [...result.taskTypes].sort((a, b) => b.frequency - a.frequency);
+  const sortedByPoints = [...result.taskTypes].sort((a, b) => b.avgPoints - a.avgPoints);
+  const topLikely = sortedByFrequency.slice(0, 3);
+  const highValue = sortedByPoints[0];
+  const confidence = Math.min(95, Math.max(35, result.examCount * 18 + (result.hasSlideContext ? 10 : 0) + Math.min(result.totalTaskTypes, 6) * 4));
+  const coverageLabel = result.examCount >= 4
+    ? 'stark'
+    : result.examCount >= 2
+    ? 'solide'
+    : 'niedrig';
+  const coverageText = result.examCount >= 4
+    ? 'Mehrere Altklausuren geben eine robuste Struktur.'
+    : result.examCount >= 2
+    ? 'Genug Material für erste Muster, aber weitere Jahrgänge würden die Sicherheit erhöhen.'
+    : 'Nur eine Klausur: Nutze die Analyse als Orientierung, nicht als Prognose.';
+  const nextActions = [
+    highValue ? `${highValue.name} zuerst üben: hoher Punktehebel (${highValue.avgPoints} Pkt).` : '',
+    topLikely[0] ? `${topLikely[0].name} kommt im Material am häufigsten vor (${topLikely[0].frequency}%).` : '',
+    result.hasSlideContext ? 'Vorlesungskontext ist einbezogen: gleiche die Folienthemen mit den Aufgabentypen ab.' : 'Optional Folien-/Themenkontext ergänzen, um neue mögliche Themen besser einzugrenzen.',
+  ].filter(Boolean);
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -217,6 +237,48 @@ export default function AnalysisDashboard({
             <p className="text-lg font-semibold text-[#19161d]">{stat.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="app-surface rounded-[1.3rem] p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Was wahrscheinlich zählt</p>
+          <div className="mt-4 space-y-3">
+            {topLikely.map((task, index) => (
+              <div key={task.id} className="flex items-center gap-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#111113] text-xs font-bold text-white">
+                  {index + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-[#19161d]">{task.name}</p>
+                  <p className="text-xs text-[#7d7785]">{task.frequency}% Gewichtung, Ø {task.avgPoints} Punkte</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="app-surface rounded-[1.3rem] p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Analysesicherheit</p>
+          <div className="mt-4 flex items-end gap-3">
+            <p className="text-4xl font-bold tracking-[-0.04em] text-[#111111]">{confidence}%</p>
+            <p className="pb-1 text-sm text-[#6f6a78]">Coverage {coverageLabel}</p>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e4dfd7]">
+            <div className="h-full rounded-full bg-[#6b8dff]" style={{ width: `${confidence}%` }} />
+          </div>
+          <p className="mt-3 text-xs leading-6 text-[#6f6a78]">{coverageText}</p>
+        </div>
+      </div>
+
+      <div className="app-surface rounded-[1.3rem] p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Was du jetzt tun solltest</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {nextActions.map((action) => (
+            <div key={action} className="rounded-xl border border-[#ddd7cd] bg-white/70 p-3">
+              <p className="text-sm leading-6 text-[#3f3a45]">{action}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div>

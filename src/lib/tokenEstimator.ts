@@ -3,10 +3,12 @@ import type { ExtractedFile, Provider } from './types';
 // Input token pricing in USD per million tokens
 const MODEL_INPUT_PRICES_USD: Record<string, number> = {
   anthropic:                            3.00,
+  'anthropic/claude-sonnet-4.6':        3.00,
   'anthropic/claude-sonnet-4-5':        3.00,
   'anthropic/claude-3.5-sonnet':        3.00,
   'openai/gpt-4o':                      2.50,
   'openai/gpt-4o-mini':                 0.15,
+  'google/gemini-3-flash-preview':      0.50,
   'google/gemini-2.5-flash':            0.15,
   'meta-llama/llama-3.3-70b-instruct':  0.23,
 };
@@ -14,10 +16,12 @@ const MODEL_INPUT_PRICES_USD: Record<string, number> = {
 // Output token pricing in USD per million tokens (typically 3–5× the input price)
 const MODEL_OUTPUT_PRICES_USD: Record<string, number> = {
   anthropic:                            15.00,
+  'anthropic/claude-sonnet-4.6':        15.00,
   'anthropic/claude-sonnet-4-5':        15.00,
   'anthropic/claude-3.5-sonnet':        15.00,
   'openai/gpt-4o':                      10.00,
   'openai/gpt-4o-mini':                  0.60,
+  'google/gemini-3-flash-preview':       3.00,
   'google/gemini-2.5-flash':             3.50,
   'meta-llama/llama-3.3-70b-instruct':   0.90,
 };
@@ -30,11 +34,13 @@ export const GENERATION_OUTPUT_TOKENS = 25_000;
 const ESTIMATE_SAFETY_MULTIPLIER = 1.15;
 
 export function getModelInputPriceUSD(provider: Provider, model: string): number {
+  if (provider === 'examdraft') return MODEL_INPUT_PRICES_USD['google/gemini-3-flash-preview'] ?? 0.50;
   if (provider === 'anthropic') return MODEL_INPUT_PRICES_USD['anthropic'] ?? 3.00;
   return MODEL_INPUT_PRICES_USD[model] ?? 3.00;
 }
 
 export function getModelOutputPriceUSD(provider: Provider, model: string): number {
+  if (provider === 'examdraft') return MODEL_OUTPUT_PRICES_USD['anthropic/claude-sonnet-4.6'] ?? 15.00;
   if (provider === 'anthropic') return MODEL_OUTPUT_PRICES_USD['anthropic'] ?? 15.00;
   return MODEL_OUTPUT_PRICES_USD[model] ?? 15.00;
 }

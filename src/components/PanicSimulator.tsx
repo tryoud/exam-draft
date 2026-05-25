@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { GeneratedExam, ExamTask, ExamSolution } from '../lib/types';
 
 interface PanicSimulatorProps {

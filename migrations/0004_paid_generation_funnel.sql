@@ -1,0 +1,1 @@
+ALTER TABLE usage_events ADD COLUMN credits_charged INTEGER NOT NULL DEFAULT 0;

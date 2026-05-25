@@ -1,0 +1,21 @@
+# Copy to `.dev.vars` for local Cloudflare Pages/Workers development.
+# Never commit `.dev.vars` with real secrets.
+
+# Required for ExamDraft's server-side LLM proxy.
+OPENROUTER_API_KEY=sk-or-v1_replace_me
+
+# Required for production magic-link emails.
+# In local development, missing RESEND_API_KEY makes /api/auth/start return a devLink.
+RESEND_API_KEY=re_replace_me
+RESEND_FROM=ExamDraft <login@your-domain.com>
+
+# Required before paid credit checkout can work.
+STRIPE_SECRET_KEY=sk_test_replace_me
+STRIPE_PRICE_ID=price_replace_me
+
+# Strong random string used to hash IPs for rate limiting.
+AUTH_RATE_LIMIT_SALT=replace_with_long_random_string
+
+# Public build-time value, not a secret. For Astro dev/build, you can also put this
+# into `.env` or configure it in Cloudflare Pages build environment variables.
+PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN=replace_with_cloudflare_site_token

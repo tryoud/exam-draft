@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AnalysisResult, Provider } from '../lib/types';
 import { estimateGenerationCostEURValue, formatEURApprox } from '../lib/tokenEstimator';
 import { OPENROUTER_MODELS } from '../lib/anthropic';
+import type { Locale } from '../lib/i18n';
+import { appCopy } from '../lib/i18n';
+import { trackEvent } from '../lib/analytics';
 
 interface ExamConfiguratorProps {
   analysis: AnalysisResult;
@@ -14,6 +17,11 @@ interface ExamConfiguratorProps {
   isLoading: boolean;
   provider: Provider;
   generationModel: string;
+  credits?: number;
+  accountPlan?: 'free' | 'credits' | 'byok';
+  onBuyCredits?: () => void;
+  onUseByok?: () => void;
+  locale?: Locale;
 }
 
 export default function ExamConfigurator({
@@ -22,7 +30,13 @@ export default function ExamConfigurator({
   isLoading,
   provider,
   generationModel,
+  credits = 0,
+  accountPlan = 'free',
+  onBuyCredits,
+  onUseByok,
+  locale = 'de',
 }: ExamConfiguratorProps) {
+  const copy = appCopy[locale].configurator;
   const [mode, setMode] = useState<'random' | 'type-training' | null>(null);
   const [difficulty, setDifficulty] = useState<'easier' | 'same' | 'harder'>('same');
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -31,6 +45,22 @@ export default function ExamConfigurator({
 
   const canGenerate =
     mode === 'random' || (mode === 'type-training' && selectedTypeId !== null);
+  const generationCredits = mode === 'type-training' ? 2 : 4;
+  const needsPaidCredits = provider === 'examdraft' && accountPlan === 'free';
+  const lacksCredits = provider === 'examdraft' && accountPlan !== 'free' && credits < generationCredits;
+  const generationBlocked = needsPaidCredits || lacksCredits;
+
+  useEffect(() => {
+    if (generationBlocked && mode) {
+      trackEvent('paywall_shown', {
+        mode,
+        provider,
+        credits,
+        accountPlan,
+        requiredCredits: generationCredits,
+      });
+    }
+  }, [accountPlan, credits, generationBlocked, generationCredits, mode, provider]);
 
   function toggleTopic(topic: string) {
     setExcludedTopics((prev) =>
@@ -44,7 +74,9 @@ export default function ExamConfigurator({
   }
 
   const modelName =
-    provider === 'anthropic'
+    provider === 'examdraft'
+      ? 'ExamDraft Credits'
+      : provider === 'anthropic'
       ? 'Claude Sonnet 4.5'
       : (OPENROUTER_MODELS.find((m) => m.id === generationModel)?.name ?? generationModel);
 
@@ -53,9 +85,9 @@ export default function ExamConfigurator({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-[#111111] mb-1">Klausur konfigurieren</h2>
+        <h2 className="text-2xl font-semibold text-[#111111] mb-1">{copy.title}</h2>
         <p className="text-sm text-[#7d7785]">
-          Wähle, was du generieren möchtest
+          {copy.subtitle}
         </p>
       </div>
 
@@ -69,9 +101,9 @@ export default function ExamConfigurator({
           }`}
         >
           <div className="text-2xl mb-2">📝</div>
-          <h3 className="font-semibold text-[#111111] mb-1">Neue Probeklausur</h3>
+          <h3 className="font-semibold text-[#111111] mb-1">{copy.fullExam}</h3>
           <p className="text-xs text-[#7d7785]">
-            Vollständige neue Klausur basierend auf deinen Altklausuren
+            {copy.fullExamDesc}
           </p>
         </button>
 
@@ -84,22 +116,22 @@ export default function ExamConfigurator({
           }`}
         >
           <div className="text-2xl mb-2">🎯</div>
-          <h3 className="font-semibold text-[#111111] mb-1">Aufgabentyp trainieren</h3>
+          <h3 className="font-semibold text-[#111111] mb-1">{copy.typeTraining}</h3>
           <p className="text-xs text-[#7d7785]">
-            5 Variationen eines Aufgabentyps zum gezielten Üben
+            {copy.typeTrainingDesc}
           </p>
         </button>
       </div>
 
       {mode === 'random' && (
         <div className="animate-slide-up">
-          <h3 className="text-sm font-medium text-[#57515e] mb-3">Schwierigkeit</h3>
+          <h3 className="text-sm font-medium text-[#57515e] mb-3">{copy.difficulty}</h3>
           <div className="grid grid-cols-3 gap-3">
             {(
               [
-                { id: 'easier', label: 'Einfacher', desc: 'Kleinere Zahlen, mehr Hinweise, weniger Kombinationen', icon: '📗' },
-                { id: 'same',   label: 'Gleich schwer', desc: 'Entspricht dem Niveau deiner Altklausuren', icon: '📘' },
-                { id: 'harder', label: 'Schwerer', desc: 'Komplexere Aufgaben, keine Hinweise, Kombinationsaufgaben', icon: '📕' },
+                { id: 'easier', label: copy.easier, desc: copy.easierDesc, icon: '📗' },
+                { id: 'same',   label: copy.same, desc: copy.sameDesc, icon: '📘' },
+                { id: 'harder', label: copy.harder, desc: copy.harderDesc, icon: '📕' },
               ] as const
             ).map((d) => (
               <button
@@ -122,7 +154,7 @@ export default function ExamConfigurator({
 
       {mode === 'type-training' && (
         <div className="animate-slide-up">
-          <h3 className="text-sm font-medium text-[#57515e] mb-3">Aufgabentyp wählen</h3>
+          <h3 className="text-sm font-medium text-[#57515e] mb-3">{copy.chooseType}</h3>
           <div className="flex flex-wrap gap-2">
             {analysis.taskTypes.map((t) => (
               <button
@@ -151,10 +183,10 @@ export default function ExamConfigurator({
             className="flex items-center gap-2 text-sm text-[#7d7785] hover:text-[#4c4754] transition-colors"
           >
             <span>{showTopicFilter ? '▲' : '▼'}</span>
-            Themenbereiche filtern
+            {copy.filterTopics}
             {excludedTopics.length > 0 && (
               <span className="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full px-2 py-0.5">
-                {excludedTopics.length} ausgeschlossen
+                {excludedTopics.length} {copy.excluded}
               </span>
             )}
           </button>
@@ -162,7 +194,7 @@ export default function ExamConfigurator({
           {showTopicFilter && (
             <div className="mt-3 app-surface rounded-[1.3rem] p-4">
               <p className="text-xs text-[#7d7785] mb-3">
-                Markierte Themen werden bei der Generierung ausgeschlossen.
+                {copy.filterHint}
               </p>
               <div className="flex flex-wrap gap-2">
                 {analysis.topicAreas.map((topic) => {
@@ -187,7 +219,7 @@ export default function ExamConfigurator({
                   onClick={() => setExcludedTopics([])}
                   className="mt-3 text-xs text-[#8b8593] hover:text-[#4c4754] transition-colors"
                 >
-                  Alle zurücksetzen
+                  {copy.resetAll}
                 </button>
               )}
             </div>
@@ -197,23 +229,50 @@ export default function ExamConfigurator({
 
       <div className="flex items-center justify-between app-surface rounded-[1.3rem] p-4">
         <p className="text-xs text-[#7d7785]">
-          Typischer Generierungspreis: <span className="text-[#3e3944] font-mono">{generationCostLabel}</span>
-          <span className="text-[#8b8593] ml-2">· {modelName} · Analyse + Generierung, nur JSON</span>
+          {provider === 'examdraft' ? `${copy.usage}: ${generationCredits} Credits` : <>{copy.typicalPrice}: <span className="text-[#3e3944] font-mono">{generationCostLabel}</span></>}
+          <span className="text-[#8b8593] ml-2">· {modelName} · {copy.generationNote}</span>
         </p>
       </div>
 
+      {generationBlocked && (
+        <div className="app-surface rounded-[1.3rem] p-4 border border-[#ead6a2] bg-[#fff8e8]">
+          <p className="text-sm font-medium text-[#5f4618]">
+            {copy.paywallTitle}
+          </p>
+          <p className="mt-1 text-xs text-[#8a7350]">
+            {copy.paywallText}
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={onBuyCredits}
+              className="app-primary-btn rounded-xl px-4 py-2 text-sm font-medium transition-all"
+            >
+              {copy.buyCredits}
+            </button>
+            <button
+              type="button"
+              onClick={onUseByok}
+              className="app-secondary-btn rounded-xl px-4 py-2 text-sm transition-all"
+            >
+              {copy.useByok}
+            </button>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={handleGenerate}
-        disabled={!canGenerate || isLoading}
+        disabled={!canGenerate || isLoading || generationBlocked}
         className="app-primary-btn w-full disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Generiere...
+            {copy.generating}
           </>
         ) : (
-          'Klausur generieren →'
+          copy.generate
         )}
       </button>
     </div>

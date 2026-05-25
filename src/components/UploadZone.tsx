@@ -19,7 +19,7 @@ interface FileCardWrapperProps {
   onModeChange: (useImage: boolean) => void;
 }
 
-function FileCardWrapper({ pendingFile, type, onRemove, onModeChange }: FileCardWrapperProps) {
+function FileCardWrapper({ pendingFile, onRemove, onModeChange }: FileCardWrapperProps) {
   const { file } = pendingFile;
   const [analyzing, setAnalyzing] = useState(true);
   const [pageCount, setPageCount] = useState(0);
@@ -134,9 +134,9 @@ function FileCardWrapper({ pendingFile, type, onRemove, onModeChange }: FileCard
           : 'Empfohlen für diese Datei'}
       </p>
 
-      {isImageMode && getProvider() === 'openrouter' && (
+      {isImageMode && getProvider() !== 'anthropic' && (
         <p className="text-xs text-amber-600 mt-1">
-          ⚠ OpenRouter: PDF-Bilder werden als Text gesendet. Wechsle zu Anthropic für vollständige Diagramm-Unterstützung.
+          ⚠ Dieser Modus sendet PDF-Bilder nur mit Anthropic BYOK vollständig. ExamDraft/OpenRouter nutzen Text-Extraktion.
         </p>
       )}
 

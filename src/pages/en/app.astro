@@ -1,0 +1,23 @@
+---
+import '../../styles/global.css';
+import ExamDraftApp from '../../components/App';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
+---
+
+<!doctype html>
+<html lang="en" class="app-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ExamDraft — AI-powered exam practice. Upload past exams and generate new practice exams with model solutions." />
+    <title>ExamDraft — App</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      localStorage.setItem('examdraft_locale', 'en');
+    </script>
+    <CloudflareAnalytics />
+  </head>
+  <body class="app-body">
+    <ExamDraftApp client:load locale="en" />
+  </body>
+</html>

@@ -1,16 +1,17 @@
 ---
 import '../styles/global.css';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 
 const benefits = [
   { value: '1', label: 'Prüfungslogik', copy: 'Aus Altklausuren wird ein glaubwürdiges Format mit wiedererkennbarer Struktur.' },
   { value: '2', label: 'Lernpfade', copy: 'Volle Probeklausur oder fokussiertes Training einzelner Aufgabentypen.' },
   { value: '3', label: 'Feedbackschleife', copy: 'Antworten schreiben, korrigieren lassen und daraus gezielt weiterlernen.' },
-  { value: '4', label: 'Datensouveränität', copy: 'Kein ExamDraft-Backend für deine Inhalte, nur dein eigener API-Key.' },
+  { value: '4', label: 'Kein API-Key nötig', copy: 'Starte mit ExamDraft-Credits. BYOK bleibt als Advanced-Modus für volle Kostenkontrolle verfügbar.' },
 ];
 
 const metrics = [
   { value: '100K+', label: 'mögliche Kombinationen aus Themen, Schwierigkeit und Aufgabentypen' },
-  { value: 'ab €0,10', label: 'typischer Gesamtpreis pro Durchlauf mit GPT-4o – bis ~€0,50 mit Claude Sonnet' },
+  { value: '1 Credit', label: 'kostenlose Startanalyse für neue Accounts – volle Klausuren danach über Credits oder BYOK' },
   { value: '30+', label: 'Minuten gesparte Vorbereitungsarbeit pro Lerneinheit' },
   { value: '97%', label: 'mehr Ruhe, wenn das Klausurformat vorher schon vertraut wirkt' },
 ];
@@ -29,8 +30,8 @@ const cards = [
     body: 'Schreiben, korrigieren und exportieren passieren in einem zusammenhängenden Lernflow statt über mehrere Tools verteilt.',
   },
   {
-    title: 'Wähle dein Modell passend zum Material',
-    body: 'OpenRouter für Flexibilität, Anthropic direkt für bildlastige PDFs. So steuerst du Kosten und Qualität über deinen API-Key.',
+    title: 'Starte einfach, bleib flexibel',
+    body: 'Normale Nutzer starten mit Magic Link und Credits. Wer maximale Kontrolle will, kann weiterhin eigene OpenRouter- oder Anthropic-Keys nutzen.',
   },
 ];
 ---
@@ -46,10 +47,18 @@ const cards = [
     />
     <title>ExamDraft — Lern, wie geprüft wird</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body class="landing-body landing-grid overflow-x-hidden">
+    <script is:inline>
+      localStorage.setItem('examdraft_locale', 'de');
+      navigator.sendBeacon?.('/api/events', new Blob([JSON.stringify({
+        event: 'landing_view',
+        properties: { path: window.location.pathname, locale: 'de' },
+      })], { type: 'application/json' }));
+    </script>
     <div class="editorial-shell">
       <nav class="top-nav fixed inset-x-0 top-0 z-50">
         <div class="w-full bg-[#fef9ec] border-b border-[#f0e4b0] text-center px-4 py-1.5 text-xs text-[#7a6320]">
@@ -111,6 +120,15 @@ const cards = [
                     sondern zu verstehen, wie Klausuren in diesem Fach aufgebaut sind:
                     Aufgabentypen, Muster, Gewichtung und typische Denkwege.
                   </p>
+                  <div class="scroll-reveal flex flex-col gap-3 sm:flex-row" data-reveal style="--reveal-delay:240ms">
+                    <a href="/app" class="primary-link px-5 py-3 text-sm">
+                      Kostenlos starten
+                      <span aria-hidden="true">→</span>
+                    </a>
+                    <a href="/app?demo=1" class="secondary-link px-5 py-3 text-sm">
+                      Beispielanalyse ansehen
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -416,7 +434,7 @@ const cards = [
 
       items.forEach((item) => observer.observe(item));
 
-      const parallaxNodes = Array.from(document.querySelectorAll('[data-parallax]'));
+      const parallaxNodes = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
       const updateParallax = () => {
         const viewport = window.innerHeight;
         parallaxNodes.forEach((node) => {

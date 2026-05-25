@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { ExtractedFile, AnalysisResult, GeneratedExam, ExamGenerationInput, ExamTask, ExamSolution, Provider, GradingResult, GradingFeedback, ExamAnswer } from './types';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -7,17 +8,17 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const OPENROUTER_REFERER = 'https://examdraft.com';
 
 export const OPENROUTER_MODELS = [
-  { id: 'anthropic/claude-sonnet-4-5',          name: 'Claude Sonnet 4.5' },
-  { id: 'anthropic/claude-3.5-sonnet',           name: 'Claude 3.5 Sonnet' },
-  { id: 'openai/gpt-4o',                         name: 'GPT-4o' },
-  { id: 'openai/gpt-4o-mini',                    name: 'GPT-4o Mini' },
-  { id: 'google/gemini-2.5-flash',       name: 'Gemini 2.5 Flash' },
-  { id: 'meta-llama/llama-3.3-70b-instruct',     name: 'Llama 3.3 70B' },
+  { id: 'anthropic/claude-sonnet-4.6',       name: 'Claude Sonnet 4.6' },
+  { id: 'google/gemini-3-flash-preview',     name: 'Gemini 3 Flash Preview' },
+  { id: 'google/gemini-2.5-flash',           name: 'Gemini 2.5 Flash' },
+  { id: 'anthropic/claude-sonnet-4-5',       name: 'Claude Sonnet 4.5' },
+  { id: 'openai/gpt-4o-mini',                name: 'GPT-4o Mini' },
+  { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B' },
 ] as const;
 
-// Sensible defaults: cheap model for analysis (large input), capable model for generation (quality output)
-export const DEFAULT_OPENROUTER_GENERATION_MODEL = 'anthropic/claude-sonnet-4-5';
-export const DEFAULT_OPENROUTER_ANALYSIS_MODEL   = 'google/gemini-2.5-flash';
+// Sensible defaults: fast long-context model for analysis, stronger model for exam quality.
+export const DEFAULT_OPENROUTER_GENERATION_MODEL = 'anthropic/claude-sonnet-4.6';
+export const DEFAULT_OPENROUTER_ANALYSIS_MODEL   = 'google/gemini-3-flash-preview';
 
 /** @deprecated use DEFAULT_OPENROUTER_GENERATION_MODEL */
 export const DEFAULT_OPENROUTER_MODEL = DEFAULT_OPENROUTER_GENERATION_MODEL;
@@ -29,7 +30,22 @@ function storage(key: string): string | null {
 }
 
 export function getProvider(): Provider {
-  return (storage('examdraft_provider') as Provider) ?? 'openrouter';
+  return (storage('examdraft_provider') as Provider) ?? 'examdraft';
+}
+
+async function examDraftApi<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(path, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const code = typeof data.error === 'string' ? data.error : 'API_ERROR';
+    throw new Error(code);
+  }
+  return data as T;
 }
 
 function getAnthropicKey(): string {
@@ -297,54 +313,132 @@ function detectDurationFromExamText(examFiles: ExtractedFile[]): number | null {
 
 // --- Response validators ---
 
+const stringArraySchema = z.array(z.string()).catch([]);
+const finiteNumberSchema = z.coerce.number().refine(Number.isFinite);
+
+const taskTypeSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().catch(''),
+  frequency: finiteNumberSchema.catch(0),
+  avgPoints: finiteNumberSchema.catch(0),
+  difficulty: finiteNumberSchema.catch(3),
+  exampleQuestion: z.string().catch(''),
+  hasdiagramContext: z.boolean().catch(false),
+});
+
+const analysisResultSchema = z.object({
+  subject: z.string().min(1),
+  totalTaskTypes: z.coerce.number().int().nonnegative(),
+  taskTypes: z.array(taskTypeSchema).min(1),
+  averageDifficulty: finiteNumberSchema.catch(3),
+  estimatedDuration: finiteNumberSchema.catch(120),
+  totalPoints: finiteNumberSchema.catch(60),
+  topicAreas: stringArraySchema,
+  examCount: z.coerce.number().int().positive().catch(1),
+  hasSlideContext: z.boolean().catch(false),
+  slideTopics: stringArraySchema,
+  hadImageOnlyContent: z.boolean().catch(false),
+});
+
+const subTaskSchema = z.object({
+  label: z.string().catch(''),
+  text: z.string().catch(''),
+  points: finiteNumberSchema.catch(0),
+});
+
+const examTaskSchema = z.object({
+  id: z.string().min(1),
+  number: z.coerce.number().int().positive(),
+  type: z.string().catch(''),
+  typeId: z.string().catch(''),
+  title: z.string().catch(''),
+  description: z.string().catch(''),
+  points: finiteNumberSchema.catch(0),
+  subTasks: z.array(subTaskSchema).catch([]).optional(),
+  hints: stringArraySchema.optional(),
+  hasDiagram: z.boolean().catch(false).optional(),
+  diagramDescription: z.string().catch('').optional(),
+  options: z.record(z.string(), z.string()).optional(),
+});
+
+const examSolutionSchema = z.object({
+  taskId: z.string().min(1),
+  solution: z.string().catch(''),
+  keyPoints: stringArraySchema,
+  commonMistakes: stringArraySchema,
+  correctOption: z.string().optional(),
+});
+
+const generatedExamSchema = z.object({
+  title: z.string().min(1),
+  duration: z.coerce.number().int().positive().catch(120),
+  totalPoints: finiteNumberSchema.pipe(z.number().positive()).catch(60),
+  tasks: z.array(examTaskSchema).min(1),
+  includedTypes: stringArraySchema,
+  excludedTypes: stringArraySchema,
+  solution: z.array(examSolutionSchema).catch([]),
+});
+
+const taskPlanSchema = z.object({
+  id: z.string().min(1),
+  number: z.coerce.number().int().positive(),
+  type: z.string().catch(''),
+  typeId: z.string().catch(''),
+  title: z.string().catch(''),
+  points: finiteNumberSchema.catch(0),
+  subTaskCount: z.coerce.number().int().nonnegative().catch(0),
+  subTaskPoints: z.array(finiteNumberSchema).catch([]),
+  hasDiagram: z.boolean().catch(false),
+});
+
+const examPlanSchema = z.object({
+  title: z.string().min(1),
+  duration: z.coerce.number().int().positive().catch(120),
+  totalPoints: finiteNumberSchema.pipe(z.number().positive()).catch(60),
+  includedTypes: stringArraySchema,
+  excludedTypes: stringArraySchema,
+  taskPlans: z.array(taskPlanSchema).min(1),
+});
+
 function validateAnalysisResult(
   data: unknown,
   detectedTotalPoints?: number | null,
   detectedDuration?: number | null
 ): AnalysisResult {
-  const d = data as Record<string, unknown>;
-  if (
-    typeof d.subject !== 'string' ||
-    !Array.isArray(d.taskTypes) ||
-    typeof d.totalTaskTypes !== 'number'
-  ) {
+  const parsed = analysisResultSchema.safeParse(data);
+  if (!parsed.success) {
+    console.error('[ExamDraft] validateAnalysisResult failed:', z.treeifyError(parsed.error));
     throw new Error('JSON_PARSE_ERROR');
   }
 
-  const taskTypes = d.taskTypes as Array<Record<string, unknown>>;
+  const d = parsed.data;
+  const taskTypes = d.taskTypes;
   const avgDifficultyFallback = taskTypes.length > 0
-    ? taskTypes.reduce((sum, task) => sum + (typeof task.difficulty === 'number' ? task.difficulty : 3), 0) / taskTypes.length
+    ? taskTypes.reduce((sum, task) => sum + task.difficulty, 0) / taskTypes.length
     : 3;
   const totalPointsFallback = taskTypes.reduce(
-    (sum, task) => sum + (typeof task.avgPoints === 'number' ? task.avgPoints : 0),
+    (sum, task) => sum + task.avgPoints,
     0
   );
 
-  // Tolerate missing optional arrays — model sometimes omits them to save tokens
-  if (!Array.isArray(d.topicAreas))  d.topicAreas  = [];
-  if (!Array.isArray(d.slideTopics)) d.slideTopics = [];
-  if (typeof d.averageDifficulty !== 'number' || Number.isNaN(d.averageDifficulty)) {
+  if (!Number.isFinite(d.averageDifficulty)) {
     d.averageDifficulty = avgDifficultyFallback;
   }
   if (typeof detectedTotalPoints === 'number' && detectedTotalPoints > 0) {
     d.totalPoints = detectedTotalPoints;
   }
-  if (typeof d.totalPoints !== 'number' || Number.isNaN(d.totalPoints) || d.totalPoints <= 0) {
+  if (!Number.isFinite(d.totalPoints) || d.totalPoints <= 0) {
     d.totalPoints = detectedTotalPoints ?? (totalPointsFallback > 0 ? totalPointsFallback : 60);
   }
   if (typeof detectedDuration === 'number' && detectedDuration > 0) {
     d.estimatedDuration = detectedDuration;
   }
-  if (typeof d.estimatedDuration !== 'number' || Number.isNaN(d.estimatedDuration) || d.estimatedDuration <= 0) {
+  if (!Number.isFinite(d.estimatedDuration) || d.estimatedDuration <= 0) {
     d.estimatedDuration = 120;
   }
-  if (typeof d.examCount !== 'number' || Number.isNaN(d.examCount) || d.examCount <= 0) {
-    d.examCount = 1;
-  }
-  if (typeof d.hasSlideContext !== 'boolean') d.hasSlideContext = false;
-  if (typeof d.hadImageOnlyContent !== 'boolean') d.hadImageOnlyContent = false;
 
-  return d as unknown as AnalysisResult;
+  return d;
 }
 
 function validateGeneratedExam(data: unknown): GeneratedExam {
@@ -355,17 +449,13 @@ function validateGeneratedExam(data: unknown): GeneratedExam {
     d = d.exam as Record<string, unknown>;
   }
 
-  if (typeof d.title !== 'string' || !Array.isArray(d.tasks)) {
-    console.error('[ExamDraft] validateGeneratedExam: missing required fields. Keys:', Object.keys(d));
+  const parsed = generatedExamSchema.safeParse(d);
+  if (!parsed.success) {
+    console.error('[ExamDraft] validateGeneratedExam failed:', z.treeifyError(parsed.error));
     throw new Error('JSON_PARSE_ERROR');
   }
 
-  // Tolerate missing optional arrays — model sometimes omits them to save tokens
-  if (!Array.isArray(d.solution))      d.solution = [];
-  if (!Array.isArray(d.includedTypes)) d.includedTypes = [];
-  if (!Array.isArray(d.excludedTypes)) d.excludedTypes = [];
-
-  return d as unknown as GeneratedExam;
+  return parsed.data;
 }
 
 // --- Public API ---
@@ -374,9 +464,38 @@ export async function analyzeExams(
   examFiles: ExtractedFile[],
   slideFiles: ExtractedFile[],
   includeSlides: boolean,
-  lectureContextSummary?: string
+  lectureContextSummary?: string,
+  options?: {
+    improvementConsent?: boolean;
+    moduleContext?: { moduleName?: string; universityName?: string; examDate?: string; targetGrade?: string };
+  }
 ): Promise<AnalysisResult> {
   const provider = getProvider();
+  const moduleContextLines = [
+    options?.moduleContext?.moduleName ? `Modul/Fach: ${options.moduleContext.moduleName}` : '',
+    options?.moduleContext?.universityName ? `Uni/Hochschule: ${options.moduleContext.universityName}` : '',
+    options?.moduleContext?.examDate ? `Klausurdatum: ${options.moduleContext.examDate}` : '',
+    options?.moduleContext?.targetGrade ? `Zielnote: ${options.moduleContext.targetGrade}` : '',
+  ].filter(Boolean);
+  const moduleContextText = moduleContextLines.length
+    ? `MODULKONTEXT:\n${moduleContextLines.join('\n')}\n\nNutze diesen Kontext zur Benennung des Fachs und zur Einordnung der Analyse. Er ersetzt keine Evidenz aus den Altklausuren.`
+    : '';
+
+  if (provider === 'examdraft') {
+    const result = await examDraftApi<{ result: AnalysisResult }>('/api/analyze', {
+      examFiles,
+      slideFiles,
+      includeSlides,
+      lectureContextSummary,
+      improvementConsent: Boolean(options?.improvementConsent),
+      moduleContext: options?.moduleContext ?? null,
+    });
+    return validateAnalysisResult(
+      result.result,
+      detectTotalPointsFromExamText(examFiles),
+      detectDurationFromExamText(examFiles)
+    );
+  }
 
   const textModeWarning = examFiles.some((f) => f.mode === 'text' && f.hasSignificantImages)
     ? `HINWEIS: Einige Dateien wurden im Text-Modus gesendet und können Diagramme/Abbildungen enthalten die nicht sichtbar sind. Wenn eine Aufgabe sich auf eine nicht lesbare Abbildung bezieht, beschreibe den Aufgabentyp anhand des Kontexts und markiere hasdiagramContext als true.`
@@ -394,6 +513,8 @@ export async function analyzeExams(
   const instructionText = `Du bist ein Experte für Hochschulprüfungsanalyse.
 
 Analysiere die ${examFiles.length} Altklausur(en)${slideInfo} und extrahiere alle für die Generierung neuer Probeklausuren relevanten Strukturmerkmale.
+
+${moduleContextText}
 
 ${textModeWarning}
 
@@ -550,28 +671,6 @@ function parseAndLog<T>(
   }
 }
 
-// --- Types for the exam plan phase ---
-interface TaskPlan {
-  id: string;
-  number: number;
-  type: string;
-  typeId: string;
-  title: string;
-  points: number;
-  subTaskCount: number;
-  subTaskPoints: number[];
-  hasDiagram: boolean;
-}
-
-interface ExamPlan {
-  title: string;
-  duration: number;
-  totalPoints: number;
-  includedTypes: string[];
-  excludedTypes: string[];
-  taskPlans: TaskPlan[];
-}
-
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -623,18 +722,18 @@ JSON-Schema:
   const json = await llmCall(provider, prompt, 8000, 0.7);
   return parseAndLog(json, 'typeTraining', (d) => {
     const obj = d as Record<string, unknown>;
-    const exam = (obj.tasks ? obj : (obj.exam as Record<string, unknown> | undefined) ?? obj) as Record<string, unknown>;
-    if (typeof exam.title !== 'string' || !Array.isArray(exam.tasks)) throw new Error('JSON_PARSE_ERROR');
-    if (!Array.isArray(exam.solution))      exam.solution = [];
-    if (!Array.isArray(exam.includedTypes)) exam.includedTypes = [];
-    if (!Array.isArray(exam.excludedTypes)) exam.excludedTypes = [];
-    return exam as unknown as GeneratedExam;
+    return validateGeneratedExam(obj.tasks ? obj : (obj.exam as Record<string, unknown> | undefined) ?? obj);
   });
 }
 
 // ── Full exam: 3-phase scalable generation ────────────────────────────────────
 export async function generateExam(input: ExamGenerationInput): Promise<GeneratedExam> {
   const provider = getProvider();
+
+  if (provider === 'examdraft') {
+    const result = await examDraftApi<{ exam: GeneratedExam }>('/api/generate', input);
+    return validateGeneratedExam(result.exam);
+  }
 
   if (input.mode === 'type-training') {
     return generateTypeTraining(input, provider);
@@ -692,11 +791,12 @@ JSON-Schema:
 
   const planJson = await llmCall(provider, planPrompt, planMaxTokens, 0.7);
   const plan = parseAndLog(planJson, 'generateExam[plan]', (d) => {
-    const obj = d as Record<string, unknown>;
-    if (!Array.isArray(obj.taskPlans) || typeof obj.title !== 'string') throw new Error('JSON_PARSE_ERROR');
-    if (!Array.isArray(obj.includedTypes)) obj.includedTypes = [];
-    if (!Array.isArray(obj.excludedTypes)) obj.excludedTypes = [];
-    return obj as unknown as ExamPlan;
+    const parsed = examPlanSchema.safeParse(d);
+    if (!parsed.success) {
+      console.error('[ExamDraft] generateExam[plan] validation failed:', z.treeifyError(parsed.error));
+      throw new Error('JSON_PARSE_ERROR');
+    }
+    return parsed.data;
   });
 
   console.log(`[ExamDraft] Plan: ${plan.taskPlans.length} tasks, ${plan.totalPoints} pts (mc=${mc})`);
@@ -761,7 +861,12 @@ ${taskSchema}`;
       return parseAndLog(batchJson, `generateExam[batch-${batchIndex}]`, (d) => {
         const obj = d as Record<string, unknown>;
         const tasks = Array.isArray(obj.tasks) ? obj.tasks : (Array.isArray(obj) ? obj : []);
-        return tasks as ExamTask[];
+        const parsed = z.array(examTaskSchema).safeParse(tasks);
+        if (!parsed.success) {
+          console.error(`[ExamDraft] generateExam[batch-${batchIndex}] validation failed:`, z.treeifyError(parsed.error));
+          throw new Error('JSON_PARSE_ERROR');
+        }
+        return parsed.data;
       });
     })
   );
@@ -809,7 +914,12 @@ ${solutionSchema}`;
     return parseAndLog(solutionsJson, label, (d) => {
       const obj = d as Record<string, unknown>;
       const arr = Array.isArray(obj) ? obj : (Array.isArray(obj.solution) ? obj.solution : []);
-      return arr as ExamSolution[];
+      const parsed = z.array(examSolutionSchema).safeParse(arr);
+      if (!parsed.success) {
+        console.error(`[ExamDraft] ${label} validation failed:`, z.treeifyError(parsed.error));
+        throw new Error('JSON_PARSE_ERROR');
+      }
+      return parsed.data;
     });
   }
 
@@ -838,7 +948,7 @@ ${solutionSchema}`;
     }
   }
 
-  return {
+  return validateGeneratedExam({
     title: plan.title,
     duration: plan.duration,
     totalPoints: plan.totalPoints,
@@ -846,7 +956,7 @@ ${solutionSchema}`;
     includedTypes: plan.includedTypes,
     excludedTypes: plan.excludedTypes,
     solution: solutions,
-  };
+  });
 }
 
 // ── AI Grading ────────────────────────────────────────────────────────────────
@@ -898,6 +1008,9 @@ export async function gradeExam(
   if (clientResult) return clientResult;
 
   const provider = getProvider();
+  if (provider === 'examdraft') {
+    return examDraftApi<GradingResult>('/api/grade', { exam, answers });
+  }
 
   const taskDetails = exam.tasks.map((t) => {
     const sol = exam.solution.find((s) => s.taskId === t.id);

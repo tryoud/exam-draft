@@ -1,5 +1,6 @@
 ---
 import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
 ---
 
 <!doctype html>
@@ -13,6 +14,7 @@ import '../../styles/global.css';
     />
     <title>Privacy — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
   </head>
   <body class="legal-body overflow-x-hidden">
     <div class="legal-shell">
@@ -44,15 +46,16 @@ import '../../styles/global.css';
             <p class="legal-kicker">Transparency</p>
             <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Privacy at ExamDraft</h1>
             <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
-              ExamDraft is designed so your study materials do not pass through an ExamDraft-owned
-              content backend. The app runs in the browser. When you use AI features, your browser
-              talks to the provider you selected. This page explains what is stored locally, what
-              is sent to external AI providers, and which parts of that flow you control yourself.
+              ExamDraft is designed so your study materials are processed only for the features
+              you actively start. In the default mode, AI requests go through ExamDraft's proxy;
+              in BYOK mode, your browser talks directly to the provider you selected. This page
+              explains what is stored locally, what is sent to external AI providers, and which
+              parts of that flow you control yourself.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
               <span class="legal-meta-chip">Version: April 2026</span>
-              <span class="legal-meta-chip">No user account required</span>
-              <span class="legal-meta-chip">Bring Your Own Key</span>
+              <span class="legal-meta-chip">Magic-link account</span>
+              <span class="legal-meta-chip">Optional BYOK</span>
             </div>
           </section>
 
@@ -60,10 +63,11 @@ import '../../styles/global.css';
             <article class="legal-card rounded-[1.7rem] p-6">
               <p class="legal-kicker">Summary</p>
               <ul class="legal-list legal-copy mt-4 text-sm">
-                <li>Your API key is stored locally in your browser, not on ExamDraft servers.</li>
-                <li>Analysis, generation, and AI grading send content directly to Anthropic or OpenRouter.</li>
+                <li>In default mode, ExamDraft uses a magic-link account and secure server proxy.</li>
+                <li>Your API key is stored locally only if you use Advanced BYOK mode.</li>
+                <li>Analysis, generation, and AI grading send the required content to Anthropic or OpenRouter.</li>
                 <li>Analysis results and generated exams may be stored temporarily in your browser session.</li>
-                <li>ExamDraft does not maintain a classic user-content database for your uploaded learning material.</li>
+                <li>If you consent to improvement, ExamDraft stores anonymized extracted text as a reviewable contribution.</li>
               </ul>
             </article>
 
@@ -95,7 +99,7 @@ import '../../styles/global.css';
                 continue working across page changes and sessions.
               </p>
               <ul class="legal-list">
-                <li><strong>API key</strong> for the selected provider in <strong>localStorage</strong>.</li>
+                <li><strong>API key</strong> for the selected provider in <strong>localStorage</strong>, if you use Advanced BYOK mode.</li>
                 <li><strong>Provider and model preferences</strong> in <strong>localStorage</strong>.</li>
                 <li><strong>Temporary analysis results and generated exams</strong> in <strong>sessionStorage</strong> so you can continue within the same browser session.</li>
                 <li><strong>No persistent ExamDraft document vault</strong> for your uploaded PDFs. Files are read for processing and then only used as needed for the active flow.</li>
@@ -108,9 +112,10 @@ import '../../styles/global.css';
             <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
               <p>
                 When you actively use ExamDraft for analysis, exam generation, or AI grading,
-                your browser sends the required content directly to the provider you selected.
-                ExamDraft currently supports providers such as <strong>Anthropic</strong> and
-                <strong> OpenRouter</strong>.
+                the required content is sent either through ExamDraft's server proxy or, in
+                Advanced BYOK mode, directly from your browser to the provider you selected.
+                ExamDraft currently supports providers such as <strong>OpenRouter</strong> and
+                <strong> Anthropic</strong>.
               </p>
               <p>Depending on the feature, that may include:</p>
               <ul class="legal-list">
@@ -120,9 +125,10 @@ import '../../styles/global.css';
                 <li>answers you type when using AI grading.</li>
               </ul>
               <p>
-                ExamDraft does <strong>not</strong> proxy this traffic through its own content
-                backend. The transfer goes directly from your browser to the selected API. The
-                provider's own privacy terms apply in addition, especially the
+                In the default mode, ExamDraft processes this content through its own Cloudflare
+                infrastructure, checks credits, and forwards it to the AI provider. In BYOK mode,
+                the transfer goes directly from your browser to the selected API. The provider's
+                own privacy terms apply in addition, especially the
                 <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer"> Anthropic Privacy Policy</a>
                 {' '}and the
                 <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer"> OpenRouter Privacy Policy</a>.
@@ -130,32 +136,54 @@ import '../../styles/global.css';
             </div>
           </section>
 
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2a. Voluntary product improvement</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                You can use ExamDraft without contributing learning material for improvement.
+                If you select the improvement option, ExamDraft may store anonymized extracted
+                text from that upload and the related validated AI results to improve task
+                detection, topic matching, and exam generation quality.
+              </p>
+              <p>
+                ExamDraft does not store the PDF upload as a file for this. It stores anonymized
+                extracted text, filename, document type, subject, consent version, timestamp, a
+                content hash for deduplication, and AI outputs such as analysis JSON or generated
+                exams with model solutions. Contributions are marked for review first and are not
+                automatically published. You can withdraw this consent later and request deletion
+                of contributed content.
+              </p>
+            </div>
+          </section>
+
           <section class="grid gap-4 lg:grid-cols-2">
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">3. No ExamDraft content database</p>
+              <p class="legal-kicker">3. No general document vault</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft does not operate a classic user document store for your exam content.
-                  In particular, there is no product-side archive where ExamDraft keeps your
-                  uploaded exams as a long-term content library.
+                  ExamDraft does not operate a general document vault for your uploaded exams.
+                  Without improvement consent, there is no product-side archive where ExamDraft
+                  keeps your uploads as a long-term content library.
                 </p>
                 <p>
-                  The practical consequence is simple: the meaningful content processing happens
-                  either in your browser or at the external AI provider you selected.
+                  With improvement consent, anonymized text contributions and related AI outputs
+                  are stored for review and quality improvement.
                 </p>
               </div>
             </article>
 
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">4. No classic tracking layer</p>
+              <p class="legal-kicker">4. Usage analytics without study-content profiles</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft currently does not rely on classic user accounts, personalized ad
-                  profiles, or product-side analytics for your study content.
+                  ExamDraft records basic product events such as landing page views, demo starts,
+                  upload starts, analysis, checkout, and generation so the funnel can be improved
+                  and product errors can be detected.
                 </p>
                 <p>
-                  Necessary browser and hosting processes may still exist. This page describes how
-                  your content is handled inside the product flow itself.
+                  These events do not include PDF contents, answers, or generated exams. IP
+                  addresses are not stored raw; they are hashed. ExamDraft does not create
+                  personalized ad profiles from your study content.
                 </p>
               </div>
             </article>
@@ -167,7 +195,8 @@ import '../../styles/global.css';
               <p>
                 Where privacy law applies, local browser storage is mainly used to provide the
                 functionality you explicitly requested. Transfers to external AI providers happen
-                because you actively trigger those functions and use your own API key.
+                because you actively trigger those functions. In default mode, ExamDraft uses the
+                server proxy; in BYOK mode, you use your own API key.
               </p>
               <p>You decide:</p>
               <ul class="legal-list">

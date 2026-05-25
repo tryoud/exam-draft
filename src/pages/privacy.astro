@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 ---
 
 <!doctype html>
@@ -13,6 +14,7 @@ import '../styles/global.css';
     />
     <title>Datenschutz — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
   </head>
   <body class="legal-body overflow-x-hidden">
     <div class="legal-shell">
@@ -44,16 +46,17 @@ import '../styles/global.css';
             <p class="legal-kicker">Transparenz</p>
             <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Datenschutz bei ExamDraft</h1>
             <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
-              ExamDraft ist so gebaut, dass deine Lernunterlagen nicht über einen eigenen
-              ExamDraft-Server laufen. Die App arbeitet direkt im Browser. Für KI-Funktionen
-              kommuniziert dein Browser mit dem von dir gewählten Anbieter. Auf dieser Seite
-              erklären wir präzise, welche Daten lokal gespeichert werden, welche Daten an
-              externe KI-Anbieter übertragen werden und welche Entscheidungen du selbst steuerst.
+              ExamDraft ist so gebaut, dass deine Lernunterlagen nur für die von dir gestarteten
+              Funktionen verarbeitet werden. Im Standardmodus laufen KI-Aufrufe über den
+              ExamDraft-Proxy; im BYOK-Modus kommuniziert dein Browser direkt mit dem gewählten
+              Anbieter. Auf dieser Seite erklären wir präzise, welche Daten lokal gespeichert
+              werden, welche Daten an externe KI-Anbieter übertragen werden und welche Entscheidungen
+              du selbst steuerst.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
               <span class="legal-meta-chip">Stand: April 2026</span>
-              <span class="legal-meta-chip">Kein Nutzerkonto erforderlich</span>
-              <span class="legal-meta-chip">Bring Your Own Key</span>
+              <span class="legal-meta-chip">Magic-Link-Konto</span>
+              <span class="legal-meta-chip">Optional BYOK</span>
             </div>
           </section>
 
@@ -61,10 +64,11 @@ import '../styles/global.css';
             <article class="legal-card rounded-[1.7rem] p-6">
               <p class="legal-kicker">Kurzfassung</p>
               <ul class="legal-list legal-copy mt-4 text-sm">
-                <li>Dein API-Key wird lokal im Browser gespeichert, nicht auf ExamDraft-Servern.</li>
-                <li>Analyse, Generierung und KI-Bewertung senden Inhalte direkt an Anthropic oder OpenRouter.</li>
+                <li>Im Standardmodus verwendet ExamDraft ein Magic-Link-Konto und einen sicheren Server-Proxy.</li>
+                <li>Dein API-Key wird nur dann lokal im Browser gespeichert, wenn du den BYOK-Modus nutzt.</li>
+                <li>Analyse, Generierung und KI-Bewertung senden die erforderlichen Inhalte an Anthropic oder OpenRouter.</li>
                 <li>Analyseergebnisse und generierte Klausuren können während deiner Sitzung im Browser zwischengespeichert werden.</li>
-                <li>ExamDraft setzt keine klassischen Nutzerkonten, keine Profile und kein produktseitiges Tracking für Lerninhalte ein.</li>
+                <li>Wenn du der Verbesserung zustimmst, speichert ExamDraft anonymisierten extrahierten Text als prüfpflichtigen Beitrag.</li>
               </ul>
             </article>
 
@@ -96,7 +100,7 @@ import '../styles/global.css';
                 damit die App zwischen Seitenwechseln und Sitzungen sinnvoll weiterarbeiten kann.
               </p>
               <ul class="legal-list">
-                <li><strong>API-Key</strong> des gewählten Anbieters im <strong>localStorage</strong>.</li>
+                <li><strong>API-Key</strong> des gewählten Anbieters im <strong>localStorage</strong>, falls du den Advanced-BYOK-Modus nutzt.</li>
                 <li><strong>Provider- und Modellwahl</strong> im <strong>localStorage</strong>.</li>
                 <li><strong>Temporäre Analyseergebnisse und generierte Klausuren</strong> im <strong>sessionStorage</strong>, damit du im selben Browserfenster weiterarbeiten kannst.</li>
                 <li><strong>Keine Upload-PDFs</strong> als dauerhafte lokale ExamDraft-Datenbank. Die Dateien werden zur Verarbeitung im Browser gelesen und anschließend nur insoweit weiterverwendet, wie es für den laufenden Vorgang nötig ist.</li>
@@ -113,9 +117,10 @@ import '../styles/global.css';
             <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
               <p>
                 Wenn du ExamDraft aktiv nutzt, zum Beispiel für Analyse, Klausurgenerierung oder
-                KI-Bewertung, schickt dein Browser die dafür erforderlichen Inhalte direkt an
-                den ausgewählten Anbieter. Aktuell unterstützt ExamDraft insbesondere
-                <strong> Anthropic</strong> und <strong>OpenRouter</strong>.
+                KI-Bewertung, werden die dafür erforderlichen Inhalte entweder über den
+                ExamDraft-Server-Proxy oder im Advanced-BYOK-Modus direkt an den ausgewählten
+                Anbieter übertragen. Aktuell unterstützt ExamDraft insbesondere
+                <strong> OpenRouter</strong> und <strong>Anthropic</strong>.
               </p>
               <p>Je nach Funktion können darunter insbesondere fallen:</p>
               <ul class="legal-list">
@@ -125,9 +130,10 @@ import '../styles/global.css';
                 <li>von dir eingegebene Antworten bei der KI-Bewertung</li>
               </ul>
               <p>
-                ExamDraft leitet diese Inhalte <strong>nicht</strong> über einen eigenen
-                Zwischenserver. Die Übertragung erfolgt vom Browser direkt an die jeweilige API.
-                Für diese Verarbeitung gelten ergänzend die Hinweise des jeweiligen Anbieters:
+                Im Standardmodus verarbeitet ExamDraft diese Inhalte über eigene Cloudflare
+                Infrastruktur, prüft Credits und leitet sie an den KI-Anbieter weiter. Im BYOK-Modus
+                erfolgt die Übertragung vom Browser direkt an die jeweilige API. Für diese
+                Verarbeitung gelten ergänzend die Hinweise des jeweiligen Anbieters:
                 <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer"> Anthropic Privacy Policy</a>
                 {' '}und
                 <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer"> OpenRouter Privacy Policy</a>.
@@ -135,35 +141,55 @@ import '../styles/global.css';
             </div>
           </section>
 
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">2a. Freiwillige Verbesserung von ExamDraft</p>
+            <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
+              <p>
+                Du kannst ExamDraft nutzen, ohne Lernmaterial zur Verbesserung beizutragen.
+                Wenn du die Verbesserungsoption auswählst, darf ExamDraft anonymisierten
+                extrahierten Text aus diesem Upload sowie die dazugehörigen validierten
+                KI-Ergebnisse speichern, um Aufgabenerkennung, Themenzuordnung und
+                Klausurgenerierung zu verbessern.
+              </p>
+              <p>
+                ExamDraft speichert dafür keinen PDF-Upload als Datei. Gespeichert werden
+                anonymisierter extrahierter Text, Dateiname, Dokumenttyp, Fach, Consent-Version,
+                Zeitstempel, Inhalts-Hash zur Deduplizierung sowie KI-Ausgaben wie Analyse-JSON
+                oder generierte Klausuren mit Musterlösungen. Die Beiträge werden zunächst als
+                prüfpflichtig markiert und nicht automatisch veröffentlicht. Du kannst diese
+                Zustimmung später widerrufen und die Löschung beigetragener Inhalte anfragen.
+              </p>
+            </div>
+          </section>
+
           <section class="grid gap-4 lg:grid-cols-2">
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">3. Keine ExamDraft-Inhaltsdatenbank</p>
+              <p class="legal-kicker">3. Keine allgemeine Dokumentenablage</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft führt keine klassische Nutzer- oder Dokumentendatenbank für deine
-                  Klausurinhalte. Es gibt insbesondere keine Oberfläche, in der ExamDraft selbst
-                  deine hochgeladenen Klausuren langfristig sammelt, archiviert oder profilbasiert
-                  auswertet.
+                  ExamDraft führt keine allgemeine Dokumentenablage für deine hochgeladenen
+                  Klausuren. Ohne Verbesserungszustimmung gibt es insbesondere keine Oberfläche,
+                  in der ExamDraft deine Uploads langfristig sammelt oder archiviert.
                 </p>
                 <p>
-                  Das ist wichtig: Die eigentliche inhaltliche Verarbeitung findet entweder
-                  lokal im Browser oder beim von dir gewählten KI-Anbieter statt.
+                  Mit Verbesserungszustimmung werden anonymisierte Textbeiträge und zugehörige
+                  KI-Ausgaben für Review und Qualitätsverbesserung gespeichert.
                 </p>
               </div>
             </article>
 
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">4. Keine klassische Tracking-Logik</p>
+              <p class="legal-kicker">4. Nutzungsanalyse ohne Lerninhaltsprofile</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft verwendet aktuell keine klassischen Nutzerkonten, keine
-                  personalisierten Werbeprofile und kein produktseitiges Analytics-System für
-                  deine Lerninhalte.
+                  ExamDraft misst grundlegende Produkt-Events wie Seitenaufruf, Demo-Start,
+                  Upload-Start, Analyse, Checkout und Generierung, damit der Funnel verbessert
+                  und Fehler erkannt werden können.
                 </p>
                 <p>
-                  Technisch notwendige Browser- und Hostingvorgänge können dennoch anfallen.
-                  Diese Seite beschreibt den produktseitigen Umgang mit deinen Inhalten innerhalb
-                  der App.
+                  Diese Events enthalten keine PDF-Inhalte, Antworten oder generierten Klausuren.
+                  IP-Adressen werden nicht roh gespeichert, sondern gehasht. ExamDraft erstellt
+                  keine personalisierten Werbeprofile aus deinen Lerninhalten.
                 </p>
               </div>
             </article>
@@ -176,7 +202,8 @@ import '../styles/global.css';
                 Soweit Datenschutzrecht anwendbar ist, verarbeitet ExamDraft lokale
                 Browserdaten vor allem zur Bereitstellung der von dir gewünschten Funktionen.
                 Die Übertragung an externe KI-Anbieter erfolgt, weil du diese Funktionen aktiv
-                auslöst und dafür deinen eigenen API-Key einsetzt.
+                auslöst. Im Standardmodus nutzt ExamDraft dafür den Server-Proxy; im BYOK-Modus
+                nutzt du deinen eigenen API-Key.
               </p>
               <p>
                 Du entscheidest selbst,

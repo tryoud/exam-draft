@@ -1,21 +1,30 @@
-import * as pdfjsLib from 'pdfjs-dist';
 import type { ExtractedFile, PDFMode } from './types';
 
-const WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const WORKER_SRC = new URL('pdfjs-dist/legacy/build/pdf.worker.mjs', import.meta.url).toString();
 
+type PdfJsLib = typeof import('pdfjs-dist/legacy/build/pdf.mjs');
+type PDFDocumentProxy = import('pdfjs-dist/legacy/build/pdf.mjs').PDFDocumentProxy;
+
+let pdfjsLibPromise: Promise<PdfJsLib> | null = null;
 let workerInitialized = false;
-function initWorker() {
+
+async function loadPdfJs(): Promise<PdfJsLib> {
+  pdfjsLibPromise ??= import('pdfjs-dist/legacy/build/pdf.mjs');
+  const pdfjsLib = await pdfjsLibPromise;
+
   if (!workerInitialized && typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
     workerInitialized = true;
   }
+
+  return pdfjsLib;
 }
 
 const MAX_CHARS_EXAM = 160000;
 const MAX_CHARS_SLIDES = 40000; // Slides are supplementary context; 40k chars (~10k tokens) is sufficient
 
 // Shared helper — samples up to 5 pages in parallel and extrapolates image count.
-async function countImages(pdf: pdfjsLib.PDFDocumentProxy, pageCount: number): Promise<number> {
+async function countImages(pdfjsLib: PdfJsLib, pdf: PDFDocumentProxy, pageCount: number): Promise<number> {
   const pagesToCheck = Math.min(pageCount, 5);
   const counts = await Promise.all(
     Array.from({ length: pagesToCheck }, (_, i) => i + 1).map(async (i) => {
@@ -36,12 +45,12 @@ export async function analyzePDF(file: File): Promise<{
   hasSignificantImages: boolean;
   recommendedMode: PDFMode;
 }> {
-  initWorker();
+  const pdfjsLib = await loadPdfJs();
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   try {
     const pageCount = pdf.numPages;
-    const imageCount = await countImages(pdf, pageCount);
+    const imageCount = await countImages(pdfjsLib, pdf, pageCount);
     const hasSignificantImages = imageCount / pageCount > 0.3;
     return {
       pageCount,
@@ -58,7 +67,7 @@ export async function extractText(
   file: File,
   type: 'exam' | 'slides'
 ): Promise<ExtractedFile> {
-  initWorker();
+  const pdfjsLib = await loadPdfJs();
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   try {
@@ -85,7 +94,7 @@ export async function extractText(
         ? fullText.slice(0, maxChars) + '\n[Text gekürzt]'
         : fullText;
 
-    const imageCount = await countImages(pdf, pageCount);
+    const imageCount = await countImages(pdfjsLib, pdf, pageCount);
 
     return {
       name: file.name,

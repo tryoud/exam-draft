@@ -1,6 +1,18 @@
 export type PDFMode = 'text' | 'image' | 'image_recommended';
 
-export type Provider = 'anthropic' | 'openrouter';
+export type Provider = 'examdraft' | 'anthropic' | 'openrouter';
+
+export interface AccountUser {
+  id: string;
+  email: string;
+}
+
+export interface AccountState {
+  user: AccountUser | null;
+  credits: number;
+  plan: 'free' | 'credits' | 'byok';
+  loading: boolean;
+}
 
 export interface ExtractedFile {
   name: string;
@@ -87,6 +99,7 @@ export interface ExamGenerationInput {
   difficulty: 'easier' | 'same' | 'harder';
   selectedTypeId?: string;
   excludedTopics?: string[];
+  improvementConsent?: boolean;
 }
 
 export interface ExamAnswer {
@@ -122,8 +135,13 @@ export interface AppState {
   includeSlides: boolean;
   lectureContextMode: 'summary' | 'pdfs';
   lectureContextText: string;
+  moduleName: string;
+  universityName: string;
+  examDate: string;
+  targetGrade: string;
   consentGiven: boolean;
   rightsConfirmed: boolean;
+  improvementConsent: boolean;
   analysisResult: AnalysisResult | null;
   selectedMode: 'random' | 'type-training' | null;
   selectedDifficulty: 'easier' | 'same' | 'harder';

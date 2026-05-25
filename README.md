@@ -23,9 +23,78 @@ open http://localhost:4321
 
 ---
 
-## Anthropic API Key
+## ExamDraft-Konto und API Keys
 
-ExamDraft nutzt das BYOK-Modell (Bring Your Own Key):
+ExamDraft unterstützt zwei Modi:
+
+1. **ExamDraft-Konto**: Anmeldung per Magic Link, ein kostenloser Start-Credit, API-Aufrufe laufen über den Cloudflare Worker.
+2. **Advanced BYOK**: Eigener OpenRouter- oder Anthropic-Key im Browser.
+
+Die vollständige Produktionskonfiguration steht in [docs/configuration.md](docs/configuration.md).
+
+### Lokale Entwicklung mit Cloudflare
+
+```bash
+# D1 Datenbank anlegen und database_id in wrangler.toml eintragen
+npx wrangler d1 create examdraft
+npx wrangler d1 migrations apply examdraft --local
+
+# Secrets für den Worker setzen
+npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler secret put RESEND_API_KEY
+```
+
+Ohne `RESEND_API_KEY` gibt `/api/auth/start` im lokalen Development einen `devLink` zurück.
+Für lokale Worker-Tests kannst du `.dev.vars.example` nach `.dev.vars` kopieren.
+
+### Abuse-Schutz für Free Credits
+
+Der Magic-Link-Startpunkt schützt das kostenlose Guthaben mit einfachen Cloudflare/D1-Regeln:
+
+- Wegwerf-Mail-Domains werden blockiert.
+- Magic-Link-Anfragen werden pro E-Mail, IP-Hash und Domain begrenzt.
+- Eine IP kann pro Tag nur wenige unterschiedliche E-Mail-Adressen ausprobieren.
+- IP-Adressen werden nicht roh gespeichert, sondern mit `AUTH_RATE_LIMIT_SALT` gehasht.
+
+Die Grenzwerte stehen in `wrangler.toml` und können pro Umgebung angepasst werden.
+
+### Speicherung bei Verbesserungszustimmung
+
+Wenn Nutzer die Verbesserungsoption aktiv auswählen, speichert der Worker keinen PDF-Upload,
+sondern den extrahierten Text nach einfacher Anonymisierung in `document_contributions`.
+Zusätzlich werden die validierten KI-Ergebnisse in `ai_contributions` gespeichert, zum Beispiel
+Analyse-JSON oder generierte Klausur inklusive Musterlösung. Neue Beiträge bekommen
+`pending_review`, eine Consent-Version und Hashes, damit Duplikate vermieden werden.
+Ohne diese Zustimmung wird nichts in diesen Tabellen gespeichert.
+
+### Modell-Routing
+
+Die Standardmodelle sind nach Preis/Leistung aus dem Artificial-Analysis-Leaderboard und
+OpenRouter-Verfügbarkeit gewählt:
+
+- Analyse, Grading und lange Dokumentinputs: `google/gemini-3-flash-preview`
+- Klausurgenerierung und Musterlösungen: `anthropic/claude-sonnet-4.6`
+
+So bleiben große Input-Prompts schnell und kontrollierbar, während die teure kreative Ausgabe
+über ein stärkeres Modell läuft.
+
+### Website Analytics
+
+Cloudflare Web Analytics ist optional eingebunden. Setze dafür in Cloudflare Pages die
+Build-Variable `PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN`. Ohne Token wird kein Analytics-Script
+gerendert.
+
+### Free-to-Paid Funnel
+
+ExamDraft folgt dem Prinzip: Free gibt den Beweis, Paid gibt die Klausur.
+
+- Neue Accounts erhalten `1` Start-Credit.
+- Die Analyse kostet `1` Credit und zeigt Aufgabentypen, Themen und Schwierigkeit.
+- Die vollständige Klausurgenerierung kostet standardmäßig `4` Credits und ist nur nach einem Credit-Kauf verfügbar.
+- BYOK bleibt als Advanced Mode verfügbar und umgeht ExamDraft-Credits.
+- `usage_events.credits_charged` protokolliert den Credit-Verbrauch pro Operation.
+
+### BYOK
 
 1. Gehe zu [console.anthropic.com](https://console.anthropic.com/settings/keys)
 2. Erstelle einen neuen API Key
@@ -74,10 +143,11 @@ Je nach Modell, Bild-Modus und Umfang der PDFs kann der tatsächliche Preis etwa
 
 ## Tech Stack
 
-- [Astro 4](https://astro.build) + React Islands
+- [Astro 6](https://astro.build) + React Islands
 - Tailwind CSS
 - [pdfjs-dist](https://mozilla.github.io/pdf.js/) (lokale PDF-Verarbeitung)
-- Claude API (direct browser access)
+- Cloudflare Pages Functions + D1 für ExamDraft-Konten und Credits
+- OpenRouter/Anthropic API über sicheren Proxy oder BYOK
 - Cloudflare Pages
 
 ---

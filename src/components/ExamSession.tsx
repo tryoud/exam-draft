@@ -474,7 +474,6 @@ export default function ExamSession({ exam, onClose, onNewExam }: ExamSessionPro
   const grade = calcGrade(displayPct);
 
   const answeredCount = Object.values(answers).filter((a) => a.trim().length > 0).length;
-  const progress = totalSeconds > 0 ? secondsLeft / totalSeconds : 1;
 
   // ── Picker ──────────────────────────────────────────────────────────────────
   if (phase === 'picker') {

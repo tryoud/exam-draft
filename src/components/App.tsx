@@ -1,26 +1,72 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { AppState, AppStep, ExtractedFile, AnalysisResult, GeneratedExam, Provider } from '../lib/types';
+import { Suspense, lazy, useState, useEffect } from 'react';
+import type { AccountState, AppState, AppStep, ExtractedFile, Provider } from '../lib/types';
 import { DEFAULT_OPENROUTER_ANALYSIS_MODEL } from '../lib/anthropic';
 import { processFile } from '../lib/pdfExtractor';
-import { analyzeExams, generateExam, getProvider } from '../lib/anthropic';
-import { estimateTotalTokens, formatTokens } from '../lib/tokenEstimator';
+import { analyzeExams, generateExam } from '../lib/anthropic';
 import ApiKeySetup from './ApiKeySetup';
+import AccountSetup from './AccountSetup';
 import UploadZone, { type PendingFile } from './UploadZone';
 import ConsentCheckbox from './ConsentCheckbox';
 import TokenEstimator from './TokenEstimator';
-import AnalysisDashboard from './AnalysisDashboard';
-import ExamConfigurator from './ExamConfigurator';
-import GeneratedExamComponent from './GeneratedExam';
-import ExamSession from './ExamSession';
-import TypeTrainer from './TypeTrainer';
 import { ToastContainer, useToasts, showError } from './Toast';
 import { DEMO_EXAM, DEMO_ANALYSIS } from '../lib/demoExam';
+import { EMPTY_ACCOUNT, fetchAccount, startCheckout } from '../lib/account';
+import type { Locale } from '../lib/i18n';
+import { appCopy } from '../lib/i18n';
+import { trackEvent } from '../lib/analytics';
+
+const AnalysisDashboard = lazy(() => import('./AnalysisDashboard'));
+const ExamConfigurator = lazy(() => import('./ExamConfigurator'));
+const GeneratedExamComponent = lazy(() => import('./GeneratedExam'));
+const ExamSession = lazy(() => import('./ExamSession'));
+const TypeTrainer = lazy(() => import('./TypeTrainer'));
+
+function FeatureFallback({ locale = 'de' }: { locale?: Locale }) {
+  return (
+    <div className="app-surface rounded-[1.6rem] p-8 flex items-center justify-center gap-3 text-sm text-[#6f6a78]">
+      <div className="w-4 h-4 border-2 border-[#6b8dff]/25 border-t-[#6b8dff] rounded-full animate-spin" />
+      {locale === 'en' ? 'Loading view...' : 'Lade Ansicht...'}
+    </div>
+  );
+}
+
+function AppBootScreen({ locale = 'de' }: { locale?: Locale }) {
+  const copy = appCopy[locale];
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f0ebe2] px-4">
+      <div className="text-center">
+        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111111] shadow-lg shadow-black/10">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-8 w-8">
+            <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2" />
+            <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2" />
+            <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-semibold text-[#111111]">ExamDraft</h1>
+        <p className="mt-2 text-sm text-[#7d7785]">{copy.boot}</p>
+      </div>
+    </div>
+  );
+}
+
+function checkoutErrorMessage(code: string, locale: Locale) {
+  if (code === 'BILLING_NOT_CONFIGURED') {
+    return locale === 'en'
+      ? 'Checkout is not configured yet.'
+      : 'Checkout ist noch nicht vollständig konfiguriert.';
+  }
+  return locale === 'en' ? 'Checkout could not be started.' : 'Checkout konnte nicht gestartet werden.';
+}
 
 /** Migrate stale model IDs that OpenRouter no longer accepts. */
 function migrateStoredModels() {
   const migrations: Record<string, string> = {
     'google/gemini-2.5-flash-preview': 'google/gemini-2.5-flash',
+    'anthropic/claude-sonnet-4-5': 'anthropic/claude-sonnet-4.6',
   };
+  if (localStorage.getItem('examdraft_openrouter_analysis_model') === 'google/gemini-2.5-flash') {
+    localStorage.setItem('examdraft_openrouter_analysis_model', 'google/gemini-3-flash-preview');
+  }
   for (const key of ['examdraft_openrouter_model', 'examdraft_openrouter_analysis_model']) {
     const val = localStorage.getItem(key);
     if (val && migrations[val]) {
@@ -30,12 +76,14 @@ function migrateStoredModels() {
 }
 
 function getStoredConfig(): { key: string | null; provider: Provider; model: string; analysisModel: string } {
-  if (typeof window === 'undefined') return { key: null, provider: 'openrouter', model: '', analysisModel: '' };
+  if (typeof window === 'undefined') return { key: null, provider: 'examdraft', model: '', analysisModel: '' };
   migrateStoredModels();
-  const provider = (localStorage.getItem('examdraft_provider') as Provider) ?? 'openrouter';
+  const provider = (localStorage.getItem('examdraft_provider') as Provider) ?? 'examdraft';
   const key = provider === 'openrouter'
     ? localStorage.getItem('examdraft_openrouter_key')
-    : localStorage.getItem('examdraft_api_key');
+    : provider === 'anthropic'
+    ? localStorage.getItem('examdraft_api_key')
+    : 'examdraft';
   const model = localStorage.getItem('examdraft_openrouter_model') ?? '';
   const analysisModel = localStorage.getItem('examdraft_openrouter_analysis_model') ?? DEFAULT_OPENROUTER_ANALYSIS_MODEL;
   return { key, provider, model, analysisModel };
@@ -43,7 +91,7 @@ function getStoredConfig(): { key: string | null; provider: Provider; model: str
 
 const initialState: AppState = {
   apiKey: null,
-  provider: 'openrouter',
+  provider: 'examdraft',
   openrouterModel: '',
   openrouterAnalysisModel: '',
   examFiles: [],
@@ -51,8 +99,13 @@ const initialState: AppState = {
   includeSlides: true,
   lectureContextMode: 'summary',
   lectureContextText: '',
+  moduleName: '',
+  universityName: '',
+  examDate: '',
+  targetGrade: '',
   consentGiven: false,
   rightsConfirmed: false,
+  improvementConsent: false,
   analysisResult: null,
   selectedMode: null,
   selectedDifficulty: 'same',
@@ -65,8 +118,13 @@ const initialState: AppState = {
   error: null,
 };
 
-export default function App() {
+export default function App({ locale = 'de' }: { locale?: Locale }) {
+  const copy = appCopy[locale];
+  const app = copy.app;
   const [state, setState] = useState<AppState>({ ...initialState });
+  const [account, setAccount] = useState<AccountState>({ ...EMPTY_ACCOUNT });
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [showAccountSetup, setShowAccountSetup] = useState(false);
   const [showKeySetup, setShowKeySetup] = useState(false);
   const [examPendingFiles, setExamPendingFiles] = useState<PendingFile[]>([]);
   const [slidePendingFiles, setSlidePendingFiles] = useState<PendingFile[]>([]);
@@ -101,12 +159,14 @@ ZIELFORMAT — Kompakter strukturierter Klartext:
 Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgenerierungs-Tool eingefügt.`;
 
   useEffect(() => {
+    trackEvent('app_opened');
     const { key, provider, model, analysisModel } = getStoredConfig();
-    if (key) {
-      setState((s) => ({ ...s, apiKey: key, provider, openrouterModel: model, openrouterAnalysisModel: analysisModel }));
-    } else {
-      setShowKeySetup(true);
-    }
+    setState((s) => ({ ...s, apiKey: key, provider, openrouterModel: model, openrouterAnalysisModel: analysisModel }));
+    void refreshAccount().then((next) => {
+      if (provider === 'examdraft' && !next.user) setShowAccountSetup(true);
+    }).finally(() => {
+      setIsInitialized(true);
+    });
 
     // Restore session: analysis result + generated exam from sessionStorage
     try {
@@ -129,6 +189,77 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     }
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const billing = params.get('billing');
+    const auth = params.get('auth');
+    if (billing === 'success') {
+      trackEvent('checkout_success');
+      addToast(locale === 'en' ? 'Payment successful. Credits are being updated.' : 'Zahlung erfolgreich. Credits werden aktualisiert.', 'success');
+      void refreshAccount();
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (billing === 'cancelled') {
+      addToast(locale === 'en' ? 'Checkout cancelled. You can buy credits later or use BYOK.' : 'Checkout abgebrochen. Du kannst später Credits kaufen oder BYOK nutzen.', 'info');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (auth === 'invalid') {
+      addToast(locale === 'en' ? 'Login link is invalid or expired.' : 'Login-Link ist ungültig oder abgelaufen.', 'error');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (auth === 'ok') {
+      trackEvent('auth_success');
+      addToast(locale === 'en' ? 'Signed in.' : 'Angemeldet.', 'success');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (params.get('demo') === '1') {
+      trackEvent('demo_opened', { source: 'landing' });
+      setState((s) => ({
+        ...s,
+        analysisResult: DEMO_ANALYSIS,
+        generatedExam: DEMO_EXAM,
+        currentStep: 4,
+      }));
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [locale]);
+
+  async function refreshAccount(): Promise<AccountState> {
+    try {
+      const next = await fetchAccount();
+      setAccount(next);
+      return next;
+    } catch {
+      const next = { ...EMPTY_ACCOUNT, loading: false };
+      setAccount(next);
+      return next;
+    }
+  }
+
+  function useAccountProvider() {
+    localStorage.setItem('examdraft_provider', 'examdraft');
+    setState((s) => ({ ...s, provider: 'examdraft', apiKey: 'examdraft' }));
+    setShowAccountSetup(false);
+  }
+
+  function openByokSetup() {
+    trackEvent('byok_selected', { provider: state.provider });
+    setShowAccountSetup(false);
+    setShowKeySetup(true);
+  }
+
+  async function handleBuyCredits() {
+    if (!account.user) {
+      setShowAccountSetup(true);
+      return;
+    }
+    try {
+      trackEvent('checkout_started', { credits: account.credits });
+      const { url } = await startCheckout(locale);
+      window.location.href = url;
+    } catch (err) {
+      addToast(err instanceof Error ? checkoutErrorMessage(err.message, locale) : checkoutErrorMessage('API_ERROR', locale), 'error');
+    }
+  }
+
   function setStep(step: AppStep) {
     setState((s) => ({ ...s, currentStep: step }));
   }
@@ -141,16 +272,29 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     true; // file readiness is managed per-file in FileCard
 
   async function handleAnalyze() {
-    if (!state.apiKey) {
+    if (state.provider === 'examdraft' && !account.user) {
+      setShowAccountSetup(true);
+      return;
+    }
+    if (state.provider !== 'examdraft' && !state.apiKey) {
       setShowKeySetup(true);
       return;
     }
 
-    setState((s) => ({ ...s, isLoading: true, loadingMessage: 'Extrahiere Text aus PDFs...' }));
+    trackEvent('analysis_started', {
+      examCount: examPendingFiles.length,
+      slideCount: slidePendingFiles.length,
+      provider: state.provider,
+      moduleName: state.moduleName.trim() || null,
+      universityName: state.universityName.trim() || null,
+      hasExamDate: Boolean(state.examDate),
+      improvementConsent: state.improvementConsent,
+    });
+    setState((s) => ({ ...s, isLoading: true, loadingMessage: app.extracting }));
 
     try {
       // OpenRouter doesn't support PDF image/document mode — always extract text
-      const useImageAllowed = state.provider !== 'openrouter';
+      const useImageAllowed = state.provider === 'anthropic';
 
       // Process all files in parallel
       const examExtracted = await Promise.all(
@@ -162,13 +306,22 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
           )
         : [];
 
-      setState((s) => ({ ...s, loadingMessage: 'Sende Daten an den KI-Anbieter...' }));
+      setState((s) => ({ ...s, loadingMessage: app.sending }));
 
       const result = await analyzeExams(
         examExtracted,
         slideExtracted,
         state.includeSlides,
-        state.lectureContextMode === 'summary' ? state.lectureContextText.trim() : undefined
+        state.lectureContextMode === 'summary' ? state.lectureContextText.trim() : undefined,
+        {
+          improvementConsent: state.improvementConsent,
+          moduleContext: {
+            moduleName: state.moduleName.trim() || undefined,
+            universityName: state.universityName.trim() || undefined,
+            examDate: state.examDate || undefined,
+            targetGrade: state.targetGrade.trim() || undefined,
+          },
+        }
       );
 
       try {
@@ -185,6 +338,13 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         loadingMessage: '',
         currentStep: 2,
       }));
+      trackEvent('analysis_success', {
+        examCount: examExtracted.length,
+        slideCount: slideExtracted.length,
+        taskTypes: result.totalTaskTypes,
+        provider: state.provider,
+      });
+      if (state.provider === 'examdraft') void refreshAccount();
     } catch (err: unknown) {
       console.error('[ExamDraft] analyzeExams error:', err);
       const code = err instanceof Error ? err.message : 'API_ERROR';
@@ -198,6 +358,12 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
           'error',
           { actionLabel: 'API-Key hinterlegen', onAction: () => setShowKeySetup(true) }
         );
+      } else if (code === 'NO_CREDITS') {
+        addToast('Nicht genug Credits. Kaufe Credits oder nutze BYOK.', 'error', { actionLabel: 'Credits kaufen', onAction: handleBuyCredits });
+      } else if (code === 'PAID_REQUIRED') {
+        addToast('Die Analyse ist kostenlos. Für die Klausur brauchst du Credits oder BYOK.', 'error', { actionLabel: 'Credits kaufen', onAction: handleBuyCredits });
+      } else if (code === 'UNAUTHENTICATED') {
+        addToast('Bitte melde dich mit deinem ExamDraft-Konto an.', 'error', { actionLabel: 'Anmelden', onAction: () => setShowAccountSetup(true) });
       } else {
         showError(code);
       }
@@ -212,8 +378,15 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     excludedTopics?: string[]
   ) {
     if (!state.analysisResult) return;
-    if (!state.apiKey) { setShowKeySetup(true); return; }
+    if (state.provider === 'examdraft' && !account.user) { setShowAccountSetup(true); return; }
+    if (state.provider !== 'examdraft' && !state.apiKey) { setShowKeySetup(true); return; }
 
+    trackEvent('generation_started', {
+      mode,
+      difficulty,
+      provider: state.provider,
+      selectedTypeId: typeId ?? null,
+    });
     setState((s) => ({
       ...s,
       isLoading: true,
@@ -232,6 +405,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         difficulty,
         selectedTypeId: typeId,
         excludedTopics,
+        improvementConsent: state.improvementConsent,
       });
 
       try {
@@ -249,6 +423,13 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
       if (mode === 'type-training') {
         setShowTypeTrainer(true);
       }
+      trackEvent('generation_success', {
+        mode,
+        difficulty,
+        provider: state.provider,
+        tasks: exam.tasks.length,
+      });
+      if (state.provider === 'examdraft') void refreshAccount();
     } catch (err: unknown) {
       console.error('[ExamDraft] generateExam error:', err);
       const code = err instanceof Error ? err.message : 'API_ERROR';
@@ -262,9 +443,14 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
           'error',
           { actionLabel: 'API-Key hinterlegen', onAction: () => setShowKeySetup(true) }
         );
+      } else if (code === 'NO_CREDITS') {
+        addToast('Keine Credits mehr verfügbar. Nutze BYOK oder lade Credits nach.', 'error', { actionLabel: 'Konto öffnen', onAction: () => setShowAccountSetup(true) });
+      } else if (code === 'UNAUTHENTICATED') {
+        addToast('Bitte melde dich mit deinem ExamDraft-Konto an.', 'error', { actionLabel: 'Anmelden', onAction: () => setShowAccountSetup(true) });
       } else {
         showError(code);
       }
+      trackEvent('generation_failed', { mode, provider: state.provider, code });
       // Stay on Step 4 — show error state there instead of silently reverting
       setState((s) => ({
         ...s,
@@ -294,11 +480,13 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         mode: 'type-training',
         difficulty: state.selectedDifficulty,
         selectedTypeId: state.selectedTypeId,
+        improvementConsent: state.improvementConsent,
       });
       try {
         sessionStorage.setItem('examdraft_session_exam', JSON.stringify(exam));
       } catch { /* storage quota exceeded — ignore */ }
       setState((s) => ({ ...s, generatedExam: exam, error: null }));
+      if (state.provider === 'examdraft') void refreshAccount();
     } catch (err: unknown) {
       const code = err instanceof Error ? err.message : 'API_ERROR';
       showError(code);
@@ -310,7 +498,17 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
   function handleNewAnalysis() {
     sessionStorage.removeItem('examdraft_session_analysis');
     sessionStorage.removeItem('examdraft_session_exam');
-    setState({ ...initialState, apiKey: state.apiKey, provider: state.provider, openrouterModel: state.openrouterModel, openrouterAnalysisModel: state.openrouterAnalysisModel });
+    setState({
+      ...initialState,
+      apiKey: state.apiKey,
+      provider: state.provider,
+      openrouterModel: state.openrouterModel,
+      openrouterAnalysisModel: state.openrouterAnalysisModel,
+      moduleName: state.moduleName,
+      universityName: state.universityName,
+      examDate: state.examDate,
+      targetGrade: state.targetGrade,
+    });
     setExamPendingFiles([]);
     setSlidePendingFiles([]);
     setShowSession(false);
@@ -380,13 +578,14 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
 
   const selectedTypeName =
     state.analysisResult?.taskTypes.find((t) => t.id === state.selectedTypeId)?.name ?? '';
+  const isBlockingAccountSetup = showAccountSetup && !account.user;
 
   async function handleCopyLecturePrompt() {
     try {
       await navigator.clipboard.writeText(lectureSummaryMasterPrompt);
-      addToast('Master-Prompt in die Zwischenablage kopiert.', 'success');
+      addToast(app.promptCopied, 'success');
     } catch {
-      addToast('Zwischenablage konnte nicht beschrieben werden.', 'error');
+      addToast(app.clipboardFailed, 'error');
     }
   }
 
@@ -394,31 +593,49 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
-      {showKeySetup && (
+      {!isInitialized && <AppBootScreen locale={locale} />}
+
+      {isInitialized && showAccountSetup && (
+        <AccountSetup
+          account={account}
+          mode={account.user ? 'drawer' : 'fullscreen'}
+          onRefresh={refreshAccount}
+          onUseAccount={useAccountProvider}
+          onUseByok={openByokSetup}
+          activeProvider={state.provider}
+          onClose={account.user ? () => setShowAccountSetup(false) : undefined}
+          locale={locale}
+        />
+      )}
+
+      {isInitialized && showKeySetup && (
         <ApiKeySetup
-          mode={state.apiKey ? 'drawer' : 'fullscreen'}
+          mode={state.provider !== 'examdraft' && state.apiKey ? 'drawer' : 'fullscreen'}
           onSaved={(provider, key, model, analysisModel) => {
+            localStorage.setItem('examdraft_provider', provider);
             setState((s) => ({ ...s, apiKey: key, provider, openrouterModel: model, openrouterAnalysisModel: analysisModel }));
             setShowKeySetup(false);
           }}
-          onClose={state.apiKey ? () => setShowKeySetup(false) : undefined}
+          onClose={() => setShowKeySetup(false)}
         />
       )}
 
-      {showSession && state.generatedExam && (
-        <ExamSession
-          exam={state.generatedExam}
-          onClose={() => setShowSession(false)}
-          onNewExam={() => { setShowSession(false); handleNewExam(); }}
-        />
+      {isInitialized && showSession && state.generatedExam && (
+        <Suspense fallback={<FeatureFallback locale={locale} />}>
+          <ExamSession
+            exam={state.generatedExam}
+            onClose={() => setShowSession(false)}
+            onNewExam={() => { setShowSession(false); handleNewExam(); }}
+          />
+        </Suspense>
       )}
 
-      {!showSession && (
+      {isInitialized && !showSession && !isBlockingAccountSetup && (
         <div className="app-shell">
           {/* Header */}
           <header className="app-header sticky top-0 z-40 flex items-center justify-between px-4">
             <div className="flex items-center gap-2.5">
-              <a href="/" className="flex items-center gap-2.5 hover:opacity-75 transition-opacity">
+              <a href={locale === 'en' ? '/en' : '/'} className="flex items-center gap-2.5 hover:opacity-75 transition-opacity">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 shrink-0">
                   <rect width="32" height="32" rx="7" fill="#111111"/>
                   <rect x="8" y="8"    width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
@@ -428,22 +645,32 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                 <span className="text-[#111111] font-bold text-lg">ExamDraft</span>
               </a>
               <span className="text-[#7d7785] text-xs hidden sm:inline">
-                Lerne klüger. Übe smarter. Bestehe sicher.
+                {copy.tagline}
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={locale === 'en' ? '/app?lang=de' : '/en/app'}
+                className="app-pill-button px-3 py-1 text-xs transition-all"
+              >
+                {locale === 'en' ? 'DE' : 'EN'}
+              </a>
             <button
-              onClick={() => setShowKeySetup(true)}
+              onClick={() => setShowAccountSetup(true)}
               className="app-pill-button flex items-center gap-2 px-3 py-1 text-xs transition-all"
             >
               <span
-                className={`w-2 h-2 rounded-full ${state.apiKey ? 'bg-green-500' : 'bg-red-500'}`}
+                className={`w-2 h-2 rounded-full ${state.provider === 'examdraft' ? account.user ? 'bg-green-500' : 'bg-red-500' : state.apiKey ? 'bg-green-500' : 'bg-red-500'}`}
               />
-              <span className={state.apiKey ? 'text-green-700' : 'text-red-600'}>
-                {state.apiKey
+              <span className={state.provider === 'examdraft' ? account.user ? 'text-green-700' : 'text-red-600' : state.apiKey ? 'text-green-700' : 'text-red-600'}>
+                {state.provider === 'examdraft'
+                  ? account.user ? `${account.credits} Credits` : app.signIn
+                  : state.apiKey
                   ? state.provider === 'openrouter' ? 'OpenRouter' : 'Anthropic'
-                  : 'Kein Key'}
+                  : app.noKey}
               </span>
             </button>
+            </div>
           </header>
 
           {/* Step indicator */}
@@ -451,7 +678,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
             <div className="app-stepbar">
               <div className="max-w-5xl mx-auto px-4 py-3">
                 <div className="flex items-center gap-2 text-xs">
-                  {(['Upload', 'Analyse', 'Konfiguration', 'Klausur'] as const).map((label, i) => {
+                  {app.steps.map((label, i) => {
                     const stepNum = (i + 1) as AppStep;
                     const active = state.currentStep === stepNum;
                     const done = state.currentStep > stepNum;
@@ -486,29 +713,79 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
             {state.currentStep === 1 && (
               <div className="space-y-6 animate-slide-up">
                 <div>
-                  <h1 className="text-3xl font-semibold text-[#111111] mb-1">Klausuren hochladen</h1>
+                  <h1 className="text-3xl font-semibold text-[#111111] mb-1">{app.uploadTitle}</h1>
                   <p className="text-sm text-[#6f6a78]">
-                    Lade deine Altklausuren hoch. Vorlesungskontext ist standardmäßig aktiv, weil er die Themenwahl meist deutlich verbessert.
+                    {app.uploadSubtitle}
                   </p>
+                </div>
+
+                <div className="app-surface rounded-[1.6rem] p-5">
+                  <div className="mb-4">
+                    <h2 className="text-sm font-medium text-[#3c3943]">{app.moduleContext}</h2>
+                    <p className="mt-1 text-xs text-[#7d7785]">{app.moduleContextHint}</p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs text-[#7d7785]">{app.moduleName}</span>
+                      <input
+                        value={state.moduleName}
+                        onChange={(e) => setState((s) => ({ ...s, moduleName: e.target.value }))}
+                        placeholder={app.modulePlaceholder}
+                        className="w-full rounded-xl border border-[#ddd7cd] bg-[#fcfbf8] px-3 py-2.5 text-sm text-[#19161d] outline-none transition-colors focus:border-[#6b8dff]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs text-[#7d7785]">{app.universityName}</span>
+                      <input
+                        value={state.universityName}
+                        onChange={(e) => setState((s) => ({ ...s, universityName: e.target.value }))}
+                        placeholder={app.universityPlaceholder}
+                        className="w-full rounded-xl border border-[#ddd7cd] bg-[#fcfbf8] px-3 py-2.5 text-sm text-[#19161d] outline-none transition-colors focus:border-[#6b8dff]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs text-[#7d7785]">{app.examDate}</span>
+                      <input
+                        type="date"
+                        value={state.examDate}
+                        onChange={(e) => setState((s) => ({ ...s, examDate: e.target.value }))}
+                        className="w-full rounded-xl border border-[#ddd7cd] bg-[#fcfbf8] px-3 py-2.5 text-sm text-[#19161d] outline-none transition-colors focus:border-[#6b8dff]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs text-[#7d7785]">{app.targetGrade}</span>
+                      <input
+                        value={state.targetGrade}
+                        onChange={(e) => setState((s) => ({ ...s, targetGrade: e.target.value }))}
+                        placeholder={app.targetGradePlaceholder}
+                        className="w-full rounded-xl border border-[#ddd7cd] bg-[#fcfbf8] px-3 py-2.5 text-sm text-[#19161d] outline-none transition-colors focus:border-[#6b8dff]"
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <h2 className="text-sm font-medium text-[#3c3943]">Altklausuren</h2>
+                      <h2 className="text-sm font-medium text-[#3c3943]">{app.oldExams}</h2>
                       <span className="text-red-500 text-xs">*</span>
                     </div>
                     <UploadZone
                       type="exam"
                       files={examPendingFiles}
-                      onFilesChange={setExamPendingFiles}
+                      onFilesChange={(files) => {
+                        if (examPendingFiles.length === 0 && files.length > 0) {
+                          trackEvent('upload_started', { type: 'exam', count: files.length });
+                        }
+                        setExamPendingFiles(files);
+                      }}
                       maxFiles={10}
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-sm font-medium text-[#3c3943]">Vorlesungskontext</h2>
+                      <h2 className="text-sm font-medium text-[#3c3943]">{app.lectureContext}</h2>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <div
                           onClick={() =>
@@ -524,7 +801,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                             }`}
                           />
                         </div>
-                        <span className="text-xs text-[#7d7785]">Kontext einbeziehen</span>
+                        <span className="text-xs text-[#7d7785]">{app.includeContext}</span>
                       </label>
                     </div>
                     {state.includeSlides && (
@@ -537,7 +814,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                               : 'text-[#6f6a78] hover:text-[#19161d]'
                           }`}
                         >
-                          Themen-Zusammenfassung
+                          {app.topicSummary}
                         </button>
                         <button
                           onClick={() => setState((s) => ({ ...s, lectureContextMode: 'pdfs' }))}
@@ -547,7 +824,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                               : 'text-[#6f6a78] hover:text-[#19161d]'
                           }`}
                         >
-                          Folien-PDFs
+                          {app.slidePdfs}
                         </button>
                       </div>
                     )}
@@ -555,36 +832,36 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                     {state.includeSlides && state.lectureContextMode === 'summary' ? (
                       <div className="app-surface rounded-[1.4rem] p-4">
                         <p className="text-sm text-[#4a4651] mb-2">
-                          Empfohlener Standard-Flow: Kopiere den Master-Prompt, füge ihn zusammen mit deinen Vorlesungsfolien in einen LLM-Chat ein und kopiere die kompakte Themen-Zusammenfassung hier zurück hinein.
+                          {app.summaryFlow}
                         </p>
                         <div className="mb-4 space-y-2 rounded-[1.1rem] bg-[#f8f4ee] p-4">
-                          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#7b7685]">Anleitung</p>
-                          <p className="text-sm text-[#4a4651]">1. `Master-Prompt kopieren` klicken</p>
-                          <p className="text-sm text-[#4a4651]">2. Prompt plus Vorlesungsfolien in einen LLM-Chat einfügen</p>
-                          <p className="text-sm text-[#4a4651]">3. Die kompakte Antwort unten einfügen</p>
+                          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#7b7685]">{app.instructions}</p>
+                          <p className="text-sm text-[#4a4651]">1. {app.copyPrompt}</p>
+                          <p className="text-sm text-[#4a4651]">2. {locale === 'en' ? 'Paste prompt plus lecture slides into an LLM chat' : 'Prompt plus Vorlesungsfolien in einen LLM-Chat einfügen'}</p>
+                          <p className="text-sm text-[#4a4651]">3. {locale === 'en' ? 'Paste the compact answer below' : 'Die kompakte Antwort unten einfügen'}</p>
                           <button
                             type="button"
                             onClick={handleCopyLecturePrompt}
                             className="app-secondary-btn mt-2 w-full rounded-xl px-4 py-2 text-sm transition-all duration-200"
                           >
-                            Master-Prompt kopieren
+                            {app.copyPrompt}
                           </button>
                         </div>
                         <textarea
                           value={state.lectureContextText}
                           onChange={(e) => setState((s) => ({ ...s, lectureContextText: e.target.value }))}
-                          placeholder="Beispiel: Fourier-Reihen, Abtasttheorem, Filterentwurf, Frequenzgang, Bode-Diagramme, Laplace-Transformation, typische Herleitungen und Standardannahmen ..."
+                          placeholder={app.summaryPlaceholder}
                           className="w-full min-h-[12rem] rounded-[1.1rem] border border-[#ddd7cd] bg-[#fcfbf8] px-4 py-3 text-sm leading-7 text-[#2b2830] placeholder:text-[#9b95a2] outline-none focus:border-[#6b8dff]"
                         />
                         <p className="text-xs text-[#8b8593] mt-2">
-                          Spart Tokens und reicht oft aus, wenn die relevanten Themen sauber zusammengefasst sind.
+                          {app.summaryHint}
                         </p>
                         <button
                           type="button"
                           onClick={() => setState((s) => ({ ...s, lectureContextMode: 'pdfs' }))}
                           className="app-secondary-btn mt-4 w-full rounded-xl px-4 py-2 text-sm transition-all duration-200"
                         >
-                          Stattdessen Folien-PDFs hochladen
+                          {app.uploadSlidesInstead}
                         </button>
                       </div>
                     ) : (
@@ -592,12 +869,17 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                         <UploadZone
                           type="slides"
                           files={slidePendingFiles}
-                          onFilesChange={setSlidePendingFiles}
+                          onFilesChange={(files) => {
+                            if (slidePendingFiles.length === 0 && files.length > 0) {
+                              trackEvent('upload_started', { type: 'slides', count: files.length });
+                            }
+                            setSlidePendingFiles(files);
+                          }}
                           disabled={!state.includeSlides}
                           maxFiles={20}
                         />
                         <p className="text-xs text-[#908997] mt-2">
-                          Alternative: PDFs hochladen, wenn konkrete Formulierungen oder Folienstruktur wichtig sind.
+                          {app.slideAlternative}
                         </p>
                       </>
                     )}
@@ -616,6 +898,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                     provider={state.provider}
                     analysisModel={state.openrouterAnalysisModel}
                     generationModel={state.openrouterModel}
+                    locale={locale}
                   />
                 )}
 
@@ -623,13 +906,17 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                   <ConsentCheckbox
                     consentGiven={state.consentGiven}
                     rightsConfirmed={state.rightsConfirmed}
+                    improvementConsent={state.improvementConsent}
                     onConsentChange={(v) => setState((s) => ({ ...s, consentGiven: v }))}
                     onRightsChange={(v) => setState((s) => ({ ...s, rightsConfirmed: v }))}
+                    onImprovementConsentChange={(v) => setState((s) => ({ ...s, improvementConsent: v }))}
+                    locale={locale}
                   />
                 </div>
 
                 <button
                   onClick={() => {
+                    trackEvent('demo_opened');
                     setState((s) => ({
                       ...s,
                       analysisResult: DEMO_ANALYSIS,
@@ -639,7 +926,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                   }}
                   className="app-secondary-btn w-full px-4 py-2 text-sm transition-all duration-200"
                 >
-                  🎭 Demo laden (kein API-Call)
+                  {app.demo}
                 </button>
 
                 <button
@@ -653,7 +940,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                       {state.loadingMessage}
                     </>
                   ) : (
-                    'Klausuren analysieren →'
+                    app.analyze
                   )}
                 </button>
               </div>
@@ -661,30 +948,39 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
 
             {/* Step 2: Analysis */}
             {state.currentStep === 2 && (
-              <AnalysisDashboard
-                isLoading={state.isLoading}
-                result={state.analysisResult}
-                examCount={examPendingFiles.length}
-                slideCount={slidePendingFiles.length}
-                imageFilesCount={examImageCount}
-                onContinue={() => setStep(3)}
-              />
+              <Suspense fallback={<FeatureFallback locale={locale} />}>
+                <AnalysisDashboard
+                  isLoading={state.isLoading}
+                  result={state.analysisResult}
+                  examCount={examPendingFiles.length}
+                  slideCount={slidePendingFiles.length}
+                  imageFilesCount={examImageCount}
+                  onContinue={() => setStep(3)}
+                />
+              </Suspense>
             )}
 
             {/* Step 3: Configuration */}
             {state.currentStep === 3 && state.analysisResult && (
-              <ExamConfigurator
-                analysis={state.analysisResult}
-                onGenerate={handleGenerate}
-                isLoading={state.isLoading}
-                provider={state.provider}
-                generationModel={state.openrouterModel}
-              />
+              <Suspense fallback={<FeatureFallback locale={locale} />}>
+                <ExamConfigurator
+                  analysis={state.analysisResult}
+                  onGenerate={handleGenerate}
+                  isLoading={state.isLoading}
+                  provider={state.provider}
+                  generationModel={state.openrouterModel}
+                  credits={account.credits}
+                  accountPlan={account.plan}
+                  onBuyCredits={handleBuyCredits}
+                  onUseByok={openByokSetup}
+                  locale={locale}
+                />
+              </Suspense>
             )}
 
             {/* Step 4: Generated exam */}
             {state.currentStep === 4 && (
-              <>
+              <Suspense fallback={<FeatureFallback locale={locale} />}>
                 {showTypeTrainer && state.generatedExam ? (
                   <TypeTrainer
                     exam={state.generatedExam}
@@ -704,7 +1000,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                     onRetry={handleRetry}
                   />
                 )}
-              </>
+              </Suspense>
             )}
           </main>
         </div>

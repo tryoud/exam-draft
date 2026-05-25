@@ -1,5 +1,6 @@
 ---
 import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
 ---
 
 <!doctype html>
@@ -13,6 +14,7 @@ import '../../styles/global.css';
     />
     <title>Terms — ExamDraft</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
   </head>
   <body class="legal-body overflow-x-hidden">
     <div class="legal-shell">
@@ -137,15 +139,16 @@ import '../../styles/global.css';
 
           <section class="grid gap-4 lg:grid-cols-2">
             <article class="legal-card rounded-[1.7rem] p-6">
-              <p class="legal-kicker">4. Bring Your Own Key</p>
+              <p class="legal-kicker">4. ExamDraft credits and Bring Your Own Key</p>
               <div class="legal-copy mt-4 space-y-4 text-sm">
                 <p>
-                  ExamDraft works with your own provider key. That means you choose the provider
-                  and you bear the resulting API costs yourself.
+                  ExamDraft can be used with an account and credits. New accounts may receive a
+                  free starter balance. Credits are not a promise of unlimited usage and may be
+                  limited by technical limits, abuse prevention, or provider failures.
                 </p>
                 <p>
-                  ExamDraft does not provide bundled model credits, its own token quota, or a
-                  flat-rate model usage plan.
+                  Alternatively, you can use your own API keys in Advanced mode. In that case, you
+                  choose the provider and bear the resulting API costs yourself.
                 </p>
               </div>
             </article>
