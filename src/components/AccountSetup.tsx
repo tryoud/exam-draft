@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AccountState, Provider } from '../lib/types';
-import { logoutAccount, startCheckout, startMagicLink } from '../lib/account';
+import { logoutAccount, startCheckout } from '../lib/account';
 import { showToast } from './Toast';
 import type { Locale } from '../lib/i18n';
 import { appCopy } from '../lib/i18n';
@@ -15,10 +15,6 @@ interface AccountSetupProps {
   onUseAccount: () => void;
   activeProvider: Provider;
   locale?: Locale;
-}
-
-function authErrorMessage(code: string, locale: Locale) {
-  return appCopy[locale].account.errors[code as keyof typeof appCopy.de.account.errors] ?? code;
 }
 
 function checkoutErrorMessage(code: string, locale: Locale) {
@@ -65,33 +61,7 @@ export default function AccountSetup({
 }: AccountSetupProps) {
   const copy = appCopy[locale].account;
   const tagline = appCopy[locale].tagline;
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const [devLink, setDevLink] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  async function handleStart() {
-    setError('');
-    setDevLink(null);
-    const trimmed = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setError(copy.invalidEmail);
-      return;
-    }
-    setLoading(true);
-    try {
-      trackEvent('auth_started');
-      const result = await startMagicLink(trimmed, locale);
-      setSent(true);
-      setDevLink(result.devLink ?? null);
-      showToast(copy.sent, 'success');
-    } catch (err) {
-      setError(err instanceof Error ? authErrorMessage(err.message, locale) : 'Login link could not be sent.');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleLogout() {
     setLoading(true);
@@ -168,40 +138,25 @@ export default function AccountSetup({
         </>
       ) : (
         <>
-          <p className="text-sm text-[#5d5866] mb-4">
-            {copy.intro}
-          </p>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setError(''); }}
-            onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-            placeholder={copy.placeholder}
-            className="w-full bg-[#fcfbf8] border border-[#ddd7cd] focus:border-[#6b8dff] focus:outline-none rounded-xl px-3 py-2.5 text-[#19161d] text-sm transition-colors"
-          />
-          {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
-          {sent && (
-            <div className="mt-3 rounded-xl border border-[#d9e3ff] bg-[#eef2ff] p-3 text-xs text-[#4f5f92]">
-              {copy.sent}
-              {devLink && (
-                <a className="block mt-2 text-[#2f5bd2] underline break-all" href={devLink}>
-                  {copy.devLink}
-                </a>
-              )}
-            </div>
-          )}
-          <button
-            onClick={handleStart}
-            disabled={loading}
-            className="app-primary-btn w-full mt-4 disabled:opacity-60 px-4 py-2.5 rounded-xl font-medium transition-all"
+          <div
+            role="alert"
+            className="rounded-2xl border border-[#f0d9a5] bg-[#fff7df] p-4 text-[#5c4512] shadow-sm"
           >
-            {loading ? copy.sending : copy.send}
-          </button>
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#ffe8a8] text-sm font-bold text-[#8a5a00]">
+                !
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-[#3f2f0c]">{copy.signInUnavailableTitle}</h3>
+                <p className="mt-1 text-sm leading-6">{copy.signInUnavailableText}</p>
+              </div>
+            </div>
+          </div>
           <button
             onClick={onUseByok}
-            className="app-secondary-btn w-full mt-3 rounded-xl px-4 py-2.5 text-sm transition-all"
+            className="app-primary-btn w-full mt-4 rounded-xl px-4 py-2.5 font-medium transition-all"
           >
-            {copy.useByok}
+            {copy.signInUnavailableAction}
           </button>
         </>
       )}
