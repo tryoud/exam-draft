@@ -61,6 +61,10 @@ const cards = [
     </script>
     <div class="editorial-shell">
       <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="w-full bg-[#fef9ec] border-b border-[#f0e4b0] text-center px-4 py-1.5 text-xs leading-5 text-[#7a6320]">
+          <span class="font-medium">Beta:</span> Still in development — send feedback to
+          <a href="mailto:nikolas.maerker@gmx.de" class="inline-block break-all underline font-medium ml-1 hover:text-[#5a4710]">nikolas.maerker@gmx.de</a>
+        </div>
         <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
           <div class="flex items-center gap-3 scroll-fade-right" data-reveal>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
@@ -84,7 +88,7 @@ const cards = [
           <div class="flex items-center gap-3">
             <a href="/" class="secondary-link px-4 py-2 text-xs">DE</a>
             <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">EN</span>
-            <a href="/en/app" class="primary-link scroll-reveal px-5 py-3 text-sm" data-reveal style="--reveal-delay:120ms">
+            <a href="/en/app" class="primary-link scroll-reveal hidden px-5 py-3 text-sm sm:inline-flex" data-reveal style="--reveal-delay:120ms">
               Open app
               <span aria-hidden="true">→</span>
             </a>
@@ -102,7 +106,7 @@ const cards = [
                 </div>
 
                 <div class="space-y-6">
-                  <h1 class="display-title scroll-reveal text-[3.8rem] leading-[0.9] sm:text-[5.8rem] lg:text-[7rem]" data-reveal style="--reveal-delay:80ms">
+                  <h1 class="display-title scroll-reveal w-[calc(100vw-2.5rem)] max-w-none text-[2.55rem] leading-[0.94] sm:w-auto sm:max-w-full sm:text-[5.8rem] lg:text-[7rem]" data-reveal style="--reveal-delay:80ms">
                     BEHIND EVERY
                     <br />
                     QUESTION
@@ -111,12 +115,12 @@ const cards = [
                     </span>
                   </h1>
 
-                  <p class="scroll-reveal max-w-xl text-lg leading-8 muted-copy sm:text-xl" data-reveal style="--reveal-delay:180ms">
+                  <p class="scroll-reveal w-[calc(100vw-2.5rem)] max-w-none text-lg leading-8 muted-copy sm:max-w-xl sm:text-xl" data-reveal style="--reveal-delay:180ms">
                     ExamDraft is not about memorizing one past exam. It is about understanding
                     how exams in this subject are constructed: recurring task types, patterns,
                     weightings, and the kinds of reasoning they expect.
                   </p>
-                  <div class="scroll-reveal flex flex-col gap-3 sm:flex-row" data-reveal style="--reveal-delay:240ms">
+                  <div class="scroll-reveal flex w-[calc(100vw-2.5rem)] max-w-none flex-col gap-3 sm:w-auto sm:flex-row" data-reveal style="--reveal-delay:240ms">
                     <a href="/en/app" class="primary-link px-5 py-3 text-sm">
                       Start free
                       <span aria-hidden="true">→</span>

@@ -16,6 +16,11 @@ import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
       const params = new URLSearchParams(window.location.search);
       if (params.get('lang') === 'de') {
         localStorage.setItem('examdraft_locale', 'de');
+      } else if (params.get('lang') === 'en') {
+        localStorage.setItem('examdraft_locale', 'en');
+        params.delete('lang');
+        const query = params.toString();
+        window.location.replace(`/en/app${query ? `?${query}` : ''}${window.location.hash}`);
       } else if (localStorage.getItem('examdraft_locale') === 'en') {
         window.location.replace(`/en/app${window.location.search}${window.location.hash}`);
       }

@@ -30,6 +30,29 @@ function checkoutErrorMessage(code: string, locale: Locale) {
   return locale === 'en' ? 'Checkout could not be started.' : 'Checkout konnte nicht gestartet werden.';
 }
 
+function LanguageSwitch({ locale }: { locale: Locale }) {
+  return (
+    <div className="app-language-switch mx-auto mt-5" aria-label={locale === 'en' ? 'Language selection' : 'Sprachauswahl'}>
+      <a
+        href="/app?lang=de"
+        onClick={() => localStorage.setItem('examdraft_locale', 'de')}
+        className={`app-language-option ${locale === 'de' ? 'is-active' : ''}`}
+        aria-current={locale === 'de' ? 'true' : undefined}
+      >
+        DE
+      </a>
+      <a
+        href="/en/app"
+        onClick={() => localStorage.setItem('examdraft_locale', 'en')}
+        className={`app-language-option ${locale === 'en' ? 'is-active' : ''}`}
+        aria-current={locale === 'en' ? 'true' : undefined}
+      >
+        EN
+      </a>
+    </div>
+  );
+}
+
 export default function AccountSetup({
   account,
   mode,
@@ -97,7 +120,7 @@ export default function AccountSetup({
   }
 
   const card = (
-    <div className="app-surface rounded-[1.8rem] p-8 w-full max-w-md mx-auto">
+    <div className="app-surface auth-shell-card rounded-[1.8rem] p-6 sm:p-8 mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl bg-[#eef2ff] flex items-center justify-center text-[#2f5bd2] text-xl border border-[#d9e3ff]">
           ↗
@@ -196,11 +219,12 @@ export default function AccountSetup({
 
   if (mode === 'fullscreen') {
     return (
-      <div className="fixed inset-0 z-50 app-body flex items-center justify-center px-4 py-16 overflow-y-auto">
-        <div className="w-full max-w-md">
+      <div className="fixed inset-0 z-50 app-body flex w-screen max-w-[100vw] items-center justify-center overflow-x-hidden overflow-y-auto px-4 py-16">
+        <div className="auth-shell-card">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#111111] mb-2">ExamDraft</h1>
-            <p className="text-[#7d7785] text-sm">{tagline}</p>
+            <p className="mx-auto max-w-xs px-2 text-[#7d7785] text-sm leading-6">{tagline}</p>
+            <LanguageSwitch locale={locale} />
           </div>
           {card}
         </div>

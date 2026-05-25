@@ -656,29 +656,40 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                 {copy.tagline}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={locale === 'en' ? '/app?lang=de' : '/en/app'}
-                onClick={() => localStorage.setItem('examdraft_locale', locale === 'en' ? 'de' : 'en')}
-                className="app-pill-button px-3 py-1 text-xs transition-all"
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="app-language-switch" aria-label={locale === 'en' ? 'Language selection' : 'Sprachauswahl'}>
+                <a
+                  href="/app?lang=de"
+                  onClick={() => localStorage.setItem('examdraft_locale', 'de')}
+                  className={`app-language-option ${locale === 'de' ? 'is-active' : ''}`}
+                  aria-current={locale === 'de' ? 'true' : undefined}
+                >
+                  DE
+                </a>
+                <a
+                  href="/en/app"
+                  onClick={() => localStorage.setItem('examdraft_locale', 'en')}
+                  className={`app-language-option ${locale === 'en' ? 'is-active' : ''}`}
+                  aria-current={locale === 'en' ? 'true' : undefined}
+                >
+                  EN
+                </a>
+              </div>
+              <button
+                onClick={() => setShowAccountSetup(true)}
+                className="app-pill-button flex items-center gap-2 px-3 py-1 text-xs transition-all"
               >
-                {locale === 'en' ? 'DE' : 'EN'}
-              </a>
-            <button
-              onClick={() => setShowAccountSetup(true)}
-              className="app-pill-button flex items-center gap-2 px-3 py-1 text-xs transition-all"
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${state.provider === 'examdraft' ? account.user ? 'bg-green-500' : 'bg-red-500' : state.apiKey ? 'bg-green-500' : 'bg-red-500'}`}
-              />
-              <span className={state.provider === 'examdraft' ? account.user ? 'text-green-700' : 'text-red-600' : state.apiKey ? 'text-green-700' : 'text-red-600'}>
-                {state.provider === 'examdraft'
-                  ? account.user ? `${account.credits} Credits` : app.signIn
-                  : state.apiKey
-                  ? state.provider === 'openrouter' ? 'OpenRouter' : 'Anthropic'
-                  : app.noKey}
-              </span>
-            </button>
+                <span
+                  className={`w-2 h-2 rounded-full ${state.provider === 'examdraft' ? account.user ? 'bg-green-500' : 'bg-red-500' : state.apiKey ? 'bg-green-500' : 'bg-red-500'}`}
+                />
+                <span className={state.provider === 'examdraft' ? account.user ? 'text-green-700' : 'text-red-600' : state.apiKey ? 'text-green-700' : 'text-red-600'}>
+                  {state.provider === 'examdraft'
+                    ? account.user ? `${account.credits} Credits` : app.signIn
+                    : state.apiKey
+                    ? state.provider === 'openrouter' ? 'OpenRouter' : 'Anthropic'
+                    : app.noKey}
+                </span>
+              </button>
             </div>
           </header>
 
