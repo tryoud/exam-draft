@@ -136,6 +136,71 @@ function repairTruncatedJSON(text: string): string {
   return current;
 }
 
+function escapeControlCharsInsideJsonStrings(text: string): string {
+  let out = '';
+  let inString = false;
+  let escape = false;
+
+  for (const ch of text) {
+    if (escape) {
+      out += ch;
+      escape = false;
+      continue;
+    }
+
+    if (ch === '\\' && inString) {
+      out += ch;
+      escape = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      out += ch;
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      if (ch === '\n') {
+        out += '\\n';
+        continue;
+      }
+      if (ch === '\r') {
+        out += '\\r';
+        continue;
+      }
+      if (ch === '\t') {
+        out += '\\t';
+        continue;
+      }
+    }
+
+    out += ch;
+  }
+
+  return out;
+}
+
+function parseJsonWithRepair(json: string, label: string): unknown {
+  const candidates = [
+    json,
+    escapeControlCharsInsideJsonStrings(json),
+    repairTruncatedJSON(escapeControlCharsInsideJsonStrings(json)).replace(/,(\s*[}\]])/g, '$1'),
+  ];
+
+  let lastError: unknown;
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  console.error(`[ExamDraft] ${label} JSON.parse failed:`, json, lastError);
+  throw new Error('JSON_PARSE_ERROR');
+}
+
 /**
  * Extracts a JSON object from a model response that may contain:
  * - Markdown code fences (```json ... ```, ```JSON ...```, etc.)
@@ -592,13 +657,7 @@ Gib NUR dieses JSON zurück (kein Markdown, kein Text davor/danach):
 
   console.log('[ExamDraft] analyzeExams raw response (first 500 chars):', json.slice(0, 500));
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json);
-  } catch {
-    console.error('[ExamDraft] JSON.parse failed. Raw response:', json);
-    throw new Error('JSON_PARSE_ERROR');
-  }
+  const parsed = parseJsonWithRepair(json, 'analyzeExams');
 
   try {
     return validateAnalysisResult(
@@ -656,13 +715,7 @@ function parseAndLog<T>(
   validate: (d: unknown) => T
 ): T {
   console.log(`[ExamDraft] ${label} raw (first 400 chars):`, json.slice(0, 400));
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json);
-  } catch {
-    console.error(`[ExamDraft] ${label} JSON.parse failed:`, json);
-    throw new Error('JSON_PARSE_ERROR');
-  }
+  const parsed = parseJsonWithRepair(json, label);
   try {
     return validate(parsed);
   } catch {
@@ -878,7 +931,7 @@ ${taskSchema}`;
   // Regular solutions can be very long (full Rechenweg + keyPoints + commonMistakes),
   // so keep batches small (≤3) to avoid hitting output-token limits and losing
   // solutions for later tasks due to JSON truncation.
-  const SOLUTION_BATCH_SIZE   = mc ? 20 : 2;
+  const SOLUTION_BATCH_SIZE   = mc ? 20 : 1;
   const SOLUTION_BATCH_TOKENS = mc ? 3000 : 8000;
   const solutionBatches = chunkArray(allTasks, SOLUTION_BATCH_SIZE);
 
@@ -901,6 +954,11 @@ ${taskSchema}`;
 
 FACH: ${input.analysis.subject}
 AUFGABEN: ${JSON.stringify(taskSummary)}
+
+JSON-REGELN:
+- Gib ausschließlich gültiges JSON zurück.
+- Escape Zeilenumbrüche innerhalb von Stringwerten als \\n. Keine rohen Zeilenumbrüche in Strings.
+- Keine Markdown-Codeblöcke mit Triple-Backticks innerhalb von Stringwerten.
 
 ANFORDERUNGEN:
 - solution: Vollständiger Lösungsweg mit ALLEN Rechenschritten, Begründungen und Zwischenergebnissen. Keine Abkürzungen. Auf Deutsch.
