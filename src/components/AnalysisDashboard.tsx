@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { AnalysisResult, TaskType } from '../lib/types';
+import type { AnalysisResult, TaskType, TopicLikelihood, RiskGap } from '../lib/types';
 
 const LOADING_MESSAGES = [
   'Extrahiere Text aus PDFs...',
@@ -17,6 +17,8 @@ interface AnalysisDashboardProps {
   slideCount: number;
   imageFilesCount: number;
   onContinue: () => void;
+  onExamSprint?: () => void;
+  initialExamDate?: string;
 }
 
 function StarRating({ value }: { value: number }) {
@@ -108,6 +110,7 @@ export default function AnalysisDashboard({
   slideCount,
   imageFilesCount,
   onContinue,
+  onExamSprint,
 }: AnalysisDashboardProps) {
   const [msgIndex, setMsgIndex] = useState(0);
 
@@ -176,22 +179,45 @@ export default function AnalysisDashboard({
   const sortedByPoints = [...result.taskTypes].sort((a, b) => b.avgPoints - a.avgPoints);
   const topLikely = sortedByFrequency.slice(0, 3);
   const highValue = sortedByPoints[0];
-  const confidence = Math.min(95, Math.max(35, result.examCount * 18 + (result.hasSlideContext ? 10 : 0) + Math.min(result.totalTaskTypes, 6) * 4));
-  const coverageLabel = result.examCount >= 4
-    ? 'stark'
-    : result.examCount >= 2
-    ? 'solide'
-    : 'niedrig';
+
+  // Use LLM-supplied scores when available, fall back to computed values
+  const computedConfidence = Math.min(95, Math.max(35, result.examCount * 18 + (result.hasSlideContext ? 10 : 0) + Math.min(result.totalTaskTypes, 6) * 4));
+  const confidence = result.confidenceScore ?? computedConfidence;
+  const coverageScore = result.coverageScore;
+  const coverageLabel = confidence >= 75 ? 'hoch' : confidence >= 55 ? 'solide' : 'niedrig';
   const coverageText = result.examCount >= 4
     ? 'Mehrere Altklausuren geben eine robuste Struktur.'
     : result.examCount >= 2
     ? 'Genug Material für erste Muster, aber weitere Jahrgänge würden die Sicherheit erhöhen.'
     : 'Nur eine Klausur: Nutze die Analyse als Orientierung, nicht als Prognose.';
-  const nextActions = [
+
+  const computedNextActions = [
     highValue ? `${highValue.name} zuerst üben: hoher Punktehebel (${highValue.avgPoints} Pkt).` : '',
     topLikely[0] ? `${topLikely[0].name} kommt im Material am häufigsten vor (${topLikely[0].frequency}%).` : '',
     result.hasSlideContext ? 'Vorlesungskontext ist einbezogen: gleiche die Folienthemen mit den Aufgabentypen ab.' : 'Optional Folien-/Themenkontext ergänzen, um neue mögliche Themen besser einzugrenzen.',
   ].filter(Boolean);
+  const nextActions = result.nextBestActions?.length ? result.nextBestActions : computedNextActions;
+
+  const likelihoodColors: Record<TopicLikelihood['likelihood'], string> = {
+    high: 'bg-green-500/10 border-green-500/25 text-green-400',
+    medium: 'bg-blue-500/10 border-blue-500/25 text-blue-400',
+    low: 'bg-[#e4dfd7]/60 border-[#d5d0c6] text-[#8b8593]',
+  };
+  const likelihoodLabel: Record<TopicLikelihood['likelihood'], string> = {
+    high: 'wahrscheinlich',
+    medium: 'möglich',
+    low: 'unsicher',
+  };
+  const severityColors: Record<RiskGap['severity'], string> = {
+    critical: 'bg-red-500/10 border-red-500/25 text-red-400',
+    important: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+    minor: 'bg-[#e4dfd7]/60 border-[#d5d0c6] text-[#8b8593]',
+  };
+  const severityLabel: Record<RiskGap['severity'], string> = {
+    critical: 'kritisch',
+    important: 'wichtig',
+    minor: 'gering',
+  };
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -261,14 +287,80 @@ export default function AnalysisDashboard({
           <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Analysesicherheit</p>
           <div className="mt-4 flex items-end gap-3">
             <p className="text-4xl font-bold tracking-[-0.04em] text-[#111111]">{confidence}%</p>
-            <p className="pb-1 text-sm text-[#6f6a78]">Coverage {coverageLabel}</p>
+            <p className="pb-1 text-sm text-[#6f6a78]">{coverageLabel}</p>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e4dfd7]">
             <div className="h-full rounded-full bg-[#6b8dff]" style={{ width: `${confidence}%` }} />
           </div>
+          {coverageScore !== undefined && (
+            <>
+              <p className="mt-3 text-xs text-[#7b7685]">Materialabdeckung</p>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#e4dfd7]">
+                <div className="h-full rounded-full bg-teal-500" style={{ width: `${coverageScore}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-[#8b8593]">{coverageScore}%</p>
+            </>
+          )}
           <p className="mt-3 text-xs leading-6 text-[#6f6a78]">{coverageText}</p>
+          {result.examCount === 1 && (
+            <p className="mt-2 text-xs text-amber-400">
+              Analyse basiert auf 1 Klausur — Confidence niedrig. Weitere Jahrgänge verbessern die Muster deutlich.
+            </p>
+          )}
         </div>
       </div>
+
+      {result.topicLikelihoods && result.topicLikelihoods.length > 0 && (
+        <div className="app-surface rounded-[1.3rem] p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Was kommt wahrscheinlich dran</p>
+          <div className="mt-4 space-y-2">
+            {result.topicLikelihoods.map((tl) => (
+              <div key={tl.topic} className="flex items-start gap-3">
+                <span className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${likelihoodColors[tl.likelihood]}`}>
+                  {likelihoodLabel[tl.likelihood]}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-[#19161d]">{tl.topic}</p>
+                  <p className="text-xs text-[#8b8593]">{tl.evidenceNote}</p>
+                </div>
+                {tl.pointImpact === 'high' && (
+                  <span className="shrink-0 text-xs text-[#d2a33d]">★ hohe Punkte</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {result.riskGaps && result.riskGaps.length > 0 && (
+        <div className="app-surface rounded-[1.3rem] p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Risky Gaps</p>
+          <div className="mt-4 space-y-2">
+            {result.riskGaps.map((rg) => (
+              <div key={rg.gap} className="flex items-start gap-3">
+                <span className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${severityColors[rg.severity]}`}>
+                  {severityLabel[rg.severity]}
+                </span>
+                <p className="text-sm text-[#3f3a45]">{rg.gap}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {result.recurringPatterns && result.recurringPatterns.length > 0 && (
+        <div className="app-surface rounded-[1.3rem] p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Prüfungsmuster</p>
+          <ul className="mt-4 space-y-2">
+            {result.recurringPatterns.map((pattern) => (
+              <li key={pattern} className="flex items-start gap-2 text-sm text-[#3f3a45]">
+                <span className="mt-1 shrink-0 text-[#6b8dff]">→</span>
+                {pattern}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="app-surface rounded-[1.3rem] p-5">
         <p className="text-xs uppercase tracking-[0.16em] text-[#7b7685]">Was du jetzt tun solltest</p>
@@ -322,12 +414,22 @@ export default function AnalysisDashboard({
         </div>
       )}
 
-      <button
-        onClick={onContinue}
-        className="app-primary-btn w-full px-4 py-3 rounded-xl font-medium transition-all duration-200"
-      >
-        Klausur konfigurieren →
-      </button>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          onClick={onContinue}
+          className="app-primary-btn px-4 py-3 rounded-xl font-medium transition-all duration-200"
+        >
+          Klausur konfigurieren →
+        </button>
+        {onExamSprint && (
+          <button
+            onClick={onExamSprint}
+            className="app-secondary-btn px-4 py-3 rounded-xl font-medium transition-all duration-200"
+          >
+            📅 Exam Sprint erstellen
+          </button>
+        )}
+      </div>
     </div>
   );
 }

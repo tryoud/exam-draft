@@ -1,0 +1,102 @@
+---
+import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
+const title = 'Prüfungsmuster erkennen mit KI — ExamDraft';
+const description = 'Erkenne Prüfungsmuster aus Altklausuren: welche Aufgabentypen kommen immer wieder, was bringt die meisten Punkte, wo liegen Lücken — ExamDraft macht Muster sichtbar.';
+---
+
+<!doctype html>
+<html lang="de" class="landing-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href="https://examdraft.com/de/pruefungsmuster-erkennen" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="landing-body overflow-x-hidden">
+    <div class="editorial-shell">
+      <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-8 w-8 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+          </a>
+          <a href="/app" class="secondary-link text-sm">Kostenlos starten →</a>
+        </div>
+      </nav>
+
+      <main class="px-5 pt-28 pb-24 sm:px-6">
+        <div class="mx-auto max-w-3xl">
+          <p class="editorial-kicker">Prüfungsmuster</p>
+          <h1 class="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl">Prüfungsmuster erkennen — bevor du lernst.</h1>
+          <p class="mt-6 text-lg leading-8 text-[#4e4e4e] max-w-2xl">
+            Viele Studierende lernen den Stoff, ohne das Format zu kennen. ExamDraft zeigt dir,
+            welche Aufgabentypen sich wiederholen, was immer drankam und wo Lücken lauern — damit du
+            gezielt lernst, was tatsächlich geprüft wird.
+          </p>
+          <div class="mt-8">
+            <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-6 py-3 text-sm font-medium inline-block">
+              Muster jetzt erkennen →
+            </a>
+          </div>
+
+          <div class="mt-16 space-y-8">
+            <h2 class="text-2xl font-semibold text-[#111111]">Welche Muster ExamDraft erkennt</h2>
+
+            <div class="space-y-4">
+              {[
+                {
+                  title: 'Dauerbrenner-Aufgabentypen',
+                  body: 'Aufgaben, die in fast jedem Jahrgang vorkommen. ExamDraft berechnet die Auftretenshäufigkeit aus mehreren Klausuren und sortiert nach Prüfungsrelevanz.',
+                },
+                {
+                  title: 'Punktestarke Themen',
+                  body: 'Nicht jedes Thema ist gleich wichtig. ExamDraft zeigt, welche Bereiche die meisten Punkte bringen — und welche trotz Vorlesungsgewicht kaum geprüft werden.',
+                },
+                {
+                  title: 'Schwierigkeitsverteilung',
+                  body: 'Steigt die Schwierigkeit im Laufe der Klausur? Gibt es einen Aufgabentyp, der konsistent schwerer ist als andere? ExamDraft macht diese Muster sichtbar.',
+                },
+                {
+                  title: 'Vorlesungsthemen vs. Klausurthemen',
+                  body: 'Mit Vorlesungskontext erkennt ExamDraft Themen, die in der Vorlesung vorkamen, aber noch nie geprüft wurden — mögliche neue Prüfungsthemen.',
+                },
+              ].map((item) => (
+                <div class="landing-card-strong rounded-[1.5rem] p-5">
+                  <h3 class="font-semibold text-[#111111] mb-2">{item.title}</h3>
+                  <p class="text-sm leading-6 text-[#4b4b4b]">{item.body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div class="mt-8 text-center">
+              <p class="text-[#7d7785] text-sm mb-4">1 kostenlose Analyse für neue Accounts — kein API-Key nötig.</p>
+              <a href="/app" class="inline-block secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-8 py-3 font-medium">
+                Prüfungsmuster erkennen →
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="px-5 pb-10 sm:px-6 border-t border-black/8 pt-6">
+        <div class="mx-auto flex max-w-6xl flex-col gap-5 text-sm sm:flex-row sm:items-end sm:justify-between">
+          <p class="text-[#6f6f6f]">ExamDraft — Probeklausuren aus echten Altklausuren.</p>
+          <div class="flex flex-wrap gap-5">
+            <a href="/app" class="footer-link">App</a>
+            <a href="/de/altklausur-analysieren" class="footer-link">Altklausur analysieren</a>
+            <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

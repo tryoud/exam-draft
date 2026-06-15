@@ -9,7 +9,7 @@ database_id = "b1fe362f-5726-4ef1-b9f4-caa0b67d093f"
 
 [vars]
 APP_ORIGIN = "https://examdraft.com"
-FREE_START_CREDITS = "1"
+FREE_START_CREDITS = "10"
 GENERATION_CREDITS = "4"
 TYPE_TRAINING_CREDITS = "2"
 STRIPE_CREDITS_PER_PACK = "30"

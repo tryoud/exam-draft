@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import type { GeneratedExam, GradingResult, GradingFeedback } from '../lib/types';
+import type { GeneratedExam, GradingResult, GradingFeedback, FlashCard, ErrorCategory } from '../lib/types';
+import { ERROR_CATEGORY_LABELS } from '../lib/types';
 import { gradeExam, gradeExamClientSide } from '../lib/anthropic';
 import { showError } from './Toast';
 
@@ -30,6 +31,15 @@ function gradeColor(grade: string): string {
   if (n <= 4.0) return 'text-[#c47b21]';
   return 'text-[#b44a35]';
 }
+
+const ERROR_CATEGORY_COLORS: Record<ErrorCategory, string> = {
+  konzept_nicht_verstanden: 'bg-red-500/10 border-red-500/20 text-red-400',
+  rechenfehler: 'bg-orange-500/10 border-orange-500/20 text-orange-400',
+  begruendung_fehlt: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+  falsches_verfahren: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
+  zeitmanagement: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
+  diagramm_interpretation: 'bg-teal-500/10 border-teal-500/20 text-teal-400',
+};
 
 function FeedbackCard({ fb, taskNumber, taskTitle, correctOption }: { fb: GradingFeedback; taskNumber: number; taskTitle: string; correctOption?: string }) {
   const [expanded, setExpanded] = useState(false);
@@ -68,7 +78,17 @@ function FeedbackCard({ fb, taskNumber, taskTitle, correctOption }: { fb: Gradin
               <span className="text-sm font-bold text-[#2e7d4f] bg-[#eef8f1] border border-[#cce6d5] rounded-lg px-2.5 py-0.5">{correctOption}</span>
             </div>
           )}
+          {fb.errorCategory && (
+            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${ERROR_CATEGORY_COLORS[fb.errorCategory]}`}>
+              {ERROR_CATEGORY_LABELS[fb.errorCategory]}
+            </span>
+          )}
           <p className="text-sm text-[#4a4450]">{fb.feedback}</p>
+          {fb.nextPracticeHint && (
+            <p className="text-xs text-[#2f5bd2] bg-[#eef2ff] border border-[#d9e3ff] rounded-xl px-3 py-2">
+              → {fb.nextPracticeHint}
+            </p>
+          )}
           {fb.correctPoints.length > 0 && (
             <div>
               <p className="text-xs font-medium text-[#7d7785] mb-2">Richtig bewertet:</p>
@@ -101,10 +121,84 @@ function FeedbackCard({ fb, taskNumber, taskTitle, correctOption }: { fb: Gradin
   );
 }
 
+function buildFlashCards(
+  exam: GeneratedExam,
+  result: GradingResult,
+  answers: Record<string, string>
+): FlashCard[] {
+  return result.feedback
+    .filter((fb) => fb.maxPoints > 0 && fb.earnedPoints / fb.maxPoints < 0.8)
+    .map((fb): FlashCard => {
+      const task = exam.tasks.find((t) => t.id === fb.taskId)!;
+      const sol = exam.solution.find((s) => s.taskId === fb.taskId);
+      return {
+        id: `fc_${fb.taskId}`,
+        taskId: fb.taskId,
+        taskTitle: task?.title ?? fb.taskId,
+        taskDescription: task?.description ?? '',
+        userAnswer: answers[fb.taskId] ?? '',
+        modelSolution: sol?.solution ?? '',
+        keyPoints: sol?.keyPoints ?? [],
+        errorCategory: fb.errorCategory,
+        createdAt: new Date().toISOString(),
+      };
+    });
+}
+
+function FlashCardView({ card }: { card: FlashCard }) {
+  const [flipped, setFlipped] = useState(false);
+  return (
+    <div
+      className={`rounded-[1.3rem] border p-5 cursor-pointer transition-all ${
+        flipped ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'app-surface border-[#ddd7cd]'
+      }`}
+      onClick={() => setFlipped(f => !f)}
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[#7d7785]">{card.taskTitle}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          {card.errorCategory && (
+            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${ERROR_CATEGORY_COLORS[card.errorCategory]}`}>
+              {ERROR_CATEGORY_LABELS[card.errorCategory]}
+            </span>
+          )}
+          <span className="text-[11px] text-[#9e98a4]">{flipped ? 'Lösung ▲' : 'Aufgabe ▼'}</span>
+        </div>
+      </div>
+      {!flipped ? (
+        <div>
+          <p className="text-xs text-[#7d7785] mb-1">Deine Antwort:</p>
+          <p className="text-sm font-mono text-[#4a4450] leading-relaxed whitespace-pre-wrap">
+            {card.userAnswer || <span className="italic text-[#9e98a4]">Keine Antwort</span>}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs text-[#7d7785] mb-1">Musterlösung:</p>
+            <p className="text-sm font-mono text-[#2e4a35] leading-relaxed whitespace-pre-wrap">{card.modelSolution}</p>
+          </div>
+          {card.keyPoints.length > 0 && (
+            <ul className="space-y-1">
+              {card.keyPoints.map((kp, i) => (
+                <li key={i} className="text-xs text-[#2e7d4f] flex gap-2">
+                  <span className="shrink-0">✓</span><span>{kp}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      <p className="mt-3 text-[11px] text-[#9e98a4]">Tippe zum {flipped ? 'Zurückblättern' : 'Aufdecken'}</p>
+    </div>
+  );
+}
+
 export default function ExamGrader({ exam, onClose }: ExamGraderProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isGrading, setIsGrading] = useState(false);
   const [result, setResult] = useState<GradingResult | null>(null);
+  const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
 
   // Pure MC exam → instant client-side grading; mixed/open → AI grading
   const isMCExam = exam.tasks.every((t) => t.options && Object.keys(t.options).length > 0);
@@ -119,6 +213,7 @@ export default function ExamGrader({ exam, onClose }: ExamGraderProps) {
     const instant = gradeExamClientSide(exam, answerList);
     if (instant) {
       setResult(instant);
+      setFlashCards(buildFlashCards(exam, instant, answers));
       return;
     }
 
@@ -126,6 +221,7 @@ export default function ExamGrader({ exam, onClose }: ExamGraderProps) {
     try {
       const res = await gradeExam(exam, answerList);
       setResult(res);
+      setFlashCards(buildFlashCards(exam, res, answers));
     } catch (err: unknown) {
       const code = err instanceof Error ? err.message : 'API_ERROR';
       showError(code);
@@ -202,9 +298,21 @@ export default function ExamGrader({ exam, onClose }: ExamGraderProps) {
               })}
             </div>
 
+            {flashCards.length > 0 && (
+              <div className="space-y-3">
+                <div>
+                  <h2 className="text-sm font-medium text-[#57515e]">Fehlerkarten ({flashCards.length})</h2>
+                  <p className="text-xs text-[#8b8593] mt-0.5">Nur aus deinen Fehlern — tippe zum Aufdecken der Musterlösung.</p>
+                </div>
+                <div className="space-y-3">
+                  {flashCards.map(card => <FlashCardView key={card.id} card={card} />)}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
-                onClick={() => { setResult(null); }}
+                onClick={() => { setResult(null); setFlashCards([]); }}
                 className="app-secondary-btn px-4 py-2 rounded-xl text-sm transition-colors"
               >
                 ← Antworten bearbeiten

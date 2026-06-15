@@ -1,0 +1,126 @@
+---
+import '../styles/global.css';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
+import PartnerApply from '../components/PartnerApply';
+---
+
+<!doctype html>
+<html lang="de" class="legal-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ExamDraft Fachschafts-Pilot: Kostenloser Zugang für Fachschaften, Tutorien und Uni-Gruppen. Privater Modulpool, keine Originalveröffentlichung."
+    />
+    <title>Fachschafts-Pilot — ExamDraft</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Für Fachschaften</p>
+            </div>
+          </a>
+          <div class="flex items-center gap-3">
+            <span class="study-accent rounded-full px-3 py-2 text-xs font-semibold">DE</span>
+            <a href="/en/partner" class="secondary-link px-4 py-2 text-xs">EN</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-5xl space-y-10">
+
+          <section class="legal-hero rounded-[2rem] px-6 py-8 sm:px-8 sm:py-10">
+            <p class="legal-kicker">Fachschafts-Pilot</p>
+            <h1 class="legal-section-title mt-4 text-4xl sm:text-5xl">Exam Intelligence für eure Studierenden.</h1>
+            <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
+              Ihr behaltet die Kontrolle über euer Altklausur-Archiv. ExamDraft veröffentlicht keine
+              Originalklausuren. Wir machen daraus private Analyse, Übungsklausuren und Lernpfade
+              für eure Studierenden — vollständig unter eurer Kontrolle.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="legal-meta-chip">Kostenloser Pilot</span>
+              <span class="legal-meta-chip">Keine Originalveröffentlichung</span>
+              <span class="legal-meta-chip">Private Modulpools</span>
+            </div>
+          </section>
+
+          <section class="grid gap-4 md:grid-cols-3">
+            {[
+              {
+                icon: '🔒',
+                title: 'Originale bleiben privat',
+                body: 'ExamDraft speichert keine Original-PDFs für andere Nutzer. Aus euren Klausuren wird eine Pattern-Datenbank — kein Download-Archiv.',
+              },
+              {
+                icon: '📊',
+                title: '100 kostenlose Analyse-Credits',
+                body: 'Zum Start erhalten Fachschaften 100 Credits für Analysen, Probeklausuren und Typtraining. Eure Studierenden bekommen zusätzlich 20% Rabatt.',
+              },
+              {
+                icon: '🎓',
+                title: 'Anonymisierte Insights',
+                body: 'Ihr bekommt aggregierte Auswertungen: welche Aufgabentypen wie oft vorkommen, welche Themen wichtig sind — ohne individuelle Nutzerdaten.',
+              },
+            ].map((card) => (
+              <article class="legal-card rounded-[1.7rem] p-6">
+                <div class="text-3xl mb-3">{card.icon}</div>
+                <h3 class="text-base font-semibold text-[#111111]">{card.title}</h3>
+                <p class="mt-2 text-sm text-[#6f6a78] leading-6">{card.body}</p>
+              </article>
+            ))}
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">Was im Pilot enthalten ist</p>
+            <div class="mt-6 grid gap-3 sm:grid-cols-2">
+              {[
+                'Privater Modulpool für eure Fachschaft',
+                '100 kostenlose Analyse-Credits zum Start',
+                '20% Rabattcode für eure Studierenden',
+                'Keine Veröffentlichung eurer Original-PDFs',
+                'Anonymisierte Insights nach der Prüfungsphase',
+                'Feedback-Call zur Weiterentwicklung',
+              ].map((item) => (
+                <div class="flex items-start gap-2.5">
+                  <span class="mt-0.5 shrink-0 text-[#2e7d4f] font-bold text-sm">✓</span>
+                  <p class="text-sm text-[#4c4754]">{item}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section class="legal-card rounded-[1.9rem] p-6 sm:p-8">
+            <p class="legal-kicker">Was ExamDraft nicht baut</p>
+            <div class="legal-copy mt-4 space-y-2 text-sm text-[#6f6a78]">
+              <p>Keine öffentliche Altklausur-Suche. Kein Download-Archiv fremder Klausuren. Kein ungeprueftes Teilen von Original-PDFs. ExamDraft lernt Muster — keine Originale werden gespeichert oder geteilt.</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-semibold text-[#111111] mb-6">Pilotanfrage stellen</h2>
+            <PartnerApply lang="de" client:load />
+            <p class="mt-4 text-xs text-[#9e98a4] text-center">
+              Fragen? Schreib uns direkt an
+              <a href="mailto:partner@examdraft.com" class="underline ml-1">partner@examdraft.com</a>
+            </p>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

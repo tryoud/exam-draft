@@ -20,6 +20,7 @@ const ExamConfigurator = lazy(() => import('./ExamConfigurator'));
 const GeneratedExamComponent = lazy(() => import('./GeneratedExam'));
 const ExamSession = lazy(() => import('./ExamSession'));
 const TypeTrainer = lazy(() => import('./TypeTrainer'));
+const ExamSprint = lazy(() => import('./ExamSprint'));
 
 function FeatureFallback({ locale = 'de' }: { locale?: Locale }) {
   return (
@@ -132,6 +133,7 @@ export default function App({ locale: initialLocale = 'de' }: { locale?: Locale 
   const [showSession, setShowSession] = useState(false);
   const [showTypeTrainer, setShowTypeTrainer] = useState(false);
   const [trainerLoading, setTrainerLoading] = useState(false);
+  const [showExamSprint, setShowExamSprint] = useState(false);
 
   const { toasts, addToast, removeToast } = useToasts();
 
@@ -263,7 +265,11 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
       const { url } = await startCheckout(locale);
       window.location.href = url;
     } catch (err) {
-      addToast(err instanceof Error ? checkoutErrorMessage(err.message, locale) : checkoutErrorMessage('API_ERROR', locale), 'error');
+      const code = err instanceof Error ? err.message : 'API_ERROR';
+      addToast(checkoutErrorMessage(code, locale), 'error', {
+        actionLabel: locale === 'en' ? 'Use BYOK' : 'BYOK nutzen',
+        onAction: openByokSetup,
+      });
     }
   }
 
@@ -365,10 +371,6 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
           'error',
           { actionLabel: 'API-Key hinterlegen', onAction: () => setShowKeySetup(true) }
         );
-      } else if (code === 'NO_CREDITS') {
-        addToast('Nicht genug Credits. Kaufe Credits oder nutze BYOK.', 'error', { actionLabel: 'Credits kaufen', onAction: handleBuyCredits });
-      } else if (code === 'PAID_REQUIRED') {
-        addToast('Die Analyse ist kostenlos. Für die Klausur brauchst du Credits oder BYOK.', 'error', { actionLabel: 'Credits kaufen', onAction: handleBuyCredits });
       } else if (code === 'UNAUTHENTICATED') {
         addToast('Bitte melde dich mit deinem ExamDraft-Konto an.', 'error', { actionLabel: 'Anmelden', onAction: () => setShowAccountSetup(true) });
       } else {
@@ -478,14 +480,21 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
     );
   }
 
-  async function handleRegenerateTrainer() {
+  async function handleRegenerateTrainer(difficultyShift?: 'easier' | 'harder') {
     if (!state.analysisResult || !state.selectedTypeId) return;
     setTrainerLoading(true);
+    const baseDifficulty = state.selectedDifficulty;
+    const difficulty = difficultyShift === 'easier'
+      ? 'easier'
+      : difficultyShift === 'harder'
+      ? 'harder'
+      : baseDifficulty;
+    if (difficultyShift) setState((s) => ({ ...s, selectedDifficulty: difficulty }));
     try {
       const exam = await generateExam({
         analysis: state.analysisResult,
         mode: 'type-training',
-        difficulty: state.selectedDifficulty,
+        difficulty,
         selectedTypeId: state.selectedTypeId,
         improvementConsent: state.improvementConsent,
       });
@@ -971,14 +980,24 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
             {/* Step 2: Analysis */}
             {state.currentStep === 2 && (
               <Suspense fallback={<FeatureFallback locale={locale} />}>
-                <AnalysisDashboard
-                  isLoading={state.isLoading}
-                  result={state.analysisResult}
-                  examCount={examPendingFiles.length}
-                  slideCount={slidePendingFiles.length}
-                  imageFilesCount={examImageCount}
-                  onContinue={() => setStep(3)}
-                />
+                {showExamSprint && state.analysisResult ? (
+                  <ExamSprint
+                    analysis={state.analysisResult}
+                    initialExamDate={state.examDate || undefined}
+                    onClose={() => setShowExamSprint(false)}
+                  />
+                ) : (
+                  <AnalysisDashboard
+                    isLoading={state.isLoading}
+                    result={state.analysisResult}
+                    examCount={examPendingFiles.length}
+                    slideCount={slidePendingFiles.length}
+                    imageFilesCount={examImageCount}
+                    onContinue={() => setStep(3)}
+                    onExamSprint={state.analysisResult ? () => setShowExamSprint(true) : undefined}
+                    initialExamDate={state.examDate || undefined}
+                  />
+                )}
               </Suspense>
             )}
 
@@ -1020,6 +1039,7 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
                     onNewExam={handleNewExam}
                     onNewAnalysis={handleNewAnalysis}
                     onRetry={handleRetry}
+                    analysisSubject={state.analysisResult?.subject}
                   />
                 )}
               </Suspense>

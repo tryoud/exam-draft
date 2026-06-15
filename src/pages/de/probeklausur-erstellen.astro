@@ -1,0 +1,101 @@
+---
+import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
+const title = 'Probeklausur erstellen mit KI — ExamDraft';
+const description = 'Aus Altklausuren eine realistische Probeklausur erstellen: KI generiert neue Aufgaben im echten Prüfungsformat mit Musterlösung und KI-Korrektur.';
+---
+
+<!doctype html>
+<html lang="de" class="landing-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href="https://examdraft.com/de/probeklausur-erstellen" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="landing-body overflow-x-hidden">
+    <div class="editorial-shell">
+      <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-8 w-8 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+          </a>
+          <a href="/app" class="secondary-link text-sm">Kostenlos starten →</a>
+        </div>
+      </nav>
+
+      <main class="px-5 pt-28 pb-24 sm:px-6">
+        <div class="mx-auto max-w-3xl">
+          <p class="editorial-kicker">Probeklausur erstellen</p>
+          <h1 class="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl">Probeklausur aus Altklausuren erstellen — im echten Prüfungsformat.</h1>
+          <p class="mt-6 text-lg leading-8 text-[#4e4e4e] max-w-2xl">
+            ExamDraft generiert neue Probeklausuren, die das Format, die Sprache und die Schwierigkeit
+            deiner echten Prüfung widerspiegeln — keine generischen Übungsblätter, sondern Klausuren
+            die so klingen, als kämen sie vom gleichen Lehrstuhl.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-6 py-3 text-sm font-medium">
+              Probeklausur erstellen →
+            </a>
+          </div>
+
+          <div class="mt-16 space-y-6">
+            <h2 class="text-2xl font-semibold text-[#111111]">Was die generierte Probeklausur enthält</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              {[
+                { icon: '📝', h: 'Vollständige Klausur', p: 'Aufgaben mit Teilaufgaben, Punkte und Zeitvorgaben — proportional zu den erkannten Aufgabentypen aus deinen Altklausuren.' },
+                { icon: '✅', h: 'Musterlösung', p: 'Jede Aufgabe kommt mit vollständiger Musterlösung, Bewertungspunkten und typischen Fehlern.' },
+                { icon: '🎯', h: 'Typtraining', p: 'Übe gezielt den Aufgabentyp, der dir am meisten Probleme macht — mit 5 Variationen im gleichen Format.' },
+                { icon: '⏱️', h: 'KI-Korrektur', p: 'Schreib deine Antworten, lass sie von KI korrigieren und erhalte Fehlerkategorien und Lernempfehlungen.' },
+              ].map((item) => (
+                <div class="landing-card rounded-[1.5rem] p-5">
+                  <div class="text-2xl mb-2">{item.icon}</div>
+                  <h3 class="font-semibold text-[#111111] mb-1">{item.h}</h3>
+                  <p class="text-sm leading-6 text-[#4b4b4b]">{item.p}</p>
+                </div>
+              ))}
+            </div>
+
+            <div class="landing-card-strong rounded-[1.8rem] p-6 sm:p-8 mt-8">
+              <h2 class="text-xl font-semibold text-[#111111] mb-3">Warum ExamDraft nicht generisch ist</h2>
+              <p class="text-sm leading-7 text-[#4b4b4b]">
+                Generische KI-Tools erzeugen Aufgaben zu einem Thema. ExamDraft analysiert zuerst
+                das Prüfungsformat — Aufgabentypen, Punkteverteilung, Formulierungsstil, Schwierigkeit —
+                und generiert danach Aufgaben, die zu diesem spezifischen Lehrstuhl passen.
+                Der Unterschied: Du übst nicht nur den Stoff, du übst die Form.
+              </p>
+            </div>
+
+            <div class="mt-8 text-center">
+              <p class="text-[#7d7785] text-sm mb-4">1 Analyse gratis, danach 4 Credits für eine vollständige Probeklausur.</p>
+              <a href="/app" class="inline-block secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-8 py-3 font-medium">
+                Jetzt Probeklausur erstellen →
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="px-5 pb-10 sm:px-6 border-t border-black/8 pt-6">
+        <div class="mx-auto flex max-w-6xl flex-col gap-5 text-sm sm:flex-row sm:items-end sm:justify-between">
+          <p class="text-[#6f6f6f]">ExamDraft — Probeklausuren aus echten Altklausuren.</p>
+          <div class="flex flex-wrap gap-5">
+            <a href="/app" class="footer-link">App</a>
+            <a href="/de/altklausur-analysieren" class="footer-link">Altklausur analysieren</a>
+            <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+            <a href="/privacy" class="footer-link">Datenschutz</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

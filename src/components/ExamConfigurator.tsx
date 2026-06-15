@@ -46,9 +46,8 @@ export default function ExamConfigurator({
   const canGenerate =
     mode === 'random' || (mode === 'type-training' && selectedTypeId !== null);
   const generationCredits = mode === 'type-training' ? 2 : 4;
-  const needsPaidCredits = provider === 'examdraft' && accountPlan === 'free';
-  const lacksCredits = provider === 'examdraft' && accountPlan !== 'free' && credits < generationCredits;
-  const generationBlocked = needsPaidCredits || lacksCredits;
+  const lacksCredits = provider === 'examdraft' && credits < generationCredits;
+  const generationBlocked = lacksCredits;
 
   useEffect(() => {
     if (generationBlocked && mode) {
@@ -236,9 +235,14 @@ export default function ExamConfigurator({
 
       {generationBlocked && (
         <div className="app-surface rounded-[1.3rem] p-4 border border-[#ead6a2] bg-[#fff8e8]">
-          <p className="text-sm font-medium text-[#5f4618]">
-            {copy.paywallTitle}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-medium text-[#5f4618]">
+              {copy.paywallTitle}
+            </p>
+            <span className="shrink-0 rounded-full bg-[#5f4618]/10 px-2.5 py-0.5 text-xs font-semibold text-[#5f4618]">
+              {generationCredits} Credits
+            </span>
+          </div>
           <p className="mt-1 text-xs text-[#8a7350]">
             {copy.paywallText}
           </p>

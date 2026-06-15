@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AccountState, Provider } from '../lib/types';
-import { logoutAccount, startCheckout } from '../lib/account';
+import { logoutAccount, startCheckout, startMagicLink } from '../lib/account';
 import { showToast } from './Toast';
 import type { Locale } from '../lib/i18n';
 import { appCopy } from '../lib/i18n';
@@ -83,7 +83,11 @@ export default function AccountSetup({
       const { url } = await startCheckout(locale);
       window.location.href = url;
     } catch (err) {
-      showToast(err instanceof Error ? checkoutErrorMessage(err.message, locale) : checkoutErrorMessage('API_ERROR', locale), 'error');
+      const code = err instanceof Error ? err.message : 'API_ERROR';
+      showToast(checkoutErrorMessage(code, locale), 'error', {
+        actionLabel: locale === 'en' ? 'Use BYOK' : 'BYOK nutzen',
+        onAction: onUseByok,
+      });
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,112 @@
+---
+import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
+const title = 'Altklausur analysieren mit KI — ExamDraft';
+const description = 'Lade Altklausuren hoch und lass sie von KI analysieren: Aufgabentypen, Themen, Schwierigkeit und Prüfungsmuster — in Minuten, kostenlos.';
+---
+
+<!doctype html>
+<html lang="de" class="landing-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href="https://examdraft.com/de/altklausur-analysieren" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="landing-body overflow-x-hidden">
+    <div class="editorial-shell">
+      <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-8 w-8 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+          </a>
+          <a href="/app" class="secondary-link text-sm">Kostenlos starten →</a>
+        </div>
+      </nav>
+
+      <main class="px-5 pt-28 pb-24 sm:px-6">
+        <div class="mx-auto max-w-3xl">
+          <p class="editorial-kicker">Altklausur-Analyse</p>
+          <h1 class="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl">Altklausur analysieren — versteh, wie dein Fach prüft.</h1>
+          <p class="mt-6 text-lg leading-8 text-[#4e4e4e] max-w-2xl">
+            ExamDraft analysiert deine Altklausuren in Minuten: Welche Aufgabentypen kommen wie oft?
+            Welche Themen tragen die meisten Punkte? Wo liegen Risky Gaps?
+            Kein manuelles Durcharbeiten mehr — die KI übernimmt die Strukturanalyse.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-6 py-3 text-sm font-medium">
+              Kostenlos analysieren →
+            </a>
+            <a href="/" class="secondary-link px-6 py-3 text-sm">Mehr über ExamDraft</a>
+          </div>
+
+          <div class="mt-16 space-y-6">
+            <h2 class="text-2xl font-semibold text-[#111111]">Was ExamDraft aus Altklausuren erkennt</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+              {[
+                { icon: '🎯', h: 'Aufgabentypen', p: 'ExamDraft erkennt automatisch, welche Aufgabentypen in deinem Fach geprüft werden — Rechenaufgaben, Definitionen, Anwendungsfälle, Multiple Choice — und wie oft jeder Typ vorkommt.' },
+                { icon: '📊', h: 'Themen und Gewichtung', p: 'Welche Themen machen wie viele Punkte? Die Analyse zeigt dir Themenbereiche sortiert nach Prüfungsrelevanz, nicht nach Kapitelreihenfolge.' },
+                { icon: '⚠️', h: 'Risky Gaps', p: 'Themen, die in der Vorlesung vorkamen, aber noch nie in Altklausuren auftauchten — oder die plötzlich häufiger werden. ExamDraft markiert solche Lücken.' },
+                { icon: '📈', h: 'Confidence Score', p: 'Wie sicher ist die Analyse? Bei einer Klausur bleibt die Confidence bewusst niedrig. Mit mehr Jahrgängen steigt die Verlässlichkeit der Muster.' },
+              ].map((item) => (
+                <div class="landing-card rounded-[1.5rem] p-5">
+                  <div class="text-2xl mb-2">{item.icon}</div>
+                  <h3 class="font-semibold text-[#111111] mb-1">{item.h}</h3>
+                  <p class="text-sm leading-6 text-[#4b4b4b]">{item.p}</p>
+                </div>
+              ))}
+            </div>
+
+            <div class="landing-card-strong rounded-[1.8rem] p-6 sm:p-8 mt-8">
+              <h2 class="text-xl font-semibold text-[#111111] mb-4">Wie die Analyse funktioniert</h2>
+              <ol class="space-y-4">
+                {[
+                  ['Altklausuren hochladen', 'PDF hochladen — Text wird lokal im Browser extrahiert, kein Upload nötig.'],
+                  ['Analyse starten', 'Claude analysiert Struktur, Aufgabentypen und Themen. Dauert 30–90 Sekunden.'],
+                  ['Ergebnisse lesen', 'Dashboard zeigt Aufgabentypen, Themengewichtung, Risky Gaps und Lernempfehlungen.'],
+                  ['Probeklausur generieren', 'Aus den erkannten Mustern wird eine neue Übungsklausur mit Musterlösung erzeugt.'],
+                ].map(([h, p], i) => (
+                  <li class="flex gap-4">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#111113] text-xs font-bold text-white">{i + 1}</span>
+                    <div>
+                      <p class="text-sm font-semibold text-[#111111]">{h}</p>
+                      <p class="text-sm text-[#6f6a78] mt-0.5">{p}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div class="mt-8 text-center">
+              <p class="text-[#7d7785] text-sm mb-4">Neue Accounts erhalten 1 kostenlose Analyse — kein API-Key nötig.</p>
+              <a href="/app" class="inline-block secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-8 py-3 font-medium">
+                Altklausur jetzt analysieren →
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="px-5 pb-10 sm:px-6 border-t border-black/8 pt-6">
+        <div class="mx-auto flex max-w-6xl flex-col gap-5 text-sm sm:flex-row sm:items-end sm:justify-between">
+          <p class="text-[#6f6f6f]">ExamDraft — Probeklausuren aus echten Altklausuren.</p>
+          <div class="flex flex-wrap gap-5">
+            <a href="/app" class="footer-link">App</a>
+            <a href="/de/probeklausur-erstellen" class="footer-link">Probeklausur erstellen</a>
+            <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+            <a href="/privacy" class="footer-link">Datenschutz</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

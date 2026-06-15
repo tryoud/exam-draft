@@ -6,7 +6,7 @@ interface TypeTrainerProps {
   exam: GeneratedExam;
   typeName: string;
   onNewType: () => void;
-  onRegenerate: () => void;
+  onRegenerate: (difficultyShift?: 'easier' | 'harder') => void;
   isLoading: boolean;
 }
 
@@ -167,7 +167,7 @@ export default function TypeTrainer({ exam, typeName, onNewType, onRegenerate, i
       {/* Footer actions */}
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={onRegenerate}
+          onClick={() => onRegenerate()}
           disabled={isLoading}
           className="app-primary-btn disabled:opacity-45 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
         >
@@ -179,6 +179,22 @@ export default function TypeTrainer({ exam, typeName, onNewType, onRegenerate, i
           ) : (
             `${exam.tasks.length} neue Variationen`
           )}
+        </button>
+        <button
+          onClick={() => onRegenerate('easier')}
+          disabled={isLoading}
+          title="Einfachere Variationen mit mehr Hilfestellung"
+          className="app-secondary-btn disabled:opacity-45 px-3 py-2.5 rounded-xl text-sm transition-colors"
+        >
+          📗 Einfacher
+        </button>
+        <button
+          onClick={() => onRegenerate('harder')}
+          disabled={isLoading}
+          title="Schwierigere Variationen mit weniger Hilfestellung"
+          className="app-secondary-btn disabled:opacity-45 px-3 py-2.5 rounded-xl text-sm transition-colors"
+        >
+          📕 Schwieriger
         </button>
         <div className="w-px h-5 self-center bg-[#ddd7cd]" />
         <button

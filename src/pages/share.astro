@@ -1,0 +1,135 @@
+---
+import '../styles/global.css';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
+---
+
+<!doctype html>
+<html lang="de" class="legal-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Geteilte Probeklausur auf ExamDraft — KI-generiert aus Altklausuren." />
+    <meta name="robots" content="noindex" />
+    <title>Geteilte Probeklausur — ExamDraft</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="legal-body overflow-x-hidden">
+    <div class="legal-shell">
+      <header class="legal-topbar sticky top-0 z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-9 w-9 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Geteilte Klausur</p>
+            </div>
+          </a>
+          <a href="/app" class="secondary-link text-sm">App öffnen →</a>
+        </div>
+      </header>
+
+      <main class="px-5 pb-20 pt-14 sm:px-6 sm:pt-16">
+        <div class="mx-auto max-w-3xl space-y-6" id="share-root">
+          <!-- Loading skeleton -->
+          <div id="share-loading">
+            <div class="h-8 bg-[#ece7de] rounded w-2/3 animate-pulse mb-3"></div>
+            <div class="h-4 bg-[#ece7de] rounded w-1/3 animate-pulse mb-6"></div>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+              <div class="h-16 bg-[#ece7de] rounded-xl animate-pulse"></div>
+              <div class="h-16 bg-[#ece7de] rounded-xl animate-pulse"></div>
+              <div class="h-16 bg-[#ece7de] rounded-xl animate-pulse"></div>
+            </div>
+            <div class="space-y-2">
+              <div class="h-12 bg-[#ece7de] rounded-xl animate-pulse"></div>
+              <div class="h-12 bg-[#ece7de] rounded-xl animate-pulse"></div>
+              <div class="h-12 bg-[#ece7de] rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+          <!-- Populated by JS -->
+          <div id="share-content" class="hidden space-y-6"></div>
+          <!-- Error state -->
+          <div id="share-error" class="hidden legal-card rounded-[1.8rem] p-8 text-center">
+            <p class="text-4xl mb-3">🔗</p>
+            <h2 class="text-xl font-semibold text-[#111111]">Klausur nicht gefunden</h2>
+            <p class="text-sm text-[#7d7785] mt-2">Dieser Link ist abgelaufen oder existiert nicht mehr.</p>
+            <a href="/app" class="mt-6 inline-block app-primary-btn rounded-xl px-6 py-3 font-medium">
+              Eigene Klausur generieren →
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      (async () => {
+        const token = new URLSearchParams(window.location.search).get('t');
+        const loading = document.getElementById('share-loading');
+        const content = document.getElementById('share-content');
+        const errorEl = document.getElementById('share-error');
+
+        if (!token) { loading?.classList.add('hidden'); errorEl?.classList.remove('hidden'); return; }
+
+        try {
+          const res = await fetch(`/api/share/${token}`);
+          if (!res.ok) throw new Error('not_found');
+          const d = await res.json();
+
+          loading?.classList.add('hidden');
+          content?.classList.remove('hidden');
+
+          const statsHtml = [
+            { label: 'Aufgaben', value: d.taskCount },
+            { label: 'Dauer', value: `${d.duration} Min` },
+            { label: 'Punkte', value: d.totalPoints },
+          ].map(s => `
+            <div class="legal-card rounded-[1.2rem] p-4 text-center">
+              <p class="text-xl font-bold text-[#111111]">${s.value}</p>
+              <p class="text-xs text-[#7d7785] mt-0.5">${s.label}</p>
+            </div>`).join('');
+
+          const tasksHtml = (d.taskTitles ?? []).map((t) => `
+            <div class="legal-card rounded-[1.2rem] px-4 py-3 flex items-center gap-3">
+              <span class="text-sm font-bold text-[#d0c8bb] shrink-0">#${t.number}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-[#19161d] truncate">${escHtml(t.title)}</p>
+                <p class="text-xs text-[#8b8593]">${escHtml(t.type)} · ${t.points} Pkt</p>
+              </div>
+            </div>`).join('');
+
+          content.innerHTML = `
+            <div>
+              <h1 class="text-2xl font-semibold text-[#111111]">${escHtml(d.title)}</h1>
+              <p class="text-sm text-[#7d7785] mt-1">${escHtml(d.subject)}</p>
+              <p class="text-xs text-[#9e98a4] mt-1">${d.viewCount} Aufrufe</p>
+            </div>
+            <div class="grid grid-cols-3 gap-3">${statsHtml}</div>
+            <div>
+              <p class="text-xs font-medium uppercase tracking-[0.14em] text-[#7d7785] mb-3">Aufgaben (ohne Lösungen)</p>
+              <div class="space-y-2">${tasksHtml}</div>
+            </div>
+            <div class="legal-card rounded-[1.9rem] p-6 text-center space-y-3">
+              <p class="text-sm text-[#4c4754]">Generiere deine eigene Probeklausur aus deinen Altklausuren — kostenlos starten.</p>
+              <a href="/app" class="inline-block app-primary-btn rounded-xl px-6 py-3 font-medium">
+                Eigene Klausur generieren →
+              </a>
+            </div>
+            <p class="text-xs text-[#9e98a4] text-center">Nur Aufgabentitel geteilt — keine Musterlösungen, keine Originalklausuren.</p>
+          `;
+        } catch {
+          loading?.classList.add('hidden');
+          errorEl?.classList.remove('hidden');
+        }
+      })();
+
+      function escHtml(str) {
+        return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+    </script>
+  </body>
+</html>

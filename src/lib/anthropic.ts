@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ExtractedFile, AnalysisResult, GeneratedExam, ExamGenerationInput, ExamTask, ExamSolution, Provider, GradingResult, GradingFeedback, ExamAnswer } from './types';
+import type { ExtractedFile, AnalysisResult, GeneratedExam, ExamGenerationInput, ExamTask, ExamSolution, Provider, GradingResult, GradingFeedback, ExamAnswer, TopicLikelihood, RiskGap } from './types';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
@@ -392,6 +392,20 @@ const taskTypeSchema = z.object({
   hasdiagramContext: z.boolean().catch(false),
 });
 
+const likelihoodSchema = z.enum(['high', 'medium', 'low']).catch('medium');
+
+const topicLikelihoodSchema = z.object({
+  topic: z.string().catch(''),
+  likelihood: likelihoodSchema,
+  evidenceNote: z.string().catch(''),
+  pointImpact: likelihoodSchema,
+}) satisfies z.ZodType<TopicLikelihood>;
+
+const riskGapSchema = z.object({
+  gap: z.string().catch(''),
+  severity: z.enum(['critical', 'important', 'minor']).catch('important'),
+}) satisfies z.ZodType<RiskGap>;
+
 const analysisResultSchema = z.object({
   subject: z.string().min(1),
   totalTaskTypes: z.coerce.number().int().nonnegative(),
@@ -404,6 +418,12 @@ const analysisResultSchema = z.object({
   hasSlideContext: z.boolean().catch(false),
   slideTopics: stringArraySchema,
   hadImageOnlyContent: z.boolean().catch(false),
+  coverageScore: z.coerce.number().min(0).max(100).optional().catch(undefined),
+  confidenceScore: z.coerce.number().min(0).max(100).optional().catch(undefined),
+  topicLikelihoods: z.array(topicLikelihoodSchema).optional().catch(undefined),
+  recurringPatterns: stringArraySchema.optional().catch(undefined),
+  riskGaps: z.array(riskGapSchema).optional().catch(undefined),
+  nextBestActions: stringArraySchema.optional().catch(undefined),
 });
 
 const subTaskSchema = z.object({
@@ -603,8 +623,16 @@ VORLESUNGSKONTEXT (falls vorhanden):
 - slideTopics: konkrete klausurrelevante Themen (nicht Kapitelüberschriften wie "Einführung").
 - Der Kontext ergänzt die Klausurstruktur aus den Originalen, ersetzt sie nicht.
 
+INTELLIGENCE-FELDER:
+- coverageScore (0-100): Wie gut decken die Unterlagen das Modul ab? Klausuren allein: max 70. Mit passenden Folien: bis 90. Nur 1 Klausur: max 50.
+- confidenceScore (0-100): Wie sicher ist die Analyse? 1 Klausur = 30-50, 3+ = 65-85, 5+ mit Folien = bis 90.
+- topicLikelihoods: 3-6 Themen aus topicAreas mit Wahrscheinlichkeit ("high"/"medium"/"low"), einer kurzen evidenceNote (max 80 Zeichen, auf Deutsch) und pointImpact ("high"/"medium"/"low"). Nur wenn aus Altklausuren belegbar. Vorlesungsthemen ohne Klausurbeleg als "low" markieren.
+- recurringPatterns: 2-4 kurze Strings (max 80 Zeichen) für erkennbare Muster oder Auffälligkeiten (z.B. "Aufgabe 1 ist immer eine Definition", "Rechenaufgaben in Klausur 2 deutlich schwieriger"). Leer lassen falls nur 1 Klausur.
+- riskGaps: 0-3 Lücken, die in der echten Klausur schaden könnten. Severity: "critical" (oft geprüft, aber unterrepräsentiert), "important" (möglich aber unbekannt), "minor". Nur echte Lücken, keine Erfindungen.
+- nextBestActions: 2-3 konkrete Lernempfehlungen auf Deutsch, direkt aus der Analyse abgeleitet.
+
 Gib NUR dieses JSON zurück (kein Markdown, kein Text davor/danach):
-{"subject":"Fachname","totalTaskTypes":Zahl,"taskTypes":[{"id":"snake_case_id","name":"Aufgabentyp auf Deutsch","description":"Was genau gefordert wird","frequency":Prozent(0-100),"avgPoints":Punkte,"difficulty":1-5,"exampleQuestion":"Typisches Beispiel aus Originalklausur (wörtlich/paraphrasiert)","hasdiagramContext":bool}],"averageDifficulty":1-5,"estimatedDuration":Minuten,"totalPoints":Punkte,"topicAreas":["Spezifisches Thema"],"examCount":Zahl,"hasSlideContext":${hasLectureSummary || hasSlideFiles},"slideTopics":["Klausurrelevantes Thema aus Folien"],"hadImageOnlyContent":bool}`;
+{"subject":"Fachname","totalTaskTypes":Zahl,"taskTypes":[{"id":"snake_case_id","name":"Aufgabentyp auf Deutsch","description":"Was genau gefordert wird","frequency":Prozent(0-100),"avgPoints":Punkte,"difficulty":1-5,"exampleQuestion":"Typisches Beispiel aus Originalklausur (wörtlich/paraphrasiert)","hasdiagramContext":bool}],"averageDifficulty":1-5,"estimatedDuration":Minuten,"totalPoints":Punkte,"topicAreas":["Spezifisches Thema"],"examCount":Zahl,"hasSlideContext":${hasLectureSummary || hasSlideFiles},"slideTopics":["Klausurrelevantes Thema aus Folien"],"hadImageOnlyContent":bool,"coverageScore":Zahl,"confidenceScore":Zahl,"topicLikelihoods":[{"topic":"Thema","likelihood":"high","evidenceNote":"Belegt in X von Y Klausuren","pointImpact":"high"}],"recurringPatterns":["Muster"],"riskGaps":[{"gap":"Lücke","severity":"important"}],"nextBestActions":["Empfehlung"]}`;
 
   let json: string;
 
@@ -628,7 +656,7 @@ Gib NUR dieses JSON zurück (kein Markdown, kein Text davor/danach):
       headers: buildOpenRouterHeaders(key),
       body: JSON.stringify({
         model,
-        max_tokens: 2000,
+        max_tokens: 3500,
         temperature: 0,
         messages: [{ role: 'user', content: parts.join('\n\n') }],
       }),
@@ -647,7 +675,7 @@ Gib NUR dieses JSON zurück (kein Markdown, kein Text davor/danach):
       headers: buildAnthropicHeaders(key),
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
-        max_tokens: 2000,
+        max_tokens: 3500,
         temperature: 0,
         messages: [{ role: 'user', content: [...examBlocks, ...slideBlocks, { type: 'text', text: instructionText }] }],
       }),
@@ -761,9 +789,13 @@ AUFGABENTYP:
 - Beispiel aus Originalklausur: "${typeInfo?.exampleQuestion ?? '–'}"
 - Themengebiete: ${input.analysis.topicAreas.join(', ')}
 
-ANFORDERUNGEN:
-- 5 Variationen, jede mit einem anderen Aspekt oder Szenario desselben Typs — keine inhaltlichen Wiederholungen.
-- Unterschiedliche Zahlenwerte, Kontexte und konkrete Formulierungen.
+ANFORDERUNGEN — ECHTE VARIATION (kein Copy-Paste-Gefühl):
+- 5 Variationen desselben Typs — jede Aufgabe muss sich in Szenario, Kontext UND Zahlenwerten unterscheiden.
+- Variation 1: Standardszenario laut Originalbeispiel, gleiche Schwierigkeit.
+- Variation 2: Neuer Anwendungskontext (anderes Fach/Gebiet), andere Zahlen.
+- Variation 3: Umgekehrte Fragerichtung oder ungewöhnliche Ausgangslage.
+- Variation 4: Mehrschrittiger Ansatz, etwas schwieriger — erfordert Konzeptübertragung.
+- Variation 5: Vereinfacht mit mehr Hilfestellung — für gezieltes Festigen des Grundprinzips.
 - Stil: fachsprachlich, präzise, wie in den Originalklausuren.
 - Vollständige Musterlösung mit Lösungsweg für jede Aufgabe.
 - keyPoints: messbare Bewertungspunkte — was ein Korrektor explizit als richtig zählt.
@@ -1105,9 +1137,11 @@ KORREKTURREGELN:
 5. correctPoints: Liste der tatsächlich erbrachten Teilleistungen — konkret, nicht "teilweise richtig".
 6. missingPoints: Liste konkreter Lücken oder Fehler — keine pauschalen Aussagen wie "Antwort unvollständig".
 7. Keine Antwort gegeben → earnedPoints=0, kurzes neutrales Feedback.
+8. errorCategory: Hauptfehlerursache falls Punkte verloren. Exakt eine dieser Strings: "konzept_nicht_verstanden" | "rechenfehler" | "begruendung_fehlt" | "falsches_verfahren" | "zeitmanagement" | "diagramm_interpretation". Weglassen wenn voll korrekt.
+9. nextPracticeHint: 1 konkreter Satz auf Deutsch — welche Übung oder welches Thema als nächstes angehen. Weglassen wenn voll korrekt.
 
 Gib NUR JSON zurück:
-{"totalEarned":Punkte,"totalMax":${exam.totalPoints},"percentage":0-100,"feedback":[{"taskId":"task_1","earnedPoints":Punkte,"maxPoints":Punkte,"feedback":"Konstruktive Bewertung 1–3 Sätze","correctPoints":["Konkrete Teilleistung"],"missingPoints":["Konkreter Fehler oder fehlender Aspekt"]}]}`;
+{"totalEarned":Punkte,"totalMax":${exam.totalPoints},"percentage":0-100,"feedback":[{"taskId":"task_1","earnedPoints":Punkte,"maxPoints":Punkte,"feedback":"Konstruktive Bewertung 1–3 Sätze","correctPoints":["Konkrete Teilleistung"],"missingPoints":["Konkreter Fehler"],"errorCategory":"konzept_nicht_verstanden","nextPracticeHint":"Übe Aufgabentyp X erneut"}]}`;
 
   const json = await llmCall(provider, prompt, 4000, 0.2);
   return parseAndLog(json, 'gradeExam', (d) => {
@@ -1116,9 +1150,11 @@ Gib NUR JSON zurück:
       throw new Error('JSON_PARSE_ERROR');
     }
     // Ensure all feedback entries have arrays
+    const validCategories = new Set(['konzept_nicht_verstanden','rechenfehler','begruendung_fehlt','falsches_verfahren','zeitmanagement','diagramm_interpretation']);
     (obj.feedback as GradingFeedback[]).forEach((fb) => {
       if (!Array.isArray(fb.correctPoints)) fb.correctPoints = [];
       if (!Array.isArray(fb.missingPoints)) fb.missingPoints = [];
+      if (fb.errorCategory && !validCategories.has(fb.errorCategory)) delete fb.errorCategory;
     });
     return obj as unknown as GradingResult;
   });

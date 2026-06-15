@@ -19,6 +19,7 @@ interface GeneratedExamProps {
   onNewExam: () => void;
   onNewAnalysis: () => void;
   onRetry?: () => void;
+  analysisSubject?: string;
 }
 
 // ── Markdown content renderer (handles tables) ────────────────────────────────
@@ -254,9 +255,31 @@ export default function GeneratedExamComponent({
   onNewExam,
   onNewAnalysis,
   onRetry,
+  analysisSubject,
 }: GeneratedExamProps) {
   const [msgIndex, setMsgIndex] = useState(0);
   const [showNewAnalysisConfirm, setShowNewAnalysisConfirm] = useState(false);
+  const [shareState, setShareState] = useState<'idle' | 'loading' | 'copied' | 'error'>('idle');
+
+  async function handleShare() {
+    if (!exam) return;
+    setShareState('loading');
+    try {
+      const res = await fetch('/api/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exam: { ...exam, subject: analysisSubject ?? exam.title } }),
+      });
+      if (!res.ok) throw new Error('share_failed');
+      const { url } = await res.json();
+      await navigator.clipboard.writeText(url);
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 3000);
+    } catch {
+      setShareState('error');
+      setTimeout(() => setShareState('idle'), 2500);
+    }
+  }
 
   useEffect(() => {
     if (!isLoading) return;
@@ -380,6 +403,17 @@ export default function GeneratedExamComponent({
             ⬇ Mit Lösung
           </button>
           <div className="w-px h-5 bg-[#ddd7cd] mx-1" />
+          <button
+            onClick={handleShare}
+            disabled={shareState === 'loading'}
+            title="Klausur teilen (ohne Lösungen)"
+            className={`app-secondary-btn disabled:opacity-50 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${
+              shareState === 'copied' ? 'border-green-500/40 bg-green-500/10 text-green-600' :
+              shareState === 'error' ? 'border-red-500/30 text-red-500' : ''
+            }`}
+          >
+            {shareState === 'loading' ? '⏳' : shareState === 'copied' ? '✓ Link kopiert' : shareState === 'error' ? '✗ Fehler' : '🔗 Teilen'}
+          </button>
           <button
             onClick={onNewExam}
             className="app-secondary-btn px-4 py-2.5 rounded-xl text-sm transition-all duration-200"

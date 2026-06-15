@@ -1,0 +1,104 @@
+---
+import '../../styles/global.css';
+import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
+const title = 'Statistik 1 Klausur vorbereiten — ExamDraft';
+const description = 'Statistik-1-Klausur vorbereiten: Altklausuren analysieren, Aufgabentypen erkennen (Deskriptive Statistik, Wahrscheinlichkeit, Tests) und Probeklausuren mit Musterlösung generieren.';
+---
+
+<!doctype html>
+<html lang="de" class="landing-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href="https://examdraft.com/de/statistik-1-klausur-vorbereiten" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <CloudflareAnalytics />
+  </head>
+  <body class="landing-body overflow-x-hidden">
+    <div class="editorial-shell">
+      <nav class="top-nav fixed inset-x-0 top-0 z-50">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-6">
+          <a href="/" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-8 w-8 shrink-0">
+              <rect width="32" height="32" rx="7" fill="#111111"/>
+              <rect x="8" y="8" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="14.25" width="11" height="3.5" rx="1.75" fill="#f0ebe2"/>
+              <rect x="8" y="20.5" width="16" height="3.5" rx="1.75" fill="#f0ebe2"/>
+            </svg>
+            <p class="text-sm font-semibold tracking-tight text-[#111318]">ExamDraft</p>
+          </a>
+          <a href="/app" class="secondary-link text-sm">Kostenlos starten →</a>
+        </div>
+      </nav>
+
+      <main class="px-5 pt-28 pb-24 sm:px-6">
+        <div class="mx-auto max-w-3xl">
+          <p class="editorial-kicker">Statistik 1</p>
+          <h1 class="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl">Statistik-1-Klausur vorbereiten — mit KI-Analyse deiner Altklausuren.</h1>
+          <p class="mt-6 text-lg leading-8 text-[#4e4e4e] max-w-2xl">
+            Statistik 1 ist eine der meistgefürchteten Klausuren im Studium.
+            ExamDraft analysiert deine Altklausuren und zeigt dir, welche Aufgabentypen
+            in deinem spezifischen Modul geprüft werden — nicht was im Lehrbuch steht,
+            sondern was tatsächlich drankommt.
+          </p>
+          <div class="mt-8">
+            <a href="/app" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-6 py-3 text-sm font-medium inline-block">
+              Statistik-Altklausur analysieren →
+            </a>
+          </div>
+
+          <div class="mt-16 space-y-6">
+            <h2 class="text-2xl font-semibold text-[#111111]">Typische Statistik-1-Aufgabentypen</h2>
+            <p class="text-sm text-[#7d7785]">ExamDraft erkennt diese automatisch aus deinen Altklausuren — mit fachspezifischen Namen und Beispielaufgaben.</p>
+            <div class="grid gap-3 sm:grid-cols-2">
+              {[
+                'Deskriptive Kennzahlen berechnen (Mittelwert, Varianz, Quartile)',
+                'Wahrscheinlichkeitsrechnung (bedingte Wahrscheinlichkeit, Bayes)',
+                'Verteilungen (Binomial, Normal, Poisson) anwenden',
+                'Hypothesentests (t-Test, Chi-Quadrat) durchführen',
+                'Konfidenzintervalle berechnen und interpretieren',
+                'Regressionsanalyse und Korrelation',
+              ].map((item) => (
+                <div class="landing-card rounded-[1.3rem] px-4 py-3 flex items-start gap-2.5">
+                  <span class="text-[#2e7d4f] font-bold shrink-0 mt-0.5">→</span>
+                  <p class="text-sm text-[#3e3944]">{item}</p>
+                </div>
+              ))}
+            </div>
+
+            <div class="landing-card-strong rounded-[1.8rem] p-6 sm:p-8 mt-4">
+              <h2 class="text-xl font-semibold text-[#111111] mb-3">Warum Statistik anders vorbereitet werden muss</h2>
+              <p class="text-sm leading-7 text-[#4b4b4b]">
+                Statistik-Klausuren unterscheiden sich stark zwischen Hochschulen und Instituten.
+                Was an der LMU als Standardaufgabe gilt, kann an der FU Berlin kaum vorkommen.
+                ExamDraft lernt aus <em>deinen</em> Altklausuren — nicht aus einem allgemeinen Statistik-Pool.
+                Das ist der Unterschied zwischen "Statistik lernen" und "diese Statistik-Klausur vorbereiten".
+              </p>
+            </div>
+
+            <div class="mt-8 text-center">
+              <p class="text-[#7d7785] text-sm mb-4">Starte mit 1 kostenlosen Analyse — keine Kreditkarte, kein API-Key.</p>
+              <a href="/app" class="inline-block secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white px-8 py-3 font-medium">
+                Statistik-Klausur vorbereiten →
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="px-5 pb-10 sm:px-6 border-t border-black/8 pt-6">
+        <div class="mx-auto flex max-w-6xl flex-col gap-5 text-sm sm:flex-row sm:items-end sm:justify-between">
+          <p class="text-[#6f6f6f]">ExamDraft — Probeklausuren aus echten Altklausuren.</p>
+          <div class="flex flex-wrap gap-5">
+            <a href="/app" class="footer-link">App</a>
+            <a href="/de/bwl-klausur-vorbereiten" class="footer-link">BWL-Klausur</a>
+            <a href="/de/altklausur-analysieren" class="footer-link">Altklausur analysieren</a>
+            <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

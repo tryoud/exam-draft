@@ -377,6 +377,95 @@ const cards = [
           </div>
         </section>
 
+        <section id="pricing" class="anchor-offset px-5 py-24 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="scroll-reveal mb-12 max-w-2xl" data-reveal>
+              <p class="editorial-kicker">Preise</p>
+              <h2 class="section-title mt-4 text-4xl sm:text-5xl">Einfach starten, bei Bedarf aufladen.</h2>
+            </div>
+            <div class="grid gap-4 md:grid-cols-3">
+              <article class="scroll-reveal landing-card-strong rounded-[1.8rem] p-7 flex flex-col gap-5" data-reveal>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#2e7d4f]">Kostenlos</p>
+                  <p class="mt-2 text-3xl font-extrabold tracking-tight text-[#111111]">0 €</p>
+                  <p class="mt-1 text-sm text-[#7d7785]">Neues Konto, kein API-Key nötig</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#4c4754]">
+                  <li class="flex items-center gap-2"><span class="text-[#2e7d4f] font-bold">✓</span> 1 kostenlose Analyse</li>
+                  <li class="flex items-center gap-2"><span class="text-[#2e7d4f] font-bold">✓</span> Aufgabentypen, Themen, Schwierigkeit</li>
+                  <li class="flex items-center gap-2"><span class="text-[#2e7d4f] font-bold">✓</span> Magic-Link-Login</li>
+                </ul>
+                <a href="/app" class="mt-auto secondary-link text-center text-sm">Kostenlos starten →</a>
+              </article>
+
+              <article class="scroll-reveal landing-card-strong rounded-[1.8rem] p-7 flex flex-col gap-5 ring-2 ring-[#6b8dff]/40" data-reveal style="--reveal-delay:80ms">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#2f5bd2]">Credit Pack</p>
+                  <p class="mt-2 text-3xl font-extrabold tracking-tight text-[#111111]">4,99 €</p>
+                  <p class="mt-1 text-sm text-[#7d7785]">30 Credits · einmalig, kein Abo</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#4c4754]">
+                  <li class="flex items-center gap-2"><span class="text-[#2f5bd2] font-bold">✓</span> Analyse: <strong>1 Credit</strong></li>
+                  <li class="flex items-center gap-2"><span class="text-[#2f5bd2] font-bold">✓</span> Typtraining: <strong>2 Credits</strong></li>
+                  <li class="flex items-center gap-2"><span class="text-[#2f5bd2] font-bold">✓</span> Volle Klausur: <strong>4 Credits</strong></li>
+                  <li class="flex items-center gap-2"><span class="text-[#2f5bd2] font-bold">✓</span> Musterlösung inklusive</li>
+                </ul>
+                <a href="/app" class="mt-auto app-primary-btn text-center text-sm">Credits kaufen →</a>
+              </article>
+
+              <article class="scroll-reveal landing-card rounded-[1.8rem] p-7 flex flex-col gap-5" data-reveal style="--reveal-delay:160ms">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[#7d7785]">Advanced BYOK</p>
+                  <p class="mt-2 text-3xl font-extrabold tracking-tight text-[#111111]">~0,20 €</p>
+                  <p class="mt-1 text-sm text-[#7d7785]">pro Durchlauf · Kosten direkt beim Anbieter</p>
+                </div>
+                <ul class="space-y-2 text-sm text-[#4c4754]">
+                  <li class="flex items-center gap-2"><span class="text-[#7d7785] font-bold">✓</span> Eigener Anthropic- oder OpenRouter-Key</li>
+                  <li class="flex items-center gap-2"><span class="text-[#7d7785] font-bold">✓</span> Volle Kostenkontrolle</li>
+                  <li class="flex items-center gap-2"><span class="text-[#7d7785] font-bold">✓</span> Kein ExamDraft-Konto nötig</li>
+                </ul>
+                <a href="/app" class="mt-auto secondary-link text-center text-sm">BYOK einrichten →</a>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="fachschaft" class="anchor-offset px-5 py-24 sm:px-6">
+          <div class="mx-auto max-w-6xl">
+            <div class="scroll-reveal grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center" data-reveal>
+              <div>
+                <p class="editorial-kicker">Für Fachschaften</p>
+                <h2 class="section-title mt-4 text-4xl sm:text-5xl">Eure Altklausuren. Eure Kontrolle.</h2>
+                <p class="mt-6 text-base leading-8 text-[#4e4e4e] max-w-lg">
+                  ExamDraft veröffentlicht keine Originalklausuren. Wir machen daraus private Prüfungsintelligenz
+                  für eure Studierenden — Analyse, Übungsklausuren, Lernpfade. Ihr behaltet das Archiv.
+                </p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                  <a href="/partner" class="secondary-link border-black/15 bg-black text-white hover:bg-[#1a1a1a] hover:text-white">
+                    Zum Pilotprogramm →
+                  </a>
+                  <a href="/partner" class="secondary-link">
+                    Mehr erfahren
+                  </a>
+                </div>
+              </div>
+              <div class="grid gap-3">
+                {[
+                  { icon: '🔒', text: 'Keine Originalveröffentlichung' },
+                  { icon: '📊', text: '100 kostenlose Credits zum Start' },
+                  { icon: '💸', text: '20% Rabattcode für Studierende' },
+                  { icon: '🎓', text: 'Anonymisierte Insights nach der Prüfungsphase' },
+                ].map((item) => (
+                  <div class="landing-card rounded-[1.4rem] flex items-center gap-3 px-5 py-4">
+                    <span class="text-xl">{item.icon}</span>
+                    <p class="text-sm text-[#3e3944]">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="final" class="anchor-offset px-5 pb-24 pt-12 sm:px-6">
           <div class="mx-auto max-w-6xl">
             <div class="scroll-reveal lime-panel rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14" data-reveal>
@@ -414,6 +503,7 @@ const cards = [
           </div>
           <div class="flex flex-wrap gap-5">
             <a href="/app" class="footer-link">App</a>
+            <a href="/partner" class="footer-link">Fachschaften</a>
             <a href="/terms" class="footer-link">Nutzungsbedingungen</a>
             <a href="/privacy" class="footer-link">Datenschutz</a>
           </div>

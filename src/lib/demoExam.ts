@@ -18,6 +18,29 @@ export const DEMO_ANALYSIS: AnalysisResult = {
   hasSlideContext: false,
   slideTopics: [],
   hadImageOnlyContent: false,
+  coverageScore: 68,
+  confidenceScore: 72,
+  topicLikelihoods: [
+    { topic: 'SQL-Abfragen', likelihood: 'high', evidenceNote: 'In allen 3 Klausuren, höchste Gewichtung', pointImpact: 'high' },
+    { topic: 'ER-Modellierung', likelihood: 'high', evidenceNote: 'In 2 von 3 Klausuren als erste Aufgabe', pointImpact: 'high' },
+    { topic: 'Normalisierung', likelihood: 'medium', evidenceNote: 'In 2 von 3 Klausuren, mittlere Gewichtung', pointImpact: 'medium' },
+    { topic: 'Transaktionen & ACID', likelihood: 'medium', evidenceNote: 'Regelmäßig, oft als Theoriefrage', pointImpact: 'low' },
+    { topic: 'Indexe & Query-Optimierung', likelihood: 'low', evidenceNote: 'Nur in 1 Klausur, geringe Punkte', pointImpact: 'low' },
+  ],
+  recurringPatterns: [
+    'Aufgabe 1 ist immer ein ER-Modell, Aufgabe 2 immer SQL',
+    'SQL-Aufgaben enthalten stets einen Gruppenvergleich mit HAVING',
+    'Normalisierungsaufgaben zeigen immer eine fehlerhafte Ausgangstabelle',
+  ],
+  riskGaps: [
+    { gap: 'Relationale Algebra kam in keiner Klausur vor, wird aber in Vorlesung betont', severity: 'important' },
+    { gap: 'Nur eine Klausur mit Transaktionen — Tiefe unklar', severity: 'minor' },
+  ],
+  nextBestActions: [
+    'SQL-Abfragen mit JOIN und HAVING üben: höchste Gewichtung in allen Klausuren.',
+    'ER-Modell aus dem Gedächtnis entwerfen: Aufgabe 1 ist immer ein ER-Diagramm.',
+    'Relationale Algebra vorbereiten: bisher nicht geprüft, aber Vorlesungsschwerpunkt.',
+  ],
 };
 
 export const DEMO_EXAM: GeneratedExam = {

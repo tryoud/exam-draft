@@ -34,11 +34,11 @@ export const appCopy = {
       },
     },
     consent: {
-      requiredPrefix: 'Meine Übungsklausur aus diesen Dateien erstellen. ExamDraft verarbeitet die hochgeladenen Inhalte, um die gewünschte Analyse, Übungsklausur, Musterlösung und Bewertung bereitzustellen. Ich bestätige, dass ich diese Dateien hochladen darf, und akzeptiere die',
+      requiredPrefix: 'Ich bin zum Upload berechtigt und akzeptiere die',
       terms: 'Nutzungsbedingungen',
-      and: 'und',
+      and: 'sowie die',
       privacy: 'Datenschutzerklärung',
-      improvementPrefix: 'ExamDraft mit anonymisiertem Lernmaterial verbessern. Wenn ich auswähle, darf ExamDraft anonymisierten extrahierten Text aus diesem Upload speichern, um Aufgabenerkennung, Themenzuordnung und Klausurgenerierung zu verbessern. Ich kann ExamDraft auch ohne diese Auswahl nutzen. Details stehen in der',
+      improvementPrefix: 'Ich stimme der anonymisierten Datennutzung zur Serviceverbesserung zu',
     },
     token: {
       title: 'Konservative Gesamtkostenschätzung',
@@ -204,11 +204,11 @@ export const appCopy = {
       },
     },
     consent: {
-      requiredPrefix: 'Create my practice exam from these files. ExamDraft processes the uploaded content to provide the requested analysis, practice exam, model solution, and grading. I confirm that I am allowed to upload these files and accept the',
+      requiredPrefix: 'I am authorized to upload these files and accept the',
       terms: 'Terms',
-      and: 'and',
+      and: 'and the',
       privacy: 'Privacy Policy',
-      improvementPrefix: 'Improve ExamDraft with anonymized learning material. If I select this, ExamDraft may store anonymized extracted text from this upload to improve task detection, topic matching, and exam generation. I can use ExamDraft without selecting this. Details are in the',
+      improvementPrefix: 'I consent to anonymized data use for service improvement',
     },
     token: {
       title: 'Conservative total cost estimate',

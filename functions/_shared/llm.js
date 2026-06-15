@@ -62,6 +62,7 @@ export async function analyzeWithLLM(env, payload) {
   const slideText = payload.lectureContextSummary
     ? `=== VORLESUNGSKONTEXT ===\n${payload.lectureContextSummary}`
     : (payload.slideFiles ?? []).map((file, i) => `=== FOLIEN ${i + 1}: ${file.name} ===\n${file.text ?? ''}`).join('\n\n');
+  const hasSlideContext = Boolean(payload.lectureContextSummary?.trim() || (payload.slideFiles ?? []).length > 0);
   const prompt = `Analysiere die folgenden Altklausuren für einen Klausurgenerator. Gib NUR valides JSON zurück.
 
 ${moduleContext ? `MODULKONTEXT:\n${moduleContext}\n\nNutze diesen Kontext zur Benennung des Fachs und zur Einordnung der Analyse. Er ersetzt keine Evidenz aus den Altklausuren.` : ''}
@@ -70,9 +71,17 @@ ${examText}
 
 ${slideText}
 
+INTELLIGENCE-FELDER:
+- coverageScore (0-100): Wie gut decken die Unterlagen das Modul ab? Nur Klausuren: max 70. Mit Folien: bis 90. Nur 1 Klausur: max 50.
+- confidenceScore (0-100): Wie sicher ist die Analyse? 1 Klausur = 30-50, 3+ = 65-85, 5+ mit Folien = bis 90.
+- topicLikelihoods: 3-6 Themen mit likelihood ("high"/"medium"/"low"), evidenceNote (max 80 Zeichen, Deutsch) und pointImpact ("high"/"medium"/"low"). Nur belegte Themen aus Altklausuren.
+- recurringPatterns: 2-4 kurze Strings für erkennbare Muster oder Auffälligkeiten. Leer bei nur 1 Klausur.
+- riskGaps: 0-3 Lücken die in der echten Klausur schaden könnten. Severity: "critical"/"important"/"minor".
+- nextBestActions: 2-3 konkrete Lernempfehlungen auf Deutsch aus der Analyse.
+
 JSON-Schema:
-{"subject":"Fachname","totalTaskTypes":Zahl,"taskTypes":[{"id":"snake_case_id","name":"Aufgabentyp","description":"Beschreibung","frequency":Prozent,"avgPoints":Punkte,"difficulty":1-5,"exampleQuestion":"Beispiel","hasdiagramContext":false}],"averageDifficulty":1-5,"estimatedDuration":Minuten,"totalPoints":Punkte,"topicAreas":["Thema"],"examCount":Zahl,"hasSlideContext":false,"slideTopics":[],"hadImageOnlyContent":false}`;
-  const json = await openRouter(env, model, prompt, 2500, 0);
+{"subject":"Fachname","totalTaskTypes":Zahl,"taskTypes":[{"id":"snake_case_id","name":"Aufgabentyp","description":"Beschreibung","frequency":Prozent,"avgPoints":Punkte,"difficulty":1-5,"exampleQuestion":"Beispiel","hasdiagramContext":false}],"averageDifficulty":1-5,"estimatedDuration":Minuten,"totalPoints":Punkte,"topicAreas":["Thema"],"examCount":Zahl,"hasSlideContext":${hasSlideContext},"slideTopics":[],"hadImageOnlyContent":false,"coverageScore":Zahl,"confidenceScore":Zahl,"topicLikelihoods":[{"topic":"Thema","likelihood":"high","evidenceNote":"Belegt in X Klausuren","pointImpact":"high"}],"recurringPatterns":["Muster"],"riskGaps":[{"gap":"Lücke","severity":"important"}],"nextBestActions":["Empfehlung"]}`;
+  const json = await openRouter(env, model, prompt, 3500, 0);
   return { result: parseAndValidate(json, 'analysis'), model };
 }
 
@@ -101,8 +110,13 @@ export async function gradeWithLLM(env, payload) {
 
 ${JSON.stringify(payload)}
 
+KORREKTURREGELN:
+- Teilpunkte proportional vergeben. Folgefehler nur einmal abziehen.
+- errorCategory: Hauptfehlerursache bei Punktverlust. Exakt einer dieser Strings: "konzept_nicht_verstanden" | "rechenfehler" | "begruendung_fehlt" | "falsches_verfahren" | "zeitmanagement" | "diagramm_interpretation". Weglassen wenn voll korrekt.
+- nextPracticeHint: 1 konkreter Satz auf Deutsch — nächste sinnvolle Übung. Weglassen wenn voll korrekt.
+
 JSON-Schema:
-{"totalEarned":0,"totalMax":60,"percentage":0,"feedback":[{"taskId":"task_1","earnedPoints":0,"maxPoints":10,"feedback":"Text","correctPoints":[],"missingPoints":[]}]}`;
+{"totalEarned":0,"totalMax":60,"percentage":0,"feedback":[{"taskId":"task_1","earnedPoints":0,"maxPoints":10,"feedback":"Text","correctPoints":[],"missingPoints":[],"errorCategory":"konzept_nicht_verstanden","nextPracticeHint":"Übe X erneut"}]}`;
   const json = await openRouter(env, model, prompt, 4000, 0.2);
   return { result: parseAndValidate(json, 'grading'), model };
 }

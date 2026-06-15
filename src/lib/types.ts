@@ -38,6 +38,18 @@ export interface TaskType {
   hasdiagramContext: boolean;
 }
 
+export interface TopicLikelihood {
+  topic: string;
+  likelihood: 'high' | 'medium' | 'low';
+  evidenceNote: string;
+  pointImpact: 'high' | 'medium' | 'low';
+}
+
+export interface RiskGap {
+  gap: string;
+  severity: 'critical' | 'important' | 'minor';
+}
+
 export interface AnalysisResult {
   subject: string;
   totalTaskTypes: number;
@@ -50,6 +62,18 @@ export interface AnalysisResult {
   hasSlideContext: boolean;
   slideTopics: string[];
   hadImageOnlyContent: boolean;
+  /** 0–100: how well the uploaded material covers the module */
+  coverageScore?: number;
+  /** 0–100: how confident the analysis is based on available evidence */
+  confidenceScore?: number;
+  /** Topics sorted by exam likelihood with evidence notes */
+  topicLikelihoods?: TopicLikelihood[];
+  /** Recurring patterns and anomalies across exams */
+  recurringPatterns?: string[];
+  /** Gaps that could hurt the student in the real exam */
+  riskGaps?: RiskGap[];
+  /** Concrete next study actions derived from the analysis */
+  nextBestActions?: string[];
 }
 
 export interface SubTask {
@@ -107,6 +131,23 @@ export interface ExamAnswer {
   answer: string;
 }
 
+export type ErrorCategory =
+  | 'konzept_nicht_verstanden'
+  | 'rechenfehler'
+  | 'begruendung_fehlt'
+  | 'falsches_verfahren'
+  | 'zeitmanagement'
+  | 'diagramm_interpretation';
+
+export const ERROR_CATEGORY_LABELS: Record<ErrorCategory, string> = {
+  konzept_nicht_verstanden: 'Konzept nicht verstanden',
+  rechenfehler: 'Rechenfehler',
+  begruendung_fehlt: 'Begründung fehlt',
+  falsches_verfahren: 'Falsches Verfahren',
+  zeitmanagement: 'Zeitmanagement',
+  diagramm_interpretation: 'Diagramm/Interpretation',
+};
+
 export interface GradingFeedback {
   taskId: string;
   earnedPoints: number;
@@ -114,6 +155,20 @@ export interface GradingFeedback {
   feedback: string;
   correctPoints: string[];
   missingPoints: string[];
+  errorCategory?: ErrorCategory;
+  nextPracticeHint?: string;
+}
+
+export interface FlashCard {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  taskDescription: string;
+  userAnswer: string;
+  modelSolution: string;
+  keyPoints: string[];
+  errorCategory?: ErrorCategory;
+  createdAt: string;
 }
 
 export interface GradingResult {
@@ -121,6 +176,33 @@ export interface GradingResult {
   totalMax: number;
   percentage: number;
   feedback: GradingFeedback[];
+}
+
+export type StudyTaskType = 'type-training' | 'simulation' | 'review' | 'mistake-review' | 'daily-drill';
+
+export interface StudyTask {
+  id: string;
+  day: number;
+  date: string;
+  title: string;
+  taskType: StudyTaskType;
+  estimatedMinutes: number;
+  linkedPracticeMode?: 'random' | 'type-training';
+  linkedTypeId?: string;
+  focusSessionUrl: string;
+  completionStatus: 'pending' | 'done' | 'skipped';
+}
+
+export interface StudyPlan {
+  id: string;
+  moduleSubject: string;
+  examDate: string;
+  dailyMinutes: number;
+  confidenceScoreAtCreation: number;
+  createdAt: string;
+  tasks: StudyTask[];
+  totalDays: number;
+  studyDays: number;
 }
 
 export type AppStep = 0 | 1 | 2 | 3 | 4;
