@@ -39,7 +39,7 @@ export async function onRequestPost({ request, env }) {
 
   const link = `${appOrigin(request, env)}/api/auth/callback?token=${encodeURIComponent(token)}&locale=${normalizedLocale}`;
   if (env.RESEND_API_KEY) {
-    await fetch('https://api.resend.com/emails', {
+    const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
@@ -54,6 +54,11 @@ export async function onRequestPost({ request, env }) {
           : `<p>Hier ist dein Login-Link für ExamDraft:</p><p><a href="${link}">Bei ExamDraft anmelden</a></p><p>Der Link läuft in 15 Minuten ab.</p>`,
       }),
     });
+    if (!resendRes.ok) {
+      const resendError = await resendRes.json().catch(() => ({}));
+      console.error('[ExamDraft] Resend error:', resendRes.status, JSON.stringify(resendError));
+      return json({ error: 'EMAIL_SEND_FAILED', detail: resendError }, 500);
+    }
     return json({ sent: true });
   }
 

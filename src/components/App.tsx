@@ -357,7 +357,23 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         taskTypes: result.totalTaskTypes,
         provider: state.provider,
       });
-      if (state.provider === 'examdraft') void refreshAccount();
+      if (state.provider === 'examdraft') {
+        void refreshAccount();
+      } else if (state.improvementConsent) {
+        void fetch('/api/contribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'analysis',
+            improvementConsent: true,
+            examFiles: examExtracted,
+            slideFiles: slideExtracted,
+            result,
+            provider: state.provider,
+            model: state.openrouterAnalysisModel || state.openrouterModel,
+          }),
+        }).catch(() => {});
+      }
     } catch (err: unknown) {
       console.error('[ExamDraft] analyzeExams error:', err);
       const code = err instanceof Error ? err.message : 'API_ERROR';
@@ -438,7 +454,22 @@ Die Ausgabe wird direkt als Vorlesungskontext in ein KI-gestütztes Klausurgener
         provider: state.provider,
         tasks: exam.tasks.length,
       });
-      if (state.provider === 'examdraft') void refreshAccount();
+      if (state.provider === 'examdraft') {
+        void refreshAccount();
+      } else if (state.improvementConsent) {
+        void fetch('/api/contribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'generated_exam',
+            improvementConsent: true,
+            analysis: state.analysisResult,
+            exam,
+            provider: state.provider,
+            model: state.openrouterModel,
+          }),
+        }).catch(() => {});
+      }
     } catch (err: unknown) {
       console.error('[ExamDraft] generateExam error:', err);
       const code = err instanceof Error ? err.message : 'API_ERROR';

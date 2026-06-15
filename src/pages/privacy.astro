@@ -49,12 +49,13 @@ import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
               ExamDraft ist so gebaut, dass deine Lernunterlagen nur für die von dir gestarteten
               Funktionen verarbeitet werden. Im Standardmodus laufen KI-Aufrufe über den
               ExamDraft-Proxy; im BYOK-Modus kommuniziert dein Browser direkt mit dem gewählten
-              Anbieter. Auf dieser Seite erklären wir präzise, welche Daten lokal gespeichert
-              werden, welche Daten an externe KI-Anbieter übertragen werden und welche Entscheidungen
-              du selbst steuerst.
+              Anbieter. Wenn du der Datennutzung zur Verbesserung zustimmst, speichert ExamDraft
+              anonymisierten Text und KI-Ergebnisse – unabhängig davon, welchen Modus du nutzt.
+              Auf dieser Seite erklären wir präzise, welche Daten gespeichert werden und welche
+              Entscheidungen du selbst steuerst.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
-              <span class="legal-meta-chip">Stand: April 2026</span>
+              <span class="legal-meta-chip">Stand: Juni 2026</span>
               <span class="legal-meta-chip">Magic-Link-Konto</span>
               <span class="legal-meta-chip">Optional BYOK</span>
             </div>
@@ -68,7 +69,8 @@ import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
                 <li>Dein API-Key wird nur dann lokal im Browser gespeichert, wenn du den BYOK-Modus nutzt.</li>
                 <li>Analyse, Generierung und KI-Bewertung senden die erforderlichen Inhalte an Anthropic oder OpenRouter.</li>
                 <li>Analyseergebnisse und generierte Klausuren können während deiner Sitzung im Browser zwischengespeichert werden.</li>
-                <li>Wenn du der Verbesserung zustimmst, speichert ExamDraft anonymisierten extrahierten Text als prüfpflichtigen Beitrag.</li>
+                <li>Wenn du der Verbesserungszustimmung gibst, speichert ExamDraft anonymisierten Text und KI-Ergebnisse – in beiden Modi (Standard und BYOK).</li>
+                <li>Ohne Zustimmung werden keine Klausurinhalte auf ExamDraft-Servern gespeichert.</li>
               </ul>
             </article>
 
@@ -146,18 +148,26 @@ import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
             <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
               <p>
                 Du kannst ExamDraft nutzen, ohne Lernmaterial zur Verbesserung beizutragen.
-                Wenn du die Verbesserungsoption auswählst, darf ExamDraft anonymisierten
-                extrahierten Text aus diesem Upload sowie die dazugehörigen validierten
-                KI-Ergebnisse speichern, um Aufgabenerkennung, Themenzuordnung und
-                Klausurgenerierung zu verbessern.
+                Wenn du die Checkbox „Ich stimme der anonymisierten Datennutzung zur
+                Serviceverbesserung zu" aktivierst, darf ExamDraft anonymisierten extrahierten
+                Text aus diesem Upload sowie die dazugehörigen KI-Ergebnisse speichern.
+                Das gilt sowohl im Standard-Modus (ExamDraft Credits) als auch im BYOK-Modus
+                (eigener API-Key) – die Zustimmung steuert die Speicherung, nicht der Modus.
               </p>
               <p>
-                ExamDraft speichert dafür keinen PDF-Upload als Datei. Gespeichert werden
-                anonymisierter extrahierter Text, Dateiname, Dokumenttyp, Fach, Consent-Version,
-                Zeitstempel, Inhalts-Hash zur Deduplizierung sowie KI-Ausgaben wie Analyse-JSON
-                oder generierte Klausuren mit Musterlösungen. Die Beiträge werden zunächst als
-                prüfpflichtig markiert und nicht automatisch veröffentlicht. Du kannst diese
-                Zustimmung später widerrufen und die Löschung beigetragener Inhalte anfragen.
+                <strong>Was gespeichert wird:</strong> anonymisierter extrahierter Text (E-Mail-Adressen
+                und Matrikelnummern werden vor der Speicherung entfernt), Dateiname, Dokumenttyp,
+                Fach, Consent-Version, Zeitstempel, Inhalts-Hash zur Deduplizierung sowie
+                KI-Ausgaben (Analyse-JSON, generierte Klausuren mit Musterlösungen).
+              </p>
+              <p>
+                <strong>Was nicht gespeichert wird:</strong> PDF-Dateien als solche, dein API-Key,
+                deine eingegebenen Antworten bei der KI-Bewertung, Zahlungsdaten.
+              </p>
+              <p>
+                Die Beiträge werden zunächst als prüfpflichtig markiert und nicht automatisch
+                veröffentlicht. Du kannst deine Zustimmung jederzeit widerrufen und die Löschung
+                deiner Beiträge anfragen: <a href="mailto:privacy@examdraft.com">privacy@examdraft.com</a>
               </p>
             </div>
           </section>

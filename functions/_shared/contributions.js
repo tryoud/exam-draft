@@ -30,9 +30,11 @@ export async function storeDocumentContributions(env, userId, payload, analysisR
     if (!text) continue;
     const anonymizedText = anonymizeText(text);
     const contentHash = await sha256Hex(anonymizedText);
-    const duplicate = await env.DB.prepare(
+    const duplicate = userId ? await env.DB.prepare(
       `SELECT id FROM document_contributions WHERE user_id = ? AND content_hash = ? AND deleted_at IS NULL LIMIT 1`
-    ).bind(userId, contentHash).first();
+    ).bind(userId, contentHash).first() : await env.DB.prepare(
+      `SELECT id FROM document_contributions WHERE user_id IS NULL AND content_hash = ? AND deleted_at IS NULL LIMIT 1`
+    ).bind(contentHash).first();
     if (duplicate) {
       storedIds.push(duplicate.id);
       continue;
@@ -82,9 +84,11 @@ export async function storeAiContribution(env, userId, payload, { kind, provider
     selectedTypeId: payload.selectedTypeId ?? null,
     excludedTopics: payload.excludedTopics ?? null,
   }));
-  const duplicate = await env.DB.prepare(
+  const duplicate = userId ? await env.DB.prepare(
     `SELECT id FROM ai_contributions WHERE user_id = ? AND kind = ? AND input_hash = ? AND deleted_at IS NULL LIMIT 1`
-  ).bind(userId, kind, inputHash).first();
+  ).bind(userId, kind, inputHash).first() : await env.DB.prepare(
+    `SELECT id FROM ai_contributions WHERE user_id IS NULL AND kind = ? AND input_hash = ? AND deleted_at IS NULL LIMIT 1`
+  ).bind(kind, inputHash).first();
   if (duplicate) return;
 
   await env.DB.prepare(

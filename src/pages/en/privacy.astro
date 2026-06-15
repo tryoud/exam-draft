@@ -48,12 +48,13 @@ import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
             <p class="legal-copy mt-6 max-w-3xl text-base sm:text-lg">
               ExamDraft is designed so your study materials are processed only for the features
               you actively start. In the default mode, AI requests go through ExamDraft's proxy;
-              in BYOK mode, your browser talks directly to the provider you selected. This page
-              explains what is stored locally, what is sent to external AI providers, and which
-              parts of that flow you control yourself.
+              in BYOK mode, your browser talks directly to the provider you selected. If you
+              consent to improvement, ExamDraft stores anonymized text and AI results regardless
+              of which mode you use. This page explains exactly what is stored and which
+              decisions you control.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
-              <span class="legal-meta-chip">Version: April 2026</span>
+              <span class="legal-meta-chip">Version: June 2026</span>
               <span class="legal-meta-chip">Magic-link account</span>
               <span class="legal-meta-chip">Optional BYOK</span>
             </div>
@@ -67,7 +68,8 @@ import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
                 <li>Your API key is stored locally only if you use Advanced BYOK mode.</li>
                 <li>Analysis, generation, and AI grading send the required content to Anthropic or OpenRouter.</li>
                 <li>Analysis results and generated exams may be stored temporarily in your browser session.</li>
-                <li>If you consent to improvement, ExamDraft stores anonymized extracted text as a reviewable contribution.</li>
+                <li>If you consent to improvement, ExamDraft stores anonymized text and AI results — in both default and BYOK mode.</li>
+                <li>Without consent, no exam content is stored on ExamDraft servers.</li>
               </ul>
             </article>
 
@@ -140,18 +142,27 @@ import CloudflareAnalytics from '../../components/CloudflareAnalytics.astro';
             <p class="legal-kicker">2a. Voluntary product improvement</p>
             <div class="legal-copy mt-4 space-y-4 text-sm sm:text-[15px]">
               <p>
-                You can use ExamDraft without contributing learning material for improvement.
-                If you select the improvement option, ExamDraft may store anonymized extracted
-                text from that upload and the related validated AI results to improve task
-                detection, topic matching, and exam generation quality.
+                You can use ExamDraft without contributing material for improvement.
+                If you check "I consent to anonymized data use for service improvement",
+                ExamDraft may store anonymized extracted text from that upload and the related
+                AI results to improve task detection, topic matching, and exam generation.
+                This applies in both default mode (ExamDraft Credits) and BYOK mode (your own
+                API key) — the consent checkbox controls storage, not the provider mode.
               </p>
               <p>
-                ExamDraft does not store the PDF upload as a file for this. It stores anonymized
-                extracted text, filename, document type, subject, consent version, timestamp, a
-                content hash for deduplication, and AI outputs such as analysis JSON or generated
-                exams with model solutions. Contributions are marked for review first and are not
-                automatically published. You can withdraw this consent later and request deletion
-                of contributed content.
+                <strong>What is stored:</strong> anonymized extracted text (email addresses and
+                student ID numbers are removed before storage), filename, document type, subject,
+                consent version, timestamp, a content hash for deduplication, and AI outputs
+                (analysis JSON, generated exams with model solutions).
+              </p>
+              <p>
+                <strong>What is not stored:</strong> PDF files as such, your API key, answers
+                you type during AI grading, payment data.
+              </p>
+              <p>
+                Contributions are initially marked for review and are not automatically published.
+                You can withdraw consent and request deletion of contributed content at any time:
+                <a href="mailto:privacy@examdraft.com">privacy@examdraft.com</a>
               </p>
             </div>
           </section>
