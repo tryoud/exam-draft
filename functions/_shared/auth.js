@@ -1,5 +1,9 @@
 import { getCookie, nowIso } from './http.js';
 
+export async function getSession(request, env) {
+  return getSessionUser(request, env);
+}
+
 export async function getSessionUser(request, env) {
   const sessionId = getCookie(request, 'examdraft_session');
   if (!sessionId || !env.DB) return null;
